@@ -6,7 +6,7 @@
       "id": "berry_stand",
       "scene": "PitOfGoblin_Lobby",
       "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",
-      "after": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Torch_Unlit",
+      "after": "left",
       "pool": [
         {
           "item": "GlowBerry",

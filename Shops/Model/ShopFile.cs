@@ -48,11 +48,18 @@ namespace POGLib.Shops.Model
         /// <summary>Metres in the anchor's space. Not with <see cref="After"/>.</summary>
         public float[] Pos { get; set; }
         /// <summary>
-        /// Instead of <see cref="Pos"/>: a slot id at one end of the row the seller's own slots form. The new slot goes one
-        /// step past it along the row (a second one "after" the same slot a step further), at its height and turn
-        /// (<see cref="SlotRow"/>). No coordinates to find, and it stays in line with the seller's goods.
+        /// Instead of <see cref="Pos"/>: <c>"left"</c> or <c>"right"</c> (the end of the seller's row on that side, as a
+        /// customer facing the seller sees it), or a slot id at one end of that row. The new slot goes one step past it
+        /// along the row (a second one after the same end a step further), at its height and turn (<see cref="SlotRow"/>).
+        /// No coordinates to find; "left"/"right" name no slot of the game, so a game update that renames slots or
+        /// reorders the seller's list does not break them.
         /// </summary>
         public string After { get; set; }
+
+        /// <summary>"left" or "right" in <see cref="After"/>: true for right, false for left, null for a slot id.</summary>
+        internal static bool? SideOf(string after) =>
+            string.Equals(after, "right", StringComparison.OrdinalIgnoreCase) ? true
+            : string.Equals(after, "left", StringComparison.OrdinalIgnoreCase) ? false : (bool?)null;
         public float[] Rot { get; set; }
         /// <summary>Price tag offset relative to the slot. Null = where the template slot has it.</summary>
         public TagDef PriceTag { get; set; }
@@ -271,6 +278,7 @@ namespace POGLib.Shops.Model
                 {
                     if (s.Pos != null) Err($"{at} has both \"after\" and \"pos\": \"after\" places it, so leave \"pos\" out");
                     if (!string.IsNullOrEmpty(s.Anchor)) Err($"{at} has both \"after\" and \"anchor\": \"after\" places it next to that slot, so leave \"anchor\" out");
+                    if (SlotDef.SideOf(s.After) != null && string.IsNullOrEmpty(s.Seller)) Err($"{at}.after \"{s.After}\" is an end of the seller's row, so the slot needs a \"seller\"");
                 }
                 else
                 {

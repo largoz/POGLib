@@ -67,7 +67,10 @@ Every candidate in your slot's `pool` has a **weight**; its chance is its weight
 
 ### Where a new slot stands
 
-`"after"` names one of the seller's own slots **at an end of the row** its goods form (the hub's starter shop lays
+`"after": "left"` or `"right"` puts the slot at that end of the seller's row, as a customer facing the seller sees
+it; this names no slot of the game, so it survives an update that renames them. A slot placed this way takes the
+game's slot without a table, so the item lies where the seller's goods lie. `"after"` can also name one of the
+seller's own slots **at an end of the row** its goods form (the hub's starter shop lays
 them out in a line on its mat). The new slot goes one step past it along that row, at its height and turn; a second
 slot after the same one goes a step further. A slot in the middle of the row, or a seller whose slots stand in no
 row, is refused with the reason in the log. Use `"anchor"` and `"pos"` instead when the slot belongs somewhere else.

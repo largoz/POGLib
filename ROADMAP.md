@@ -71,7 +71,15 @@ Done when: the answers and the names are written in this file.
       section (proposed answer to the open question, so the code paths and their tests stay alive; SHOPS.md calls
       them the host's settings that may change, not something to publish). **The user has not said yes to that
       part yet.** SHOPS.md and the README describe only this.
-- [ ] 1.3 R5: slot and seller ids that survive a game update (seller flag + index, the path as a fallback).
+- [~] 1.3 R5: slot and seller ids that survive a game update (seller flag + index, the path as a fallback).
+      **2026-11-21, from a dump of the hub (run checks-12-scope):** the seller's own list is not in spatial order
+      (the starter shop lists key, rock, bread, torch, big item), so "seller + index" would name an arbitrary slot
+      and break when the list changes; slot paths carry the default item's name. Since a mod's file in 0.1 names
+      the game's slots only to place its own (1.2), the stable form is **`"after": "left" | "right"`**: the end of
+      the seller's row on that side, as a customer facing the seller sees it (the seller stands behind its goods;
+      the starter shop's seller faces -x, its right end is the rock). It names only the seller (its flag, already
+      the seller id). A slot path in `after` stays for a seller with more than one row. Seller ids: the NPC flag
+      (unchanged). Still open: host files' paths for `add`/`patch` (host-only now) and dungeon merchants' slots.
 - [ ] 1.4 R4: a new slot at a seller as the main path. A slot needs coordinates, and today they come from the
       in-game tools: either the library places a slot by itself next to the seller's own, or the tools ship (1.5).
       Try the first; decide then.
@@ -92,11 +100,26 @@ Done when: the answers and the names are written in this file.
       of known keys was a second copy of the model and called `after` a typo; it is now taken from the model.
       Run `checks-11-after` (PC): 0 failures; the stand at (8.77, 3.78, -11.30), one step past the torch
       (8.8, 3.8, -11.7), in the row. **Not seen on screen yet, and not over LAN** (the laptop was off).
+      **Then the same evening:** the row only at the named slot's height (Curiosa's cog hangs 0.7 m above its table
+      row) and at most 1.5 m between slots; `"left"`/`"right"` (1.3); 12 row tests on the dumped starter shop and
+      Curiosa, calibrated by swapping left and right. **The look:** the game's standard slot prefab holds its item
+      0.75 m up on a small table (that, on the counter, was the "goods at his face"); its other registered prefab,
+      `ShopLocationSlim` (3511405297), holds it at the origin. A slot placed with `after` takes the slim one unless
+      the file names a `template`. Seen on screen, run `checks-14-floor` (PC): the sample's berry at the left end
+      past the torch, a host-file apple at the right end past the rock, both on the floor in line with the shop's
+      goods (`look_0.png`, `look_1.png`); 0 failures, 36 checks, among them both holders at the origin
+      (calibrated on `checks-13-sides`, where the table one fails it). Over LAN: not yet.
 - [ ] 1.5 R3: the shop tools out of the library, into a mod of their own on the public API. **The user, 2026-11-20:
       a separate mod** (only mod authors need them; today 630 lines ship to every player). Packages then: the core,
       Shops on it, the tools on Shops; content mods on the core, and on Shops when they have a shop file. Nothing
       depends on the tools, so they can be released later than Shops, unless 1.4 leaves them the only way to get
       a slot's coordinates. A human has never used them: the user tries them once before they are documented.
+      **The user, 2026-11-21: turning the model by hand is hard to get right at once.** Add an "item" mode to the
+      tools: T cycles slot → price tag → item; in item mode `[` `]` turn the item about the vertical, `;` `'` tilt
+      it, Shift finer; the ghost follows at once and Save writes `items[].standing` (rot). Today only data can turn
+      an item on a counter (`StandingRotation`, `items[].standing.rot`, seen after the next scene load), the tools
+      turn only a slot, and an OBJ model cannot be turned inside its item at all (`ItemVisual.At` is bundle-only and
+      internal): open a turn for `ItemVisual.Obj` when models are proven (2.12).
 - [~] 1.6 The package boundary (question 3): Shops as a mod of its own, the core without balance decisions. It
       needs the same public API as 1.5.
       **Split 2026-11-21:** `Shops/` builds into `POGShops.dll` (`Shops/POGShops.csproj`, MelonInfo "POGShops"

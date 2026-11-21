@@ -207,10 +207,21 @@ namespace POGLib.Shops
             Vector3 pos;
             if (!string.IsNullOrEmpty(def.After))
             {
-                var after = ShopScene.FindSlot(def.After);
-                if (after == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: the slot it goes after, '{def.After}', is not in scene {def.Scene}"); return false; }
-                if (seller == null) seller = after.m_shopKeeper;
-                if (!PlaceAfter(after, seller, ms.FullId, def.After, out pos, out string why))
+                bool? side = SlotDef.SideOf(def.After);
+                ShopLocation after;
+                if (side != null)
+                {
+                    if (seller == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: \"after\": \"{def.After}\" needs its seller, which is not here; not placed"); return false; }
+                    after = EndOnSide(seller, side.Value, out string sideWhy);
+                    if (after == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: no {def.After} end at {ShopScene.SellerId(seller)}: {sideWhy}; not placed"); return false; }
+                }
+                else
+                {
+                    after = ShopScene.FindSlot(def.After);
+                    if (after == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: the slot it goes after, '{def.After}', is not in scene {def.Scene}"); return false; }
+                    if (seller == null) seller = after.m_shopKeeper;
+                }
+                if (!PlaceAfter(after, seller, ms.FullId, ShopScene.SlotId(after), out pos, out string why))
                 { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: cannot go after '{def.After}': {why}; not placed"); return false; }
                 anchor = after.transform;
             }
@@ -253,16 +264,29 @@ namespace POGLib.Shops
         /// Where a slot "after" <paramref name="after"/> goes: one step past it along the row of its seller's own slots
         /// (<see cref="SlotRow"/>), a step further for each mod slot already standing after the same slot.
         /// </summary>
+        /// <summary>The game's own slot at the left or right end of the seller's row (<see cref="SlotRow.TryEndOnSide"/>).</summary>
+        private static ShopLocation EndOnSide(NpcSpawner seller, bool right, out string why)
+        {
+            var own = OwnSlots(seller);
+            var sp = seller.transform.position;
+            if (!SlotRow.TryEndOnSide(own.Select(s => { var p = s.transform.position; return new[] { p.x, p.y, p.z }; }).ToList(),
+                                      new[] { sp.x, sp.y, sp.z }, right, out int i, out why)) return null;
+            return own[i];
+        }
+
+        // The seller's own slots as the game placed them (the library's new slots left out).
+        private static List<ShopLocation> OwnSlots(NpcSpawner seller) =>
+            seller?.m_itemsForSale == null ? new List<ShopLocation>()
+            : seller.m_itemsForSale.Where(s => s != null && !s.gameObject.name.StartsWith(ShopScene.ModSlotPrefix)).ToList();
+
         private static bool PlaceAfter(ShopLocation after, NpcSpawner seller, string fullId, string afterId, out Vector3 pos, out string why)
         {
             pos = default;
-            var own = seller?.m_itemsForSale;
-            if (own == null) { why = "it has no seller, so there is no row to follow"; return false; }
+            if (seller?.m_itemsForSale == null) { why = "it has no seller, so there is no row to follow"; return false; }
             var row = new List<float[]>();
             int afterIndex = -1;
-            foreach (var s in own)
+            foreach (var s in OwnSlots(seller))
             {
-                if (s == null || s.gameObject.name.StartsWith(ShopScene.ModSlotPrefix)) continue;   // the game's own slots only
                 if (s.Pointer == after.Pointer) afterIndex = row.Count;
                 var p = s.transform.position;
                 row.Add(new[] { p.x, p.y, p.z });

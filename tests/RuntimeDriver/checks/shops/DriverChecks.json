@@ -15,6 +15,12 @@
     // A pool slot (loot table) given a mod item: only the HasNetworkPrefab / LoadNetworkPrefab substitution reaches it.
     { "slot": "vanilla:PitOfGoblin_Lobby/Merchant_Curiosa/Game.Spawning.ShopLocation Item_Dice", "item": "ShopDemo:GlowBerry", "weight": 1 }
   ],
+  // A new slot at the right end of the starter shop's row (from the customer's side: past the rock); with "after" it
+  // takes the game's slot prefab without a table, so the apple lies on the floor like the shop's own goods.
+  "slots": [
+    { "id": "right_stand", "scene": "PitOfGoblin_Lobby", "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",
+      "after": "right", "pool": [ { "item": "vanilla:Item_Apple", "weight": 1 } ] }
+  ],
   // A dungeon merchant variant (driver dungeon=1): weight 100 makes the Curiosa preset near certain at the entrance.
   "sellers": [
     { "id": "test_merchant", "preset": "EntranceCave_Shopkeeper_Curiosa", "weight": 100,

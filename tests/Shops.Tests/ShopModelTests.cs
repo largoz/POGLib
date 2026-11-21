@@ -76,6 +76,20 @@ namespace POGLib.Shops.Tests
         }
 
         [Theory]
+        [InlineData("left", false)]
+        [InlineData("RIGHT", true)]
+        [InlineData("vanilla:PitOfGoblin_Lobby/StarterShop/T", null)]
+        public void LeftAndRightAreEndsOfTheRowAnythingElseIsASlotId(string after, bool? right) => Assert.Equal(right, SlotDef.SideOf(after));
+
+        [Fact]
+        public void LeftOrRightNeedsASeller()
+        {
+            var d = new List<Diagnostic>();
+            Assert.Null(Parse(AfterSlot.Replace("\"seller\": \"vanilla:NPC_X\",", "").Replace("vanilla:PitOfGoblin_Lobby/StarterShop/T", "left"), d));
+            Assert.Contains(d, x => x.Severity == Severity.Error && x.Message.Contains("needs a \"seller\""));
+        }
+
+        [Theory]
         [InlineData("\"after\"", "\"pos\": [0, 0, 0], \"after\"", "both \"after\" and \"pos\"")]
         [InlineData("\"after\"", "\"anchor\": \"vanilla:A\", \"after\"", "both \"after\" and \"anchor\"")]
         [InlineData("\"after\": \"vanilla:PitOfGoblin_Lobby/StarterShop/T\",", "", "pos must be")]

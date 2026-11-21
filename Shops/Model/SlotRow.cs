@@ -16,28 +16,80 @@ namespace POGLib.Shops.Model
         public const float OffRow = 0.3f;
         /// <summary>Slots closer than this along the row are not a row one can step along (metres).</summary>
         public const float MinStep = 0.15f;
+        /// <summary>Slots farther apart than this along the row are not a row of goods (metres): two lone stands far apart.</summary>
+        public const float MaxStep = 1.5f;
 
         /// <summary>
         /// The position for a new slot <paramref name="stepsPast"/> steps past <c>row[afterIndex]</c> (1 = the next free
         /// place), away from the middle of the row. <paramref name="row"/> holds the seller's slots as world positions
-        /// [x, y, z]. False, with the reason in <paramref name="why"/>, when there is no row to step along or the slot
-        /// is not at one of its ends.
+        /// [x, y, z]; only slots at that slot's height (within <see cref="OffRow"/>) make the row. False, with the reason
+        /// in <paramref name="why"/>, when there is no row to step along or the slot is not at one of its ends.
         /// </summary>
         public static bool TryPlaceAfter(IReadOnlyList<float[]> row, int afterIndex, int stepsPast, out float[] pos, out string why)
         {
             pos = null;
-            if (row == null || afterIndex < 0 || afterIndex >= row.Count) { why = "the slot is not one of the seller's"; return false; }
+            if (row == null || afterIndex < 0 || afterIndex >= row.Count || !Valid(row[afterIndex])) { why = "the slot is not one of the seller's"; return false; }
             if (stepsPast < 1) { why = "steps past must be 1 or more"; return false; }
-            var all = Enumerable.Range(0, row.Count).Where(i => row[i] != null && row[i].Length == 3).ToList();
-            if (all.Count < 2) { why = "the seller has fewer than two slots, so there is no row to follow"; return false; }
+            if (!TryRow(row, row[afterIndex][1], out var r, out why)) return false;
+            if (!r.Along.Any(p => p.i == afterIndex)) { why = "the slot is off the row the seller's other slots form"; return false; }
 
-            // Fit the row's line, drop slots off it, fit again on the rest.
+            int dir;
+            if (r.Along[r.Along.Count - 1].i == afterIndex) dir = 1;
+            else if (r.Along[0].i == afterIndex) dir = -1;
+            else { why = "the slot is in the middle of the row; name the slot at one of its ends"; return false; }
+
+            var a = row[afterIndex];
+            float d = dir * r.Step * stepsPast;
+            pos = new[] { a[0] + r.Ax * d, a[1], a[2] + r.Az * d };
+            why = null;
+            return true;
+        }
+
+        /// <summary>
+        /// The slot at the <paramref name="right"/> (or left) end of the seller's row, as a customer facing the seller
+        /// sees it: the seller stands behind its goods, so the customer looks from the row towards the seller. The row is
+        /// the level most of the seller's slots stand at. This names a place by the seller alone, so it survives the game
+        /// renaming its slots (their names carry the default item) or reordering the seller's list (not spatial, seen
+        /// 2026-11-21: the starter shop lists key, rock, bread, torch).
+        /// </summary>
+        public static bool TryEndOnSide(IReadOnlyList<float[]> row, float[] seller, bool right, out int index, out string why)
+        {
+            index = -1;
+            if (row == null || !Valid(seller)) { why = "the seller is not known"; return false; }
+            var all = Enumerable.Range(0, row.Count).Where(i => Valid(row[i])).ToList();
+            if (all.Count < 2) { why = "the seller has fewer than two slots, so there is no row to follow"; return false; }
+            // The level most slots stand at (ties: the lower).
+            float level = all.Select(i => row[i][1]).OrderBy(y => -all.Count(j => Math.Abs(row[j][1] - y) <= OffRow)).ThenBy(y => y).First();
+            if (!TryRow(row, level, out var r, out why)) return false;
+            float fx = seller[0] - r.Cx, fz = seller[2] - r.Cz;          // the customer's forward, on the floor
+            if (Math.Abs(fx) + Math.Abs(fz) < 1e-3f) { why = "the seller stands in the middle of its own row, so it has no left or right"; return false; }
+            float rx = fz, rz = -fx;                                      // the customer's right (Unity: up × forward)
+            var first = r.Along[0].i; var last = r.Along[r.Along.Count - 1].i;
+            float dFirst = (row[first][0] - r.Cx) * rx + (row[first][2] - r.Cz) * rz;
+            float dLast = (row[last][0] - r.Cx) * rx + (row[last][2] - r.Cz) * rz;
+            index = (dLast > dFirst) == right ? last : first;
+            why = null;
+            return true;
+        }
+
+        private sealed class Line
+        {
+            public float Cx, Cz, Ax, Az, Step;
+            public List<(int i, float t)> Along;
+        }
+
+        // The row at height `level`: slots within OffRow of it, fitted to a line on the floor, those off the line left
+        // out, sorted along it, with the median gap as the step.
+        private static bool TryRow(IReadOnlyList<float[]> row, float level, out Line line, out string why)
+        {
+            line = null;
+            var all = Enumerable.Range(0, row.Count).Where(i => Valid(row[i]) && Math.Abs(row[i][1] - level) <= OffRow).ToList();
+            if (all.Count < 2) { why = "the seller has fewer than two slots at that height, so there is no row to follow"; return false; }
             var (cx, cz, ax, az) = Fit(row, all);
             var inRow = all.Where(i => Distance(row[i], cx, cz, ax, az) <= OffRow).ToList();
             if (inRow.Count >= 2 && inRow.Count < all.Count) (cx, cz, ax, az) = Fit(row, inRow);
             inRow = all.Where(i => Distance(row[i], cx, cz, ax, az) <= OffRow).ToList();
             if (inRow.Count < 2) { why = "the seller's slots do not stand in a row"; return false; }
-            if (!inRow.Contains(afterIndex)) { why = "the slot is off the row the seller's other slots form"; return false; }
 
             var along = inRow.Select(i => (i, t: (row[i][0] - cx) * ax + (row[i][2] - cz) * az)).OrderBy(p => p.t).ToList();
             var gaps = new List<float>();
@@ -45,18 +97,13 @@ namespace POGLib.Shops.Model
             gaps.Sort();
             float step = gaps[gaps.Count / 2];
             if (step < MinStep) { why = $"the seller's slots are {step:0.00} m apart, too close to step along"; return false; }
-
-            int dir;
-            if (along[along.Count - 1].i == afterIndex) dir = 1;
-            else if (along[0].i == afterIndex) dir = -1;
-            else { why = "the slot is in the middle of the row; name the slot at one of its ends"; return false; }
-
-            var a = row[afterIndex];
-            float d = dir * step * stepsPast;
-            pos = new[] { a[0] + ax * d, a[1], a[2] + az * d };
+            if (step > MaxStep) { why = $"the seller's slots at that height are {step:0.00} m apart, which is not a row of goods"; return false; }
+            line = new Line { Cx = cx, Cz = cz, Ax = ax, Az = az, Step = step, Along = along };
             why = null;
             return true;
         }
+
+        private static bool Valid(float[] p) => p != null && p.Length == 3;
 
         // Centre and unit direction of the line through the given slots (principal axis on the floor plane).
         private static (float cx, float cz, float ax, float az) Fit(IReadOnlyList<float[]> row, List<int> idx)

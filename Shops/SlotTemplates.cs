@@ -22,6 +22,13 @@ namespace POGLib.Shops
     /// </summary>
     internal static class SlotTemplates
     {
+        /// <summary>
+        /// The game's slot prefab without a table (item holder at the slot's origin): the look of a slot that stands in
+        /// a row of goods on the floor or a mat, the default for a slot placed with "after" (2026-11-21: the standard
+        /// prefab, 'ShopLocation', holds its item 0.75 m up on a small table; the starter shop's goods lie 0.11 m up).
+        /// </summary>
+        internal const string FloorTemplate = "ShopLocationSlim";
+
         private static GameObject _holder;
         private static readonly Dictionary<string, ShopLocation> _built = new Dictionary<string, ShopLocation>();
 
@@ -46,7 +53,8 @@ namespace POGLib.Shops
             EnsureHolder();
             foreach (var s in pending)
             {
-                var src = FindDonor(s.Def.Template) ?? donor;
+                string look = !string.IsNullOrEmpty(s.Def.Template) ? s.Def.Template : !string.IsNullOrEmpty(s.Def.After) ? FloorTemplate : null;
+                var src = FindDonor(look) ?? donor;
                 var t = Build(src, s);
                 if (t != null) _built[s.FullId] = t;
             }

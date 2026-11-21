@@ -66,11 +66,73 @@ namespace POGLib.Shops.Tests
         }
 
         [Fact]
-        public void SlotsOnTopOfEachOtherAreNoRow()
+        public void SlotsTooCloseAreNoRow()
         {
-            var stacked = new List<float[]> { new[] { 1f, 0f, 1f }, new[] { 1.05f, 0.5f, 1f } };
-            Assert.False(SlotRow.TryPlaceAfter(stacked, 1, 1, out _, out var why));
+            var close = new List<float[]> { new[] { 1f, 0f, 1f }, new[] { 1.05f, 0f, 1f } };
+            Assert.False(SlotRow.TryPlaceAfter(close, 1, 1, out _, out var why));
             Assert.Contains("too close", why);
+        }
+
+        [Fact]
+        public void SlotsAtAnotherHeightAreNotInTheRow()
+        {
+            var stacked = new List<float[]> { new[] { 1f, 0f, 1f }, new[] { 1.5f, 0.7f, 1f } };
+            Assert.False(SlotRow.TryPlaceAfter(stacked, 1, 1, out _, out var why));
+            Assert.Contains("at that height", why);
+        }
+
+        // The hub's merchant Curiosa (dump, 2026-11-21), in its own list order: potion, ward, orb, dice on a table in a
+        // row; a cog shown 0.7 m higher; armour and helmet on a dummy a metre away; a treasure display beside.
+        static readonly List<float[]> Curiosa = new List<float[]>
+        {
+            new[] { 37.95f, 12.34f, -26.37f },   // 0 potion
+            new[] { 38.30f, 12.34f, -25.97f },   // 1 ward
+            new[] { 37.61f, 12.34f, -26.64f },   // 2 orb
+            new[] { 38.46f, 12.32f, -25.66f },   // 3 dice
+            new[] { 38.70f, 13.07f, -25.55f },   // 4 cog, higher
+            new[] { 36.50f, 12.40f, -26.61f },   // 5 armour, on the dummy
+            new[] { 36.50f, 12.90f, -26.59f },   // 6 helmet, on the dummy
+            new[] { 38.81f, 12.03f, -24.48f },   // 7 treasure display
+        };
+        static readonly float[] CuriosaSeller = { 38.99f, 11.94f, -26.90f };
+
+        // The starter shop as the seller lists it (not in spatial order): key, rock, bread, torch, big item.
+        static readonly List<float[]> StarterListed = new List<float[]>
+        {
+            new[] { 8.85f, 3.84f, -12.64f },     // 0 key
+            new[] { 8.88f, 3.83f, -13.08f },     // 1 rock
+            new[] { 8.77f, 3.71f, -12.23f },     // 2 bread
+            new[] { 8.79f, 3.78f, -11.75f },     // 3 torch
+            new[] { 9.64f, 3.71f, -13.00f },     // 4 big item
+        };
+        static readonly float[] StarterSeller = { 9.76f, 3.88f, -12.21f };
+
+        [Fact]
+        public void TheStarterShopsEndsAreTheRockOnTheRightAndTheTorchOnTheLeft()
+        {
+            // The seller faces -x, the customer +x; the customer's right is -z, where the rock is.
+            Assert.True(SlotRow.TryEndOnSide(StarterListed, StarterSeller, true, out int right, out var why), why);
+            Assert.Equal(1, right);
+            Assert.True(SlotRow.TryEndOnSide(StarterListed, StarterSeller, false, out int left, out why), why);
+            Assert.Equal(3, left);
+        }
+
+        [Fact]
+        public void CuriosasRowIsTheTableNotTheCogNorTheDummy()
+        {
+            Assert.True(SlotRow.TryEndOnSide(Curiosa, CuriosaSeller, true, out int right, out var why), why);
+            Assert.Equal(2, right);   // orb
+            Assert.True(SlotRow.TryEndOnSide(Curiosa, CuriosaSeller, false, out int left, out why), why);
+            Assert.Equal(3, left);    // dice
+            Assert.True(SlotRow.TryPlaceAfter(Curiosa, left, 1, out var p, out why), why);
+            Near(12.32f, p[1], 0.001f);   // at the table's height, not the cog's
+        }
+
+        [Fact]
+        public void TheCogAndTheHelmetAreNoRow()
+        {
+            Assert.False(SlotRow.TryPlaceAfter(Curiosa, 4, 1, out _, out var why));
+            Assert.Contains("not a row of goods", why);
         }
 
         [Fact]

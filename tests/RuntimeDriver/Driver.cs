@@ -588,7 +588,18 @@ namespace POGLib.RuntimeDriver
             foreach (var s in sellers)
             {
                 var slots = s.m_itemsForSale;
-                Log($"  seller {PathOf(s.transform)} flag='{s.m_npcFlag}' npc={(s.m_npc != null ? s.m_npc.name : "-")} slots={(slots != null ? slots.Length : -1)}");
+                var sp = s.transform.position; var sf = s.transform.forward;
+                Log($"  seller {PathOf(s.transform)} flag='{s.m_npcFlag}' npc={(s.m_npc != null ? s.m_npc.name : "-")} slots={(slots != null ? slots.Length : -1)} " +
+                    $"at ({sp.x:F2},{sp.y:F2},{sp.z:F2}) forward ({sf.x:F2},{sf.z:F2})");
+                // R5 (ids that survive a game update): the seller's own order, where each slot stands and how it is turned.
+                if (slots != null)
+                    for (int i = 0; i < slots.Length; i++)
+                    {
+                        var sl = slots[i];
+                        if (sl == null) { Log($"    #{i} null"); continue; }
+                        var p = sl.transform.position;
+                        Log($"    #{i} {PathOf(sl.transform)} at ({p.x:F2},{p.y:F2},{p.z:F2}) yaw {sl.transform.eulerAngles.y:F0}");
+                    }
             }
             var shops = UnityEngine.Object.FindObjectsOfType<ShopLocation>(true);
             Log($"dump {scene}: {shops.Length} ShopLocation");

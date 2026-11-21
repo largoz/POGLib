@@ -31,6 +31,10 @@ placed ShopDemo:berry_stand
 # 1.4 (2026-11-21): the sample's stand has no coordinates; it goes in the row of the starter shop's goods.
 placed ShopDemo:berry_stand at .* in the row after Game\.Spawning\.ShopLocation Item_Torch_Unlit
 !cannot go after
+placed DriverChecks:right_stand at .* in the row after Game\.Spawning\.ShopLocation Item_Rock_02
+# Slots placed with "after" take the prefab without a table (holder at the origin, not 0.75 m up).
+=2 DRIVER\]   slot POGShopSlot\|(ShopDemo:berry_stand|DriverChecks:right_stand) .*holder=ItemHolder \(0\.00, 0\.00, 0\.00\)
+!no (left|right) end at
 # 1.2 (2026-11-21): a mod's file with "add" (checks/mods/ScopeCheck.pogshop.json, deployed into Mods/) is refused as a
 # whole, with the reason; its slot is not placed. The host's own files (shops/) keep "add".
 ScopeCheck\.pogshop\.json: "add" puts items into slots that are not this mod's \(1 rule\(s\)\).*the file is not used
