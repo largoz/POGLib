@@ -9,7 +9,7 @@ namespace POGLib.Core
     /// registering real I2 terms, we intercept LocalizationManager.GetTranslation and return
     /// our own strings for keys the content pack registered.
     /// </summary>
-    public static class ModLocalization
+    internal static class ModLocalization
     {
         private static readonly Dictionary<string, string> Terms = new();
 

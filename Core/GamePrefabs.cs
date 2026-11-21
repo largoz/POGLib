@@ -14,7 +14,7 @@ namespace POGLib.Core
     /// network prefab, and so every item shell, is loaded. The list is read through its concrete
     /// <c>List&lt;NetworkPrefab&gt;</c>: enumerating Addressables interfaces through the proxies crashed the game.
     /// </summary>
-    public static class GamePrefabs
+    internal static class GamePrefabs
     {
         /// <summary>The loaded list, or null before the game has loaded it.</summary>
         public static NetworkPrefabsList Loaded

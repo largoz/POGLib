@@ -8,8 +8,15 @@
 rules target slot 'DriverChecks:nosuchslot', which 'DriverChecks' does not define
 slot 'vanilla:PitOfGoblin_Lobby/StarterShop/Game\.Spawning\.ShopLocation Item_Breadd' is not in PitOfGoblin_Lobby
 Closest slot ids here: vanilla:PitOfGoblin_Lobby/StarterShop/Game\.Spawning\.ShopLocation Item_Bread( \||\.)
-# Every patch of the library runs once (2026-11-19: MelonLoader's own PatchAll had doubled all 26).
-Harmony: [0-9]+ game method\(s\) patched; each patch once
+# Every patch of the library runs once (2026-11-19: MelonLoader's own PatchAll had doubled all 26); POGShops, a mod
+# of its own since 2026-11-21, checks its own the same way.
+\[POGLib\] Harmony: [0-9]+ game method\(s\) patched; each patch once
+\[POGShops\] Harmony: [0-9]+ game method\(s\) patched; each patch once
+\[POGShops\] 0\.1\.0 started on POGLib 0\.1\.0
+\[POGLib\] Registered plugin: Shops
+\[POGLib\] Compatibility OK
+\[POGShops\] Compatibility OK
+!Harmony patch FAILED
 !patch\(es\) more than once
 # 2026-11-14 build: the mod items are built once the game has loaded its prefab list, and registered.
 The game's network prefab list is loaded \([0-9]+ entries\)

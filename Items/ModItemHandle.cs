@@ -29,10 +29,10 @@ namespace POGLib.Items
         private bool _hasEffects;
 
         /// <summary>This item's identity hash (== GlobalObjectIdHash).</summary>
-        public uint Hash { get; private set; }
+        internal uint Hash { get; private set; }
 
-        public int UsesRemaining { get { EnsureInit(); return _usesRemaining; } set { EnsureInit(); _usesRemaining = value; } }
-        public bool IsConsumed { get { EnsureInit(); return _consumed; } set { EnsureInit(); _consumed = value; } }
+        internal int UsesRemaining { get { EnsureInit(); return _usesRemaining; } set { EnsureInit(); _usesRemaining = value; } }
+        internal bool IsConsumed { get { EnsureInit(); return _consumed; } set { EnsureInit(); _consumed = value; } }
 
         /// <summary>Lazily initialize state from the definition found by hash.</summary>
         private void EnsureInit()

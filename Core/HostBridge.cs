@@ -14,21 +14,28 @@ namespace POGLib.Core
     /// Registered when a session starts (<see cref="Hook"/> from the StartHost/StartClient postfix), on whichever
     /// CustomMessagingManager that session has; a handler that throws is logged, never passed on.
     /// </summary>
-    public class HostBridge
+    public sealed class HostBridge
     {
-        public const string MessageName = "POGLib.HostBridge";
+        internal HostBridge() { }
+
+        internal const string MessageName = "POGLib.HostBridge";
         private const int MaxText = 64 * 1024;
         private readonly Dictionary<string, Action<ulong, string>> _handlers = new();
         private CustomMessagingManager _registeredOn;
         private CustomMessagingManager.HandleNamedMessageDelegate _handler;
 
+        /// <summary>
+        /// Handle <paramref name="action"/> when it arrives: the handler gets the sender's client id and the payload.
+        /// Name actions after your mod (<c>"MyMod.open"</c>), so two mods never answer each other's; one handler per
+        /// action, the last one registered wins. The library's own actions start with "shops.".
+        /// </summary>
         public void RegisterHandler(string action, Action<ulong, string> handler)
         {
             if (!string.IsNullOrEmpty(action) && handler != null) _handlers[action] = handler;
         }
 
         /// <summary>Registers the message on the current session's manager (once per manager; safe without one).</summary>
-        public void Hook()
+        internal void Hook()
         {
             var cmm = NetworkManager.Singleton?.CustomMessagingManager;
             if (cmm == null || (_registeredOn != null && _registeredOn.Pointer == cmm.Pointer)) return;
@@ -46,7 +53,7 @@ namespace POGLib.Core
         }
 
         /// <summary>The session ended: the next one has a new manager to register on.</summary>
-        public void Unhook()
+        internal void Unhook()
         {
             try { _registeredOn?.UnregisterNamedMessageHandler(MessageName); } catch { }
             _registeredOn = null;

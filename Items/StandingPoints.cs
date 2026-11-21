@@ -9,7 +9,7 @@ namespace POGLib.Items
     /// holder, and throws when that field is null — leaving the slot empty (read in the game's code, see
     /// _research/SHOPS_NATIVE.md Q2). Shells such as Item_Diamond have none, so every mod item gets one.
     /// </summary>
-    public static class StandingPoints
+    internal static class StandingPoints
     {
         public const string ChildName = "ModStandingPoint";
 

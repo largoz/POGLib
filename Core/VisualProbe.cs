@@ -16,7 +16,7 @@ namespace POGLib.Core
     /// Use it to capture reference numbers for <c>GlowCapability</c>: run the game once, read the
     /// block it logs, then feed those values into a content pack. Read-only — it never mutates.
     /// </summary>
-    public static class VisualProbe
+    internal static class VisualProbe
     {
         /// <summary>HDRP stores real photometric intensity here; read reflectively (no HDRP reference).</summary>
         private const string HdLightDataType = "Il2CppUnityEngine.Rendering.HighDefinition.HDAdditionalLightData";

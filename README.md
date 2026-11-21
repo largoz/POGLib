@@ -7,23 +7,28 @@ community content packs. Targets **Unity IL2CPP + Unity Netcode for GameObjects*
 
 ## Architecture
 
+Two mods, released together (since 2026-11-21; ROADMAP 1.6):
+
 ```
-POGLib.dll
-├── Core/                     ← stable core (code seam: interfaces)
-│   ├── IPOGPlugin, PluginRegistry, PluginGraph   — plugin graph (Bevy-style)
-│   ├── ContentRegistry        — definitions registry, deterministic GlobalObjectIdHash
-│   ├── ShellFactory           — clone a vanilla shell prefab + assign the hash
-│   ├── NetworkRegistrar        — register NetworkPrefabs before the session starts
-│   ├── LootInjector            — append items into vanilla loot tables (array-realloc)
-│   ├── SaveGuard               — Harmony guard for the reward-chest load path
-│   ├── AssetLoader             — AssetBundle + loose PNG → Sprite
-│   └── HostBridge              — client→host via CustomMessagingManager (v2)
-├── Items/                    ← domain module v1 (current)
-├── Shops/                    ← sell items: shop files, weights, new slots, merchants, in-game tools
-├── Mobs/                     ← v3 (planned)
-├── Levels/                   ← v4 (planned)
-└── Effects/                  ← stretch
+POGLib.dll                    ← the core: what a content pack calls
+├── Core/                     ← internal: plugin graph, content registry (deterministic GlobalObjectIdHash),
+│                               shells, network registration, loot, save guard, HostBridge (public: messages
+│                               between a client and the host)
+└── Items/                    ← Content.Items: ModItemDefinition, capabilities, use handlers
+
+POGShops.dll                  ← Shops/: shop files, weights, new slots, merchants, in-game tools.
+                                A mod of its own on POGLib; only mods that sell items need it.
 ```
+
+Mobs and levels come after the first release (ROADMAP, "After the first release").
+
+### What a pack can call
+
+Everything a pack can see is listed, line by line, in [`api/POGLib.txt`](api/POGLib.txt): `Content.Items`,
+`ModItemDefinition` and the types it uses, the capabilities, use handlers, `HostBridge`, and
+`Content.ContentAssemblies` (read by POG Mod Check). The rest of the library is `internal`. A build whose public
+surface differs from that file fails `tools/apisurface` (`check`), so the list cannot drift from the code; a
+change to it is a decision, written into the file on purpose (`write`). Within 0.x, what is in the file stays.
 
 ### Lifecycle stages
 
@@ -40,8 +45,7 @@ once, so systems are idempotent:
 ## Usage (for content-pack authors)
 
 ```csharp
-using POGLib.Core;   // LootCategory
-using POGLib.Items;  // Content, ModItemDefinition, LootPlacement
+using POGLib.Items;  // Content, ModItemDefinition, ItemShellKind, LootPlacement, LootCategory
 
 public override void OnInitializeMelon()
 {
@@ -56,7 +60,7 @@ public override void OnInitializeMelon()
     {
         ModId = "MyMod",
         ContentId = "HealingBerry",
-        ShellKind = ShellFactory.ItemShellKind.Diamond, // safe default shell
+        ShellKind = ItemShellKind.Diamond,              // safe default shell
         ItemType = Il2Cpp.ItemType.Food,                // inventory slot routing (§2)
         MapIcon  = Il2Cpp.MapIconType.Food,             // minimap marker (separate field)
         GoldValue = 40,   // loot budget
@@ -97,8 +101,8 @@ tables (`DT_BonusChest_*`) casually — a removed mod then NREs on save restore;
 
 ### Selling items in shops
 
-Give the item a `ShopCost`, then describe where it is sold in a `pogshop.json` next to your mod — no shop
-code. Chances are weights, so any number of mods can share a slot; you can add new slots next to any
+Install POGShops too (a mod of its own on POGLib). Give the item a `ShopCost`, then describe where it is sold in a
+`pogshop.json` next to your mod — no shop code. Chances are weights, so any number of mods can share a slot; you can add new slots next to any
 seller and new dungeon merchants. The in-game shop tools (preference `[POGLib_ShopTools] Enabled`,
 then F7 while hosting alone) place slots by aiming and write the file. Full guide: [`SHOPS.md`](SHOPS.md);
 example: `samples/ShopDemo/`.

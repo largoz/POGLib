@@ -14,7 +14,7 @@ namespace POGLib.Core
     /// load state are never touched. Only by key: enumerating the catalog through the interface proxies crashed
     /// the game (2026-11-14).
     /// </summary>
-    public static class Addresses
+    internal static class Addresses
     {
         /// <summary>The address (primary key) a GUID or key resolves to, or null.</summary>
         public static string AddressOf(string key)

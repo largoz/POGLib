@@ -12,7 +12,7 @@ namespace POGLib.Core
     /// HDRP material properties, and strip SpeakingStone voice/VFX (a common donor mesh).
     /// This is the no-AssetBundle visual tier.
     /// </summary>
-    public static class ItemVisuals
+    internal static class ItemVisuals
     {
         /// <summary>
         /// Reskin by REPLACING the mesh on the shell's own renderers, rather than adding a visual of

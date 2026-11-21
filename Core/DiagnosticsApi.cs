@@ -15,7 +15,7 @@ namespace POGLib.Core
     ///  2. Without writing code: create <c>UserData/pog_probe.txt</c> next to the game, one prefab
     ///     name per line. Each is probed once, on scene load, as soon as it is in memory.
     /// </summary>
-    public sealed class DiagnosticsApi
+    internal sealed class DiagnosticsApi
     {
         /// <summary>Probe file: one prefab name per line ('#' starts a comment).</summary>
         public const string ProbeListFile = "UserData/pog_probe.txt";

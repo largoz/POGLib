@@ -12,6 +12,8 @@ namespace POGLib.Items
     /// <summary>Use context. owner runs host-authoritative.</summary>
     public sealed class UseContext
     {
+        internal UseContext() { }
+
         public bool IsHost { get; internal set; }
         public HostBridge Bridge { get; internal set; }
     }
@@ -24,7 +26,7 @@ namespace POGLib.Items
     /// runs the host-side use flow. Network prefab registration and loot injection are done by
     /// the core (NetworkRegistrar / LootInjector) at the correct lifecycle moments.
     /// </summary>
-    public sealed class ItemsPlugin : IPOGPlugin
+    internal sealed class ItemsPlugin : IPOGPlugin
     {
         public string Name => "Items";
         public string Version => "0.1.0";
@@ -153,7 +155,7 @@ namespace POGLib.Items
             // A big item on the default shell would keep the diamond's one-hand grips and size (D7): it gets the
             // big-item shell unless the definition chose a shell itself.
             var shellKind = def.ShellKind;
-            if (def.Big && shellKind == ShellFactory.ItemShellKind.Diamond) shellKind = ShellFactory.ItemShellKind.BigItem;
+            if (def.Big && shellKind == ItemShellKind.Diamond) shellKind = ItemShellKind.BigItem;
             var template = CoreServices.Shells.BuildItemTemplate(shellKind, def.ModId, def.ContentId);
             if (template == null) return; // shell not in memory yet — retry on the next scene load
 

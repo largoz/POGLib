@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="POGLib"><HintPath>../../bin/Release/net6.0/POGLib.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="POGShops"><HintPath>../../Shops/bin/Release/net6.0/POGShops.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="MelonLoader"><HintPath>$(MelonDir)\MelonLoader.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="0Harmony"><HintPath>$(MelonDir)\0Harmony.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Il2CppInterop.Runtime"><HintPath>$(MelonDir)\Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>

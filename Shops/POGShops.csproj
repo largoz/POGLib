@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- POGShops: shop slots for mod items, a mod of its own built on POGLib (ROADMAP 1.6). It reaches POGLib's internals
+       (InternalsVisibleTo in POGLib's Plugin.cs) and is released together with it; ShopsMod checks the version. -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>POGLib.Shops</RootNamespace>
+    <AssemblyName>POGShops</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../GameReferences.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="../POGLib.csproj" Private="false" />
+  </ItemGroup>
+</Project>

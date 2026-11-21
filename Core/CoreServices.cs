@@ -9,7 +9,7 @@ namespace POGLib.Core
     /// (Start*, FromContainerData) are static and must reach the registry/injector
     /// without a DI graph. Initialized once in Plugin.OnInitializeMelon before Boot.
     /// </summary>
-    public static class CoreServices
+    internal static class CoreServices
     {
         public static ContentRegistry Content { get; private set; }
         public static ShellFactory Shells { get; private set; }

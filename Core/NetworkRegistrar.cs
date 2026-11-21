@@ -12,7 +12,7 @@ namespace POGLib.Core
     /// verifies registration via NetworkPrefabOverrideLinks and re-salts the hash on collision.
     /// Session-scoped: reset on Shutdown so it re-registers on the next session start.
     /// </summary>
-    public class NetworkRegistrar
+    internal class NetworkRegistrar
     {
         private readonly ContentRegistry _registry;
         private bool _registered;

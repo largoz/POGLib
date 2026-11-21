@@ -5,18 +5,14 @@ using Unity.Netcode;
 
 namespace POGLib.Core
 {
-    /// <summary>Which side of the session is starting (drives the parity step).</summary>
-    internal enum SessionRole { Host, Client }
-
     /// <summary>
-    /// NGO lifecycle Harmony hooks. A prefix on Start* is the only correct window to register
-    /// mod prefabs (ForceSamePrefabs=true). A postfix on Shutdown resets session-scoped state
-    /// so a lobby rejoin re-registers content. The same window drives the multiplayer parity step:
-    /// the host advertises its manifest, a joining client reads and compares the host's.
+    /// NGO lifecycle Harmony hooks. A prefix on Start* registers the mod prefabs before the session
+    /// starts; a postfix on Shutdown resets session-scoped state so a rejoin registers content again.
+    /// Telling players that their mods differ is POG Mod Check's job (a mod of its own), not this library's.
     /// </summary>
     internal static class NetworkLifecycleHooks
     {
-        internal static void OnBeforeSessionStart(SessionRole role)
+        internal static void OnBeforeSessionStart()
         {
             if (!CoreServices.Ready) return;
             // The game normally loads its prefab list just before this (and GamePrefabsLoaded has built the
@@ -24,18 +20,6 @@ namespace POGLib.Core
             if (!GamePrefabs.IsLoaded && GamePrefabs.EnsureLoaded()) OnGamePrefabsLoaded();
             CoreServices.Network.RegisterAll();
             PluginRegistry.Dispatch(PluginStage.BeforeSessionStart);
-
-            // Multiplayer parity (ForceSamePrefabs): host advertises, client compares. Guarded so a
-            // Steam/interop shape change degrades to a log line instead of breaking session start.
-            try
-            {
-                if (role == SessionRole.Host) ParityService.AdvertiseAsHost();
-                else ParityService.CheckAsClient();
-            }
-            catch (Exception ex)
-            {
-                MelonLogger.Warning($"[POGLib] Parity step failed ({role}): {ex.Message}");
-            }
         }
 
         private static int _dispatchedList;
@@ -72,20 +56,20 @@ namespace POGLib.Core
     [HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.StartHost))]
     internal static class Patch_StartHost
     {
-        static void Prefix() => NetworkLifecycleHooks.OnBeforeSessionStart(SessionRole.Host);
+        static void Prefix() => NetworkLifecycleHooks.OnBeforeSessionStart();
         static void Postfix() { try { NetworkLifecycleHooks.OnSessionStarted(); } catch (Exception ex) { MelonLogger.Warning($"[POGLib] After StartHost: {ex.Message}"); } }
     }
 
     [HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.StartServer))]
     internal static class Patch_StartServer
     {
-        static void Prefix() => NetworkLifecycleHooks.OnBeforeSessionStart(SessionRole.Host);
+        static void Prefix() => NetworkLifecycleHooks.OnBeforeSessionStart();
     }
 
     [HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.StartClient))]
     internal static class Patch_StartClient
     {
-        static void Prefix() => NetworkLifecycleHooks.OnBeforeSessionStart(SessionRole.Client);
+        static void Prefix() => NetworkLifecycleHooks.OnBeforeSessionStart();
         static void Postfix() { try { NetworkLifecycleHooks.OnSessionStarted(); } catch (Exception ex) { MelonLogger.Warning($"[POGLib] After StartClient: {ex.Message}"); } }
     }
 

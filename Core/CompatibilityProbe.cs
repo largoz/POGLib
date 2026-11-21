@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text;
 using Il2Cpp;
 using Il2CppGame.Gameplay;
-using Il2CppGame.Spawning;
 using Il2CppI2.Loc;
 using Il2CppInventory;
 using Il2CppItems;
@@ -16,9 +15,9 @@ namespace POGLib.Core
     /// Load-time sanity check. IL2CPP mods break when a game update renames/removes a member the
     /// mod binds to by name; this reflects over the current interop and turns a silent mid-game
     /// NRE (or a PatchAll throw) into one clear, actionable log line naming exactly what is missing.
-    /// Run it early in OnInitializeMelon, BEFORE Harmony PatchAll.
+    /// Run it early in OnInitializeMelon, BEFORE Harmony PatchAll. A sibling mod (Shops) runs it on its own list.
     /// </summary>
-    public static class CompatibilityProbe
+    internal static class CompatibilityProbe
     {
         private const BindingFlags Flags =
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
@@ -50,9 +49,6 @@ namespace POGLib.Core
             (typeof(LootTable), new[] { "m_treasureItems", "m_foodItems", "m_usefulItems", "m_bigItems", "m_shopItems" }),
             (typeof(InventoryLootTable), new[] { "Items" }),
             (typeof(ItemContainer), new[] { GameNames.Methods.ItemContainer_FromContainerData }),
-            // 2026-11-14: spawners load by address (m_networkPrefab / m_lootTable became references).
-            (typeof(ShopLocation), new[] { "m_lootTableRef", "m_itemHolder", "m_priceTagText", "LoadLootTable", "CreateShopItems" }),
-            (typeof(SpawnerBase), new[] { "m_networkPrefabRef", "m_loadedPrefab", "LoadNetworkPrefab", "HasNetworkPrefab" }),
             (typeof(SpeakingStone), new[] { GameNames.Methods.SpeakingStone_Start, GameNames.Methods.SpeakingStone_SetEnabled }),
             (typeof(LocalizationManager), new[] { GameNames.Methods.LocalizationManager_GetTranslation }),
             (typeof(NetworkManager), new[]
@@ -62,22 +58,6 @@ namespace POGLib.Core
             }),
             (typeof(NetworkObject), new[] { "GlobalObjectIdHash" }),
             (typeof(NetworkConfig), new[] { "ForceSamePrefabs", "Prefabs" }),
-        };
-
-        // Parity-layer members bound REFLECTIVELY (Facepunch interop is not referenced at compile
-        // time), so they are resolved here by full type name rather than typeof(). A miss only
-        // disables lobby-metadata parity detection — the game's own connect check still applies.
-        private static readonly (string typeName, string[] members)[] ExpectedByName =
-        {
-            (GameNames.Steam.SteamManagerTypeFullName, new[]
-            {
-                GameNames.Steam.SteamManager_Lobby,
-                // Patched to capture the manager instance — a rename here silently disables parity.
-                GameNames.Steam.OnSteamLobbyEntered, GameNames.Steam.OnSteamLobbyGameCreated,
-                GameNames.Steam.OnSteamLobbyDataChanged,
-            }),
-            (GameNames.Steam.LobbyTypeFullName, new[]
-                { GameNames.Steam.Lobby_SetData, GameNames.Steam.Lobby_GetData }),
         };
 
         // Types this DLL references at compile time. A game update can MOVE a type to another assembly or
@@ -99,21 +79,21 @@ namespace POGLib.Core
             ("LootTable", () => typeof(LootTable)),
             ("InventoryLootTable", () => typeof(InventoryLootTable)),
             ("ItemContainer", () => typeof(ItemContainer)),
-            ("ShopLocation", () => typeof(ShopLocation)),
-            ("NpcSpawner", () => typeof(NpcSpawner)),
             ("SpeakingStone", () => typeof(SpeakingStone)),
             ("LocalizationManager", () => typeof(LocalizationManager)),
-            ("SteamRuntimeManager", () => typeof(Il2CppGame.Platform.SteamRuntimeManager)),
             ("NetworkManager", () => typeof(NetworkManager)),
         };
 
-        /// <summary>Check all expected members; log a clear warning listing any that are missing.</summary>
-        public static void Check()
+        /// <summary>Check the library's own members; log a clear warning listing any that are missing.</summary>
+        internal static void Check() => Check("[POGLib]", Expected, CompiledBindings);
+
+        /// <summary>Check the given members; log one line either way, naming every missing one.</summary>
+        internal static void Check(string tag, (Type type, string[] members)[] expected, (string name, Func<Type> touch)[] compiledBindings)
         {
             var missing = new StringBuilder();
             int miss = 0, total = 0;
 
-            foreach (var (name, touch) in CompiledBindings)
+            foreach (var (name, touch) in compiledBindings)
             {
                 total++;
                 try { if (touch() == null) throw new TypeLoadException("resolved to null"); }
@@ -124,7 +104,7 @@ namespace POGLib.Core
                                    "— the game moved or changed this type; this DLL must be rebuilt against the current game");
                 }
             }
-            foreach (var (type, members) in Expected)
+            foreach (var (type, members) in expected)
             {
                 foreach (var m in members)
                 {
@@ -145,44 +125,16 @@ namespace POGLib.Core
                 }
             }
 
-            // Reflective (by-name) members — Steam/parity bindings not referenced at compile time.
-            foreach (var (typeName, members) in ExpectedByName)
-            {
-                Type type = FindType(typeName);
-                foreach (var m in members)
-                {
-                    total++;
-                    if (type == null || type.GetMember(m, Flags).Length == 0)
-                    {
-                        miss++;
-                        missing.Append($"\n  - {typeName}.{m}{(type == null ? " (type not found)" : "")}");
-                    }
-                }
-            }
-
             if (miss == 0)
             {
-                MelonLogger.Msg($"[POGLib] Compatibility OK ({total} game members resolved).");
+                MelonLogger.Msg($"{tag} Compatibility OK ({total} game members resolved).");
             }
             else
             {
                 MelonLogger.Warning(
-                    $"[POGLib] COMPATIBILITY: {miss}/{total} expected game members NOT FOUND — the game may " +
+                    $"{tag} COMPATIBILITY: {miss}/{total} expected game members NOT FOUND — the game may " +
                     $"have updated. The framework may misbehave; update GameNames/bindings for this version. Missing:{missing}");
             }
-        }
-
-        /// <summary>Find a loaded type by full name across all assemblies (for by-name interop bindings).</summary>
-        private static Type FindType(string fullName)
-        {
-            var direct = Type.GetType(fullName, throwOnError: false);
-            if (direct != null) return direct;
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                try { var t = asm.GetType(fullName, throwOnError: false); if (t != null) return t; }
-                catch { /* dynamic/reflection-only assemblies can throw */ }
-            }
-            return null;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace POGLib.Core
     /// Lookups for existing game assets by name. Lets content packs reskin with vanilla
     /// meshes/sprites without shipping an AssetBundle (the "reskin" tier).
     /// </summary>
-    public static class GameAssets
+    internal static class GameAssets
     {
         /// <summary>Find a loaded InventoryItem prefab by GameObject name.</summary>
         public static InventoryItem FindItemPrefab(string prefabName)

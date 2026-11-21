@@ -1,0 +1,194 @@
+POGLib.Shops.Model.AddOp | prop Double Weight { get; set; }
+POGLib.Shops.Model.AddOp | prop String Item { get; set; }
+POGLib.Shops.Model.AddOp | prop String Slot { get; set; }
+POGLib.Shops.Model.AddOp | public ctor()
+POGLib.Shops.Model.AddOp | sealed class
+POGLib.Shops.Model.Diagnostic | prop POGLib.Shops.Model.Severity Severity { get; }
+POGLib.Shops.Model.Diagnostic | prop String Message { get; }
+POGLib.Shops.Model.Diagnostic | prop String Source { get; }
+POGLib.Shops.Model.Diagnostic | public ctor(POGLib.Shops.Model.Severity severity, String source, String message)
+POGLib.Shops.Model.Diagnostic | public override String ToString()
+POGLib.Shops.Model.Diagnostic | sealed class
+POGLib.Shops.Model.HistoryRecord | prop String Mod { get; }
+POGLib.Shops.Model.HistoryRecord | prop String Text { get; }
+POGLib.Shops.Model.HistoryRecord | public ctor(String mod, String text)
+POGLib.Shops.Model.HistoryRecord | public override String ToString()
+POGLib.Shops.Model.HistoryRecord | sealed class
+POGLib.Shops.Model.ItemDisplayDef | prop POGLib.Shops.Model.TagDef Standing { get; set; }
+POGLib.Shops.Model.ItemDisplayDef | prop String Item { get; set; }
+POGLib.Shops.Model.ItemDisplayDef | public ctor()
+POGLib.Shops.Model.ItemDisplayDef | sealed class
+POGLib.Shops.Model.ItemReference | prop String How { get; }
+POGLib.Shops.Model.ItemReference | prop String Item { get; }
+POGLib.Shops.Model.ItemReference | prop String Mod { get; }
+POGLib.Shops.Model.ItemReference | prop String Slot { get; }
+POGLib.Shops.Model.ItemReference | public ctor(String item, String mod, String slot, String how)
+POGLib.Shops.Model.ItemReference | public override String ToString()
+POGLib.Shops.Model.ItemReference | sealed class
+POGLib.Shops.Model.NearestIds | public static Int32 Distance(String a, String b)
+POGLib.Shops.Model.NearestIds | public static System.Collections.Generic.List`1<String> Of(String id, System.Collections.Generic.IEnumerable`1<String> candidates, Int32 max)
+POGLib.Shops.Model.NearestIds | static class
+POGLib.Shops.Model.PatchOp | prop Boolean Remove { get; set; }
+POGLib.Shops.Model.PatchOp | prop String Item { get; set; }
+POGLib.Shops.Model.PatchOp | prop String ReplaceWith { get; set; }
+POGLib.Shops.Model.PatchOp | prop String Slot { get; set; }
+POGLib.Shops.Model.PatchOp | prop System.Nullable`1<Double> Weight { get; set; }
+POGLib.Shops.Model.PatchOp | public ctor()
+POGLib.Shops.Model.PatchOp | sealed class
+POGLib.Shops.Model.PoolEntry | prop Double Weight { get; set; }
+POGLib.Shops.Model.PoolEntry | prop String Item { get; set; }
+POGLib.Shops.Model.PoolEntry | public ctor()
+POGLib.Shops.Model.PoolEntry | sealed class
+POGLib.Shops.Model.ResolvedSlot | prop Boolean Untouched { get; }
+POGLib.Shops.Model.ResolvedSlot | prop Double TotalWeight { get; }
+POGLib.Shops.Model.ResolvedSlot | prop String SlotId { get; }
+POGLib.Shops.Model.ResolvedSlot | prop System.Collections.Generic.IReadOnlyList`1<POGLib.Shops.Model.HistoryRecord> History { get; }
+POGLib.Shops.Model.ResolvedSlot | prop System.Collections.Generic.IReadOnlyList`1<POGLib.Shops.Model.SlotEntry> Entries { get; }
+POGLib.Shops.Model.ResolvedSlot | public Double ChanceAmong(POGLib.Shops.Model.SlotEntry e, System.Func`2<POGLib.Shops.Model.SlotEntry,Boolean> usable)
+POGLib.Shops.Model.ResolvedSlot | public Double ChanceOf(POGLib.Shops.Model.SlotEntry e)
+POGLib.Shops.Model.ResolvedSlot | public Double ChanceOfItem(String item)
+POGLib.Shops.Model.ResolvedSlot | public POGLib.Shops.Model.SlotEntry Pick(Double r, System.Func`2<POGLib.Shops.Model.SlotEntry,Boolean> usable)
+POGLib.Shops.Model.ResolvedSlot | sealed class
+POGLib.Shops.Model.SellerDef | prop Double Weight { get; set; }
+POGLib.Shops.Model.SellerDef | prop String Id { get; set; }
+POGLib.Shops.Model.SellerDef | prop String Preset { get; set; }
+POGLib.Shops.Model.SellerDef | prop System.Collections.Generic.List`1<System.Collections.Generic.List`1<POGLib.Shops.Model.PoolEntry>> Slots { get; set; }
+POGLib.Shops.Model.SellerDef | public ctor()
+POGLib.Shops.Model.SellerDef | sealed class
+POGLib.Shops.Model.Severity | enum
+POGLib.Shops.Model.Severity | value Error = 2
+POGLib.Shops.Model.Severity | value Info = 0
+POGLib.Shops.Model.Severity | value Warning = 1
+POGLib.Shops.Model.ShopCatalog | prop POGLib.Shops.Model.ShopCatalogOptions Options { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IEnumerable`1<String> TargetedSlots { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IReadOnlyDictionary`2<String,POGLib.Shops.Model.ShopCatalog+ModSlot> ModSlots { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IReadOnlyDictionary`2<String,System.ValueTuple`2<String,POGLib.Shops.Model.TagDef>> ItemDisplays { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IReadOnlyList`1<POGLib.Shops.Model.Diagnostic> Diagnostics { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IReadOnlyList`1<POGLib.Shops.Model.ItemReference> ItemReferences { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IReadOnlyList`1<POGLib.Shops.Model.ShopCatalog+ModSeller> Sellers { get; }
+POGLib.Shops.Model.ShopCatalog | prop System.Collections.Generic.IReadOnlyList`1<String> ModOrder { get; }
+POGLib.Shops.Model.ShopCatalog | public POGLib.Shops.Model.ResolvedSlot Resolve(String slotId, System.Collections.Generic.IEnumerable`1<POGLib.Shops.Model.VanillaEntry> vanilla)
+POGLib.Shops.Model.ShopCatalog | public System.Collections.Generic.IReadOnlyList`1<String> ModsTargeting(String slotId)
+POGLib.Shops.Model.ShopCatalog | public static POGLib.Shops.Model.ShopCatalog Build(System.Collections.Generic.IEnumerable`1<POGLib.Shops.Model.ShopFile> files, POGLib.Shops.Model.ShopCatalogOptions options)
+POGLib.Shops.Model.ShopCatalog | public static String SellerSlotId(String fullSellerId, Int32 n)
+POGLib.Shops.Model.ShopCatalog | sealed class
+POGLib.Shops.Model.ShopCatalog+ModSeller | prop POGLib.Shops.Model.SellerDef Def { get; }
+POGLib.Shops.Model.ShopCatalog+ModSeller | prop String FullId { get; }
+POGLib.Shops.Model.ShopCatalog+ModSeller | prop String Mod { get; }
+POGLib.Shops.Model.ShopCatalog+ModSeller | public ctor()
+POGLib.Shops.Model.ShopCatalog+ModSeller | sealed class
+POGLib.Shops.Model.ShopCatalog+ModSlot | prop POGLib.Shops.Model.SlotDef Def { get; }
+POGLib.Shops.Model.ShopCatalog+ModSlot | prop String FullId { get; }
+POGLib.Shops.Model.ShopCatalog+ModSlot | prop String Mod { get; }
+POGLib.Shops.Model.ShopCatalog+ModSlot | public ctor()
+POGLib.Shops.Model.ShopCatalog+ModSlot | sealed class
+POGLib.Shops.Model.ShopCatalogOptions | const field Double StandardVanillaWeight = 10
+POGLib.Shops.Model.ShopCatalogOptions | prop Double DefaultVanillaWeight { get; set; }
+POGLib.Shops.Model.ShopCatalogOptions | public ctor()
+POGLib.Shops.Model.ShopCatalogOptions | public static Boolean IsValidVanillaWeight(Double w)
+POGLib.Shops.Model.ShopCatalogOptions | sealed class
+POGLib.Shops.Model.ShopFile | const field Int32 CurrentFormat = 1
+POGLib.Shops.Model.ShopFile | prop Int32 Format { get; set; }
+POGLib.Shops.Model.ShopFile | prop String Mod { get; set; }
+POGLib.Shops.Model.ShopFile | prop String SourcePath { get; set; }
+POGLib.Shops.Model.ShopFile | prop System.Collections.Generic.List`1<POGLib.Shops.Model.AddOp> Add { get; set; }
+POGLib.Shops.Model.ShopFile | prop System.Collections.Generic.List`1<POGLib.Shops.Model.ItemDisplayDef> Items { get; set; }
+POGLib.Shops.Model.ShopFile | prop System.Collections.Generic.List`1<POGLib.Shops.Model.PatchOp> Patch { get; set; }
+POGLib.Shops.Model.ShopFile | prop System.Collections.Generic.List`1<POGLib.Shops.Model.SellerDef> Sellers { get; set; }
+POGLib.Shops.Model.ShopFile | prop System.Collections.Generic.List`1<POGLib.Shops.Model.SlotDef> Slots { get; set; }
+POGLib.Shops.Model.ShopFile | prop System.Collections.Generic.List`1<String> Requires { get; set; }
+POGLib.Shops.Model.ShopFile | public ctor()
+POGLib.Shops.Model.ShopFile | sealed class
+POGLib.Shops.Model.ShopFileIO | public static Boolean Validate(POGLib.Shops.Model.ShopFile f, System.Collections.Generic.List`1<POGLib.Shops.Model.Diagnostic> d)
+POGLib.Shops.Model.ShopFileIO | public static POGLib.Shops.Model.ShopFile Parse(String json, String sourcePath, System.Collections.Generic.List`1<POGLib.Shops.Model.Diagnostic> diagnostics)
+POGLib.Shops.Model.ShopFileIO | public static String Write(POGLib.Shops.Model.ShopFile file)
+POGLib.Shops.Model.ShopFileIO | static class
+POGLib.Shops.Model.ShopIds | const field String Nothing = "nothing"
+POGLib.Shops.Model.ShopIds | const field String Vanilla = "vanilla"
+POGLib.Shops.Model.ShopIds | public static Boolean IsValidModId(String modId)
+POGLib.Shops.Model.ShopIds | public static Boolean IsVanilla(String id)
+POGLib.Shops.Model.ShopIds | public static Boolean TrySplit(String id, ref String owner, ref String local)
+POGLib.Shops.Model.ShopIds | public static String OwnerOf(String id)
+POGLib.Shops.Model.ShopIds | public static String Qualify(String id, String defaultOwner)
+POGLib.Shops.Model.ShopIds | public static String SceneOfVanilla(String id)
+POGLib.Shops.Model.ShopIds | public static String VanillaItem(String prefabName)
+POGLib.Shops.Model.ShopIds | public static String VanillaSlot(String scene, String objectPath)
+POGLib.Shops.Model.ShopIds | static class
+POGLib.Shops.Model.SlotDef | prop POGLib.Shops.Model.TagDef PriceTag { get; set; }
+POGLib.Shops.Model.SlotDef | prop Single[] Pos { get; set; }
+POGLib.Shops.Model.SlotDef | prop Single[] Rot { get; set; }
+POGLib.Shops.Model.SlotDef | prop String Anchor { get; set; }
+POGLib.Shops.Model.SlotDef | prop String Faction { get; set; }
+POGLib.Shops.Model.SlotDef | prop String Id { get; set; }
+POGLib.Shops.Model.SlotDef | prop String Scene { get; set; }
+POGLib.Shops.Model.SlotDef | prop String Seller { get; set; }
+POGLib.Shops.Model.SlotDef | prop String Template { get; set; }
+POGLib.Shops.Model.SlotDef | prop System.Collections.Generic.List`1<POGLib.Shops.Model.PoolEntry> Pool { get; set; }
+POGLib.Shops.Model.SlotDef | public ctor()
+POGLib.Shops.Model.SlotDef | sealed class
+POGLib.Shops.Model.SlotEntry | prop Double Weight { get; }
+POGLib.Shops.Model.SlotEntry | prop String AddedBy { get; }
+POGLib.Shops.Model.SlotEntry | prop String Item { get; }
+POGLib.Shops.Model.SlotEntry | public ctor(String item, Double weight, String addedBy)
+POGLib.Shops.Model.SlotEntry | public override String ToString()
+POGLib.Shops.Model.SlotEntry | sealed class
+POGLib.Shops.Model.SlotInfo | const field String Format = "1"
+POGLib.Shops.Model.SlotInfo | prop Boolean TagHidden { get; }
+POGLib.Shops.Model.SlotInfo | prop Single[] TagPos { get; }
+POGLib.Shops.Model.SlotInfo | prop Single[] TagRot { get; }
+POGLib.Shops.Model.SlotInfo | prop String SlotId { get; }
+POGLib.Shops.Model.SlotInfo | prop UInt64 NetworkId { get; }
+POGLib.Shops.Model.SlotInfo | public String Encode()
+POGLib.Shops.Model.SlotInfo | public ctor(UInt64 networkId, String slotId, Single[] tagPos, Single[] tagRot, Boolean tagHidden)
+POGLib.Shops.Model.SlotInfo | public static Boolean TryDecode(String text, ref POGLib.Shops.Model.SlotInfo info)
+POGLib.Shops.Model.SlotInfo | public static Boolean TryReadAsk(String text, ref UInt64 networkId)
+POGLib.Shops.Model.SlotInfo | public static String Ask(UInt64 networkId)
+POGLib.Shops.Model.SlotInfo | sealed class
+POGLib.Shops.Model.TagDef | prop Single[] Pos { get; set; }
+POGLib.Shops.Model.TagDef | prop Single[] Rot { get; set; }
+POGLib.Shops.Model.TagDef | public ctor()
+POGLib.Shops.Model.TagDef | sealed class
+POGLib.Shops.Model.VanillaEntry | prop Int32 Count { get; }
+POGLib.Shops.Model.VanillaEntry | prop String Item { get; }
+POGLib.Shops.Model.VanillaEntry | public ctor(String item, Int32 count)
+POGLib.Shops.Model.VanillaEntry | struct
+POGLib.Shops.Model.WeightedPick | public static Boolean Usable(Double w)
+POGLib.Shops.Model.WeightedPick | public static Int32 Index(System.Collections.Generic.IReadOnlyList`1<Double> weights, Double r)
+POGLib.Shops.Model.WeightedPick | public static Int32 Index<T>(System.Collections.Generic.IReadOnlyList`1<M0> items, System.Func`2<M0,Double> weight, Double r)
+POGLib.Shops.Model.WeightedPick | static class
+POGLib.Shops.ShopRuntime | public static Void SetRandomSeed(System.Nullable`1<Int32> seed)
+POGLib.Shops.ShopRuntime | static class
+POGLib.Shops.ShopRuntime | static prop System.Collections.Generic.IReadOnlyDictionary`2<String,POGLib.Shops.SlotRecord> Records { get; }
+POGLib.Shops.ShopScene | const field String ModSlotPrefix = "POGShopSlot|"
+POGLib.Shops.ShopScene | public static Boolean IsTemplate(UnityEngine.Transform t)
+POGLib.Shops.ShopScene | public static Il2CppGame.Spawning.NpcSpawner FindSeller(String sellerId)
+POGLib.Shops.ShopScene | public static Il2CppGame.Spawning.ShopLocation FindSlot(String slotId)
+POGLib.Shops.ShopScene | public static String CleanName(String n)
+POGLib.Shops.ShopScene | public static String PathOf(UnityEngine.Transform t)
+POGLib.Shops.ShopScene | public static String SellerId(Il2CppGame.Spawning.NpcSpawner seller)
+POGLib.Shops.ShopScene | public static String SlotId(Il2CppGame.Spawning.ShopLocation slot)
+POGLib.Shops.ShopScene | public static System.Collections.Generic.IEnumerable`1<Il2CppGame.Spawning.NpcSpawner> SellersInLoadedScenes()
+POGLib.Shops.ShopScene | public static System.Collections.Generic.IEnumerable`1<Il2CppGame.Spawning.ShopLocation> SlotsInLoadedScenes()
+POGLib.Shops.ShopScene | public static System.Collections.Generic.List`1<POGLib.Shops.Model.VanillaEntry> VanillaEntriesOf(Il2CppGame.Spawning.ShopLocation slot)
+POGLib.Shops.ShopScene | public static Unity.Netcode.NetworkObject ResolveItemPrefab(String itemId)
+POGLib.Shops.ShopScene | public static UnityEngine.Transform FindAnchor(String anchorId)
+POGLib.Shops.ShopScene | static class
+POGLib.Shops.ShopsApi | public static Boolean AddFile(POGLib.Shops.Model.ShopFile file)
+POGLib.Shops.ShopsApi | public static Void Reload()
+POGLib.Shops.ShopsApi | static class
+POGLib.Shops.ShopsApi | static prop POGLib.Shops.Model.ShopCatalog Catalog { get; }
+POGLib.Shops.ShopsApi | static prop System.Collections.Generic.IReadOnlyDictionary`2<String,POGLib.Shops.SlotRecord> Slots { get; }
+POGLib.Shops.ShopsMod | public ctor()
+POGLib.Shops.ShopsMod | public override Void OnGUI()
+POGLib.Shops.ShopsMod | public override Void OnInitializeMelon()
+POGLib.Shops.ShopsMod | public override Void OnSceneWasLoaded(Int32 buildIndex, String sceneName)
+POGLib.Shops.ShopsMod | public override Void OnUpdate()
+POGLib.Shops.ShopsMod | sealed class : MelonLoader.MelonMod
+POGLib.Shops.SlotRecord | prop Il2CppGame.Spawning.ShopLocation Slot { get; }
+POGLib.Shops.SlotRecord | prop POGLib.Shops.Model.ResolvedSlot Resolved { get; }
+POGLib.Shops.SlotRecord | prop String Picked { get; }
+POGLib.Shops.SlotRecord | prop String SlotId { get; }
+POGLib.Shops.SlotRecord | prop System.Collections.Generic.List`1<POGLib.Shops.Model.VanillaEntry> Vanilla { get; }
+POGLib.Shops.SlotRecord | prop System.Collections.Generic.List`1<String> Notes { get; }
+POGLib.Shops.SlotRecord | public ctor()
+POGLib.Shops.SlotRecord | sealed class

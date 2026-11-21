@@ -19,10 +19,10 @@ namespace POGLib.Shops
     ///   • anywhere under Mods/ named "pogshop.json" or "*.pogshop.json" (how mod packages ship them —
     ///     Gale keeps Mods/&lt;Author&gt;-&lt;Name&gt;/…, r2modman nests packages in Mods/&lt;package&gt;/);
     ///   • in UserData/POGLib/Shops/*.json (local files, e.g. the dev tools' export);
-    ///   • added from code with Content.Shops.AddFile(...).
+    ///   • added from code with ShopsApi.AddFile(...).
     /// The catalog is built on the first scene load, after every mod's OnInitializeMelon has run.
     /// </summary>
-    public sealed class ShopsPlugin : IPOGPlugin
+    internal sealed class ShopsPlugin : IPOGPlugin
     {
         public string Name => "Shops";
         public string Version => "0.1.0";

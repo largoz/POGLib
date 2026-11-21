@@ -3,7 +3,8 @@
 #
 #   run.sh <out dir> [extra DLL or folder to deploy into Mods/ ...]
 #
-# Deploys: the library build (../../bin/Release/net6.0/POGLib.dll), the driver, the extras, and
+# Deploys: the library build (../../bin/Release/net6.0/POGLib.dll), POGShops (../../Shops/bin/Release/net6.0/POGShops.dll;
+# POG_NO_SHOPS=1 leaves it out), the driver, the extras, and
 # <out dir>/driver.txt as UserData/POGLib/driver.txt when it exists. Screenshots the window ~2 s
 # after every "[DRIVER] shot <name>" log line, stops at "[DRIVER] done", closes the game and removes
 # everything it deployed. Prints the library's and driver's log lines.
@@ -66,6 +67,7 @@ cleanup() {
 trap cleanup EXIT
 
 deploy "$ROOT/bin/Release/net6.0/POGLib.dll"
+[ -z "${POG_NO_SHOPS:-}" ] && deploy "$ROOT/Shops/bin/Release/net6.0/POGShops.dll"
 deploy "$HERE/bin/Release/net6.0/POGLibRuntimeDriver.dll"
 for extra in "$@"; do deploy "$extra"; done
 if [ -f "$OUT/driver.txt" ]; then mkdir -p "$(dirname "$CFG")"; cp "$OUT/driver.txt" "$CFG"; fi
@@ -74,6 +76,7 @@ SHOPS_DIR="$PROFILE/UserData/POGLib/Shops"
 test_shops=()
 if [ -d "$OUT/shops" ]; then mkdir -p "$SHOPS_DIR"; for f in "$OUT"/shops/*.json; do cp "$f" "$SHOPS_DIR/"; test_shops+=("$SHOPS_DIR/$(basename "$f")"); done; fi
 sha256sum "$ROOT/bin/Release/net6.0/POGLib.dll" "$MODS/POGLib.dll" | awk '{print $1}' | uniq -c
+[ -z "${POG_NO_SHOPS:-}" ] && sha256sum "$ROOT/Shops/bin/Release/net6.0/POGShops.dll" "$MODS/POGShops.dll" | awk '{print $1}' | uniq -c
 
 T0=$(date +%s)
 # POG_LAUNCH_ARGS: extra game arguments, e.g. "--melonloader.hideconsole" (split on spaces).

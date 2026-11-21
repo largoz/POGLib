@@ -5,7 +5,7 @@ using UnityEngine;
 namespace POGLib.Items
 {
     /// <summary>Item visual kind.</summary>
-    public enum ItemVisualKind
+    internal enum ItemVisualKind
     {
         None,
         GameMesh,     // clone a mesh child from an existing game prefab (reskin, no bundle)
@@ -14,22 +14,28 @@ namespace POGLib.Items
         BundlePrefab, // prefab/mesh from an AssetBundle
     }
 
-    /// <summary>Visual source descriptor (optional).</summary>
+    /// <summary>
+    /// The item's look (optional): made only by its factory methods. In 0.1 a pack has <see cref="Obj"/> (shown in the
+    /// game) and <see cref="GameMesh"/>; an AssetBundle model waits for the game's Unity editor (ROADMAP, "Bundle
+    /// models"), and an icon is <see cref="ModItemDefinition.IconFile"/>.
+    /// </summary>
     public sealed class ItemVisual
     {
-        public ItemVisualKind Kind = ItemVisualKind.None;
-        public string Path;                 // path to a PNG or a .bundle
-        public string AssetName;            // asset name inside the bundle (for BundlePrefab)
-        public string SourcePrefabName;     // donor game prefab (for GameMesh)
-        public string ChildName;            // mesh child name to clone (for GameMesh)
-        public bool StripSpeakingStone = true; // when donor is SpeakingStone, strip voice/VFX
+        internal ItemVisual() { }
+
+        internal ItemVisualKind Kind = ItemVisualKind.None;
+        internal string Path;                 // path to a PNG or a .bundle
+        internal string AssetName;            // asset name inside the bundle (for BundlePrefab)
+        internal string SourcePrefabName;     // donor game prefab (for GameMesh)
+        internal string ChildName;            // mesh child name to clone (for GameMesh)
+        internal bool StripSpeakingStone = true; // when donor is SpeakingStone, strip voice/VFX
 
         // — Placement of the custom visual inside the item (BundlePrefab) —
-        public Vector3 LocalOffset = Vector3.zero;
-        public Vector3 LocalEuler = Vector3.zero;
-        public Vector3 LocalScale = Vector3.one;
+        internal Vector3 LocalOffset = Vector3.zero;
+        internal Vector3 LocalEuler = Vector3.zero;
+        internal Vector3 LocalScale = Vector3.one;
         /// <summary>Re-point materials that lost their shader in the bundle onto the game's HDRP/Lit.</summary>
-        public bool RepairShaders = true;
+        internal bool RepairShaders = true;
 
         /// <summary>Reskin by cloning a mesh child from an existing game prefab (no AssetBundle).</summary>
         public static ItemVisual GameMesh(string sourcePrefabName, string childName)
@@ -49,19 +55,19 @@ namespace POGLib.Items
         public static ItemVisual Obj(string objPath)
             => new ItemVisual { Kind = ItemVisualKind.ObjFile, Path = objPath };
 
-        public static ItemVisual Png(string path) => new ItemVisual { Kind = ItemVisualKind.Png, Path = path };
+        internal static ItemVisual Png(string path) => new ItemVisual { Kind = ItemVisualKind.Png, Path = path };
 
         /// <summary>
         /// Custom mesh/prefab from an AssetBundle — your own model WITH its own visual effects
         /// (particles, lights, trails, animation all ride along inside the prefab). Custom C#
         /// MonoBehaviour scripts do NOT survive under IL2CPP; use capabilities/use handlers for logic.
-        /// Build the bundle with the game's Unity version (2022.3.62f2, HDRP 14).
+        /// Build the bundle with the game's Unity version (6000.3.24f1 on build 26668562). Not shown in the game yet.
         /// </summary>
-        public static ItemVisual Bundle(string bundlePath, string assetName)
+        internal static ItemVisual Bundle(string bundlePath, string assetName)
             => new ItemVisual { Kind = ItemVisualKind.BundlePrefab, Path = bundlePath, AssetName = assetName };
 
         /// <summary>Position/rotate/scale the custom visual inside the item (fluent).</summary>
-        public ItemVisual At(Vector3 offset, Vector3 euler = default, float scale = 1f)
+        internal ItemVisual At(Vector3 offset, Vector3 euler = default, float scale = 1f)
         {
             LocalOffset = offset;
             LocalEuler = euler;
@@ -69,6 +75,9 @@ namespace POGLib.Items
             return this;
         }
     }
+
+    /// <summary>Loot table category (an array in Il2Cpp.LootTable).</summary>
+    public enum LootCategory { Treasure, Food, Useful, Big, Shop }
 
     /// <summary>
     /// Natural-drop placement. There is no rarity/weight field in the game — bias is emergent:
@@ -105,18 +114,15 @@ namespace POGLib.Items
     }
 
     /// <summary>Mod item data contract (versioned — data outlives code).</summary>
-    public sealed class ModItemDefinition : IContentDefinition, IContentVersion
+    public sealed class ModItemDefinition : IContentDefinition
     {
         // — Identity —
         public string ModId { get; set; }
         public string ContentId { get; set; }
-        /// <summary>Data-contract version advertised in the multiplayer parity manifest (default "1").
-        /// Bump when the item's network-visible shape changes so peers can flag a version mismatch.</summary>
-        public string ContentVersion { get; set; } = "1";
 
         // — Shell / visual —
         /// <summary>Vanilla donor shell (Diamond by default — safe).</summary>
-        public ShellFactory.ItemShellKind ShellKind { get; set; } = ShellFactory.ItemShellKind.Diamond;
+        public ItemShellKind ShellKind { get; set; } = ItemShellKind.Diamond;
         public ItemVisual Visual { get; set; }
         /// <summary>Direct icon override (takes precedence over IconSpriteName).</summary>
         public Sprite Icon { get; set; }

@@ -26,7 +26,7 @@ namespace POGLib.Core
     /// apparent winding — leaves the triangle order alone. Export from Blender with Y up / -Z forward
     /// (the exporter's default) and the model arrives upright, unmirrored and correctly facing.
     /// </summary>
-    public static class ObjMesh
+    internal static class ObjMesh
     {
         /// <summary>
         /// Objects in the OBJ whose name marks them as collision geometry rather than something to

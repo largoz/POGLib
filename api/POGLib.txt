@@ -1,0 +1,160 @@
+POGLib.Core.HostBridge | public Void RegisterHandler(String action, System.Action`2<UInt64,String> handler)
+POGLib.Core.HostBridge | public Void SendToClient(UInt64 clientId, String action, String payload)
+POGLib.Core.HostBridge | public Void SendToServer(String action, String payload)
+POGLib.Core.HostBridge | sealed class
+POGLib.Items.Content | static class
+POGLib.Items.Content | static prop POGLib.Items.ItemsApi Items { get; }
+POGLib.Items.Content | static prop System.Collections.Generic.IReadOnlyCollection`1<String> ContentAssemblies { get; }
+POGLib.Items.EatCapability | field String BuffFrom
+POGLib.Items.EatCapability | field String CopyFrom
+POGLib.Items.EatCapability | field System.Nullable`1<Boolean> UseStaminaMin
+POGLib.Items.EatCapability | field System.Nullable`1<Int32> BodyValue
+POGLib.Items.EatCapability | field System.Nullable`1<Int32> StaminaValue
+POGLib.Items.EatCapability | field System.Nullable`1<Int32> StrengthValue
+POGLib.Items.EatCapability | field System.Nullable`1<Single> BuffValueToAdd
+POGLib.Items.EatCapability | field System.Nullable`1<Single> BuffValueToStart
+POGLib.Items.EatCapability | field System.Nullable`1<Single> DamageOnEating
+POGLib.Items.EatCapability | field System.Nullable`1<Single> HealthOnEating
+POGLib.Items.EatCapability | field System.Nullable`1<Single> MaxStaminaBonus
+POGLib.Items.EatCapability | field System.Nullable`1<Single> MinStaminaBonus
+POGLib.Items.EatCapability | field System.Nullable`1<Single> StaminaRefill
+POGLib.Items.EatCapability | field System.Nullable`1<Single> StomachFullTime
+POGLib.Items.EatCapability | prop String Name { get; }
+POGLib.Items.EatCapability | public ctor()
+POGLib.Items.EatCapability | public override Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.EatCapability | sealed class : POGLib.Items.ItemCapability
+POGLib.Items.GlowCapability | field Boolean CastsLight
+POGLib.Items.GlowCapability | field Boolean Pulse
+POGLib.Items.GlowCapability | field Int32 PulseVibrato
+POGLib.Items.GlowCapability | field Single Intensity
+POGLib.Items.GlowCapability | field Single LightIntensity
+POGLib.Items.GlowCapability | field Single LightRange
+POGLib.Items.GlowCapability | field Single PulseDuration
+POGLib.Items.GlowCapability | field Single PulseRandomness
+POGLib.Items.GlowCapability | field Single PulseStrength
+POGLib.Items.GlowCapability | field String MaterialFilter
+POGLib.Items.GlowCapability | field System.Nullable`1<UnityEngine.Color> EmissiveColour
+POGLib.Items.GlowCapability | field UnityEngine.Color Colour
+POGLib.Items.GlowCapability | field UnityEngine.Vector3 LocalOffset
+POGLib.Items.GlowCapability | prop String Name { get; }
+POGLib.Items.GlowCapability | public ctor()
+POGLib.Items.GlowCapability | public override Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.GlowCapability | sealed class : POGLib.Items.ItemVisualEffect
+POGLib.Items.ItemCapability | abstract class
+POGLib.Items.ItemCapability | prop String Name { get; }
+POGLib.Items.ItemCapability | protected ctor()
+POGLib.Items.ItemCapability | protected static M0 AddOrGet<T>(UnityEngine.GameObject go)
+POGLib.Items.ItemCapability | public abstract Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.ItemShellKind | enum
+POGLib.Items.ItemShellKind | value BigItem = 3
+POGLib.Items.ItemShellKind | value Coin = 1
+POGLib.Items.ItemShellKind | value Diamond = 0
+POGLib.Items.ItemShellKind | value Gem = 2
+POGLib.Items.ItemVisual | public static POGLib.Items.ItemVisual GameMesh(String sourcePrefabName, String childName)
+POGLib.Items.ItemVisual | public static POGLib.Items.ItemVisual Obj(String objPath)
+POGLib.Items.ItemVisual | sealed class
+POGLib.Items.ItemVisualEffect | abstract class : POGLib.Items.ItemCapability
+POGLib.Items.ItemVisualEffect | const field String ChildPrefix = "ModEffect_"
+POGLib.Items.ItemVisualEffect | protected ctor()
+POGLib.Items.ItemVisualEffect | protected static UnityEngine.GameObject CreateEffectChild(Il2Cpp.InventoryItem item, String effectName, UnityEngine.Vector3 localOffset)
+POGLib.Items.ItemVisualEffect | protected static UnityEngine.Transform GetVisualRoot(Il2Cpp.InventoryItem item)
+POGLib.Items.ItemsApi | public Void Register(POGLib.Items.ModItemDefinition definition)
+POGLib.Items.ItemsApi | public Void Register(POGLib.Items.ModItemDefinition definition, String handlerId, POGLib.Items.ModItemUseHandler handler)
+POGLib.Items.ItemsApi | public Void RegisterUseHandler(String handlerId, POGLib.Items.ModItemUseHandler handler)
+POGLib.Items.ItemsApi | sealed class
+POGLib.Items.LootCategory | enum
+POGLib.Items.LootCategory | value Big = 3
+POGLib.Items.LootCategory | value Food = 1
+POGLib.Items.LootCategory | value Shop = 4
+POGLib.Items.LootCategory | value Treasure = 0
+POGLib.Items.LootCategory | value Useful = 2
+POGLib.Items.LootPlacement | field Int32 Weight
+POGLib.Items.LootPlacement | field String[] TableNames
+POGLib.Items.LootPlacement | field System.Nullable`1<POGLib.Items.LootCategory> Category
+POGLib.Items.LootPlacement | public POGLib.Items.LootPlacement RestrictTo(String[] names)
+POGLib.Items.LootPlacement | public POGLib.Items.LootPlacement WithWeight(Int32 w)
+POGLib.Items.LootPlacement | public ctor()
+POGLib.Items.LootPlacement | public static POGLib.Items.LootPlacement In(POGLib.Items.LootCategory category)
+POGLib.Items.LootPlacement | public static POGLib.Items.LootPlacement InTables(String[] names)
+POGLib.Items.LootPlacement | sealed class
+POGLib.Items.MeleeWeaponCapability | field Int32 DurabilityLossOnDestructibleHit
+POGLib.Items.MeleeWeaponCapability | field Int32 DurabilityLossOnEntityHit
+POGLib.Items.MeleeWeaponCapability | field Int32 MaxDurability
+POGLib.Items.MeleeWeaponCapability | field Single HitCooldown
+POGLib.Items.MeleeWeaponCapability | prop String Name { get; }
+POGLib.Items.MeleeWeaponCapability | public ctor()
+POGLib.Items.MeleeWeaponCapability | public override Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.MeleeWeaponCapability | sealed class : POGLib.Items.ItemCapability
+POGLib.Items.ModItemDefinition | prop Boolean Big { get; set; }
+POGLib.Items.ModItemDefinition | prop Boolean Consumable { get; set; }
+POGLib.Items.ModItemDefinition | prop Boolean ShowInJournal { get; set; }
+POGLib.Items.ModItemDefinition | prop Il2Cpp.ItemType ItemType { get; set; }
+POGLib.Items.ModItemDefinition | prop Il2Cpp.MapIconType MapIcon { get; set; }
+POGLib.Items.ModItemDefinition | prop Int32 FoodValue { get; set; }
+POGLib.Items.ModItemDefinition | prop Int32 GoldValue { get; set; }
+POGLib.Items.ModItemDefinition | prop Int32 MaxUses { get; set; }
+POGLib.Items.ModItemDefinition | prop Int32 ShopCost { get; set; }
+POGLib.Items.ModItemDefinition | prop POGLib.Items.ItemShellKind ShellKind { get; set; }
+POGLib.Items.ModItemDefinition | prop POGLib.Items.ItemVisual Visual { get; set; }
+POGLib.Items.ModItemDefinition | prop POGLib.Items.LootPlacement Loot { get; set; }
+POGLib.Items.ModItemDefinition | prop Single MovementFactorWhenHeld { get; set; }
+POGLib.Items.ModItemDefinition | prop Single PickupStaminaPenalty { get; set; }
+POGLib.Items.ModItemDefinition | prop String ContentId { get; set; }
+POGLib.Items.ModItemDefinition | prop String DisplayDescription { get; set; }
+POGLib.Items.ModItemDefinition | prop String DisplayName { get; set; }
+POGLib.Items.ModItemDefinition | prop String IconFile { get; set; }
+POGLib.Items.ModItemDefinition | prop String IconSpriteName { get; set; }
+POGLib.Items.ModItemDefinition | prop String ModId { get; set; }
+POGLib.Items.ModItemDefinition | prop String SpawnOnConsume { get; set; }
+POGLib.Items.ModItemDefinition | prop String TooltipDescriptionKey { get; set; }
+POGLib.Items.ModItemDefinition | prop String TooltipKey { get; set; }
+POGLib.Items.ModItemDefinition | prop String UseHandlerId { get; set; }
+POGLib.Items.ModItemDefinition | prop System.Collections.Generic.List`1<POGLib.Items.ItemCapability> Capabilities { get; }
+POGLib.Items.ModItemDefinition | prop System.Nullable`1<Il2CppGame.Journal.ItemGroup> JournalGroup { get; set; }
+POGLib.Items.ModItemDefinition | prop System.Nullable`1<UnityEngine.Color> Tint { get; set; }
+POGLib.Items.ModItemDefinition | prop System.Nullable`1<UnityEngine.Vector3> StandingPoint { get; set; }
+POGLib.Items.ModItemDefinition | prop System.Nullable`1<UnityEngine.Vector3> StandingRotation { get; set; }
+POGLib.Items.ModItemDefinition | prop UnityEngine.Sprite Icon { get; set; }
+POGLib.Items.ModItemDefinition | public ctor()
+POGLib.Items.ModItemDefinition | sealed class
+POGLib.Items.ModItemHandle | class : UnityEngine.MonoBehaviour
+POGLib.Items.ModItemHandle | public ctor(IntPtr ptr)
+POGLib.Items.ModItemUseHandler | delegate
+POGLib.Items.ModItemUseHandler | public Boolean Invoke(Il2Cpp.InventoryItem item, Il2CppEntities.Entity owner, POGLib.Items.UseContext ctx)
+POGLib.Items.ParticleEffect | field Boolean FollowVisualMesh
+POGLib.Items.ParticleEffect | field Boolean PlayOnAttach
+POGLib.Items.ParticleEffect | field Single Scale
+POGLib.Items.ParticleEffect | field String EffectId
+POGLib.Items.ParticleEffect | field String SourceChildName
+POGLib.Items.ParticleEffect | field String SourcePrefabName
+POGLib.Items.ParticleEffect | field System.Nullable`1<UnityEngine.Color> Tint
+POGLib.Items.ParticleEffect | field UnityEngine.Vector3 LocalEuler
+POGLib.Items.ParticleEffect | field UnityEngine.Vector3 LocalOffset
+POGLib.Items.ParticleEffect | prop String Name { get; }
+POGLib.Items.ParticleEffect | public POGLib.Items.ParticleEffect At(UnityEngine.Vector3 offset, UnityEngine.Vector3 euler, Single scale)
+POGLib.Items.ParticleEffect | public POGLib.Items.ParticleEffect Coloured(UnityEngine.Color colour)
+POGLib.Items.ParticleEffect | public ctor()
+POGLib.Items.ParticleEffect | public override Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.ParticleEffect | public static POGLib.Items.ParticleEffect FromGameObject(String effectId, String sourcePrefabName, String sourceChildName)
+POGLib.Items.ParticleEffect | sealed class : POGLib.Items.ItemVisualEffect
+POGLib.Items.ThrowableCapability | field Int32 HealthMax
+POGLib.Items.ThrowableCapability | field Int32 HealthMin
+POGLib.Items.ThrowableCapability | field Single BounceFactor
+POGLib.Items.ThrowableCapability | prop String Name { get; }
+POGLib.Items.ThrowableCapability | public ctor()
+POGLib.Items.ThrowableCapability | public override Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.ThrowableCapability | sealed class : POGLib.Items.ItemCapability
+POGLib.Items.UsableCapability | field Boolean UseCrosshair
+POGLib.Items.UsableCapability | field Single FovChange
+POGLib.Items.UsableCapability | field Single ReadyDuration
+POGLib.Items.UsableCapability | prop String Name { get; }
+POGLib.Items.UsableCapability | public ctor()
+POGLib.Items.UsableCapability | public override Void Attach(Il2Cpp.InventoryItem item)
+POGLib.Items.UsableCapability | sealed class : POGLib.Items.ItemVisualEffect
+POGLib.Items.UseContext | prop Boolean IsHost { get; }
+POGLib.Items.UseContext | prop POGLib.Core.HostBridge Bridge { get; }
+POGLib.Items.UseContext | sealed class
+POGLib.Plugin | class : MelonLoader.MelonMod
+POGLib.Plugin | public ctor()
+POGLib.Plugin | public override Void OnInitializeMelon()
+POGLib.Plugin | public override Void OnSceneWasLoaded(Int32 buildIndex, String sceneName)

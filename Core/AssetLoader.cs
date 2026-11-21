@@ -9,7 +9,7 @@ namespace POGLib.Core
     /// Asset loader. AssetBundle (Unity 2022.3.62f2 / HDRP 14) + loose PNG→Sprite.
     /// The full bundle pipeline (meshes/prefabs) is enabled after the Milestone 0.2 smoke test.
     /// </summary>
-    public class AssetLoader
+    internal class AssetLoader
     {
         private readonly Dictionary<string, AssetBundle> _bundles = new();
 

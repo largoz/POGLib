@@ -13,6 +13,8 @@ namespace POGLib.Items
     /// </summary>
     public sealed class ItemsApi
     {
+        internal ItemsApi() { }
+
         internal ItemsPlugin Plugin;
 
         private bool Guard()
@@ -48,10 +50,6 @@ namespace POGLib.Items
     public static class Content
     {
         public static ItemsApi Items { get; } = new ItemsApi();
-        /// <summary>Shop slots (experimental, v0.2). See ShopsApi.</summary>
-        public static ShopsApi Shops { get; } = new ShopsApi();
-        /// <summary>Multiplayer content-parity events (ForceSamePrefabs). See ParityApi.</summary>
-        public static ParityApi Parity { get; } = new ParityApi();
         /// <summary>
         /// The assemblies (simple names, e.g. "ShopDemo") that registered network content through this library, plus
         /// POGLib itself once any did. Every player needs these mods, with the same content: a mod-list check
@@ -59,7 +57,7 @@ namespace POGLib.Items
         /// </summary>
         public static IReadOnlyCollection<string> ContentAssemblies => ContentOwners.Assemblies;
         /// <summary>Runtime inspection of vanilla visuals (lights/pulse/emissive). See DiagnosticsApi.</summary>
-        public static DiagnosticsApi Diagnostics { get; } = new DiagnosticsApi();
+        internal static DiagnosticsApi Diagnostics { get; } = new DiagnosticsApi();
         // TODO(v2): public static MobsApi Mobs { get; }
         // TODO(v3): public static LevelsApi Levels { get; }
     }

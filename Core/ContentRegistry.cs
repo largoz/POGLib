@@ -8,21 +8,10 @@ using Unity.Netcode;
 namespace POGLib.Core
 {
     /// <summary>Base contract for any content definition (item, mob, level…).</summary>
-    public interface IContentDefinition
+    internal interface IContentDefinition
     {
         string ModId { get; }
         string ContentId { get; }
-    }
-
-    /// <summary>
-    /// Optional: a content definition can declare a data-contract version. The multiplayer parity
-    /// layer advertises it so peers can detect not just "you lack this item" but "your copy is a
-    /// different version" — relevant because ForceSamePrefabs requires an identical prefab set.
-    /// Definitions that don't implement this are treated as version "1".
-    /// </summary>
-    public interface IContentVersion
-    {
-        string ContentVersion { get; }
     }
 
     /// <summary>
@@ -30,7 +19,7 @@ namespace POGLib.Core
     /// The identity key is a deterministic GlobalObjectIdHash (MD5(modId:contentId)),
     /// identical on every peer — which is exactly what ForceSamePrefabs=true requires.
     /// </summary>
-    public class ContentRegistry
+    internal class ContentRegistry
     {
         private readonly Dictionary<string, IContentDefinition> _defsByFullId = new();
         private readonly Dictionary<uint, IContentDefinition> _defsByHash = new();

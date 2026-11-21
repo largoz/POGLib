@@ -63,7 +63,7 @@ namespace POGLib.RuntimeDriver
         /// <summary>In the hub, after the slots spawned: what the setting and the rules did to the bread slot.</summary>
         public static void HubChecks()
         {
-            var records = POGLib.Items.Content.Shops.Slots;
+            var records = POGLib.Shops.ShopsApi.Slots;
             if (!records.TryGetValue(BreadSlot, out var rec)) { Check("bread slot stocked", false, "no record for " + BreadSlot); return; }
             var vanilla = rec.Resolved.Entries.Where(e => e.AddedBy == "vanilla").ToList();
             Check("vanilla weight setting reached the pick", vanilla.Count > 0 && vanilla.All(e => e.Weight == 0),

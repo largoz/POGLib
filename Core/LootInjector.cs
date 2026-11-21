@@ -5,12 +5,10 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppInventory;
 using MelonLoader;
 using UnityEngine;
+using POGLib.Items;
 
 namespace POGLib.Core
 {
-    /// <summary>Loot table category (an array in Il2Cpp.LootTable).</summary>
-    public enum LootCategory { Treasure, Food, Useful, Big, Shop }
-
     /// <summary>
     /// Injects mod items into vanilla loot so they appear naturally. Two table families
     /// (ITEM_SYSTEM.md §5.6), each with its own technique — the framework handles both:
@@ -24,7 +22,7 @@ namespace POGLib.Core
     /// decide the value-budget match. Zero consumer patching — consumers read the array/list at
     /// call time. Host-side, at scene load, before dungeon generation.
     /// </summary>
-    public class LootInjector
+    internal class LootInjector
     {
         private readonly ContentRegistry _registry;
         private readonly List<Request> _requests = new();

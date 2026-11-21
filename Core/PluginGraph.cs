@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MelonLoader;
 
 namespace POGLib.Core
@@ -9,7 +10,7 @@ namespace POGLib.Core
     /// Systems are grouped by lifecycle stage; resources are a typed service locator
     /// shared between plugins.
     /// </summary>
-    public class PluginGraph
+    internal class PluginGraph
     {
         private readonly Dictionary<PluginStage, List<NamedSystem>> _systems = new();
         private readonly Dictionary<Type, object> _resources = new();
@@ -49,11 +50,15 @@ namespace POGLib.Core
         /// Run all systems of a stage. A single system failure is isolated (log + continue)
         /// so one broken content mod cannot take down the rest.
         /// </summary>
-        public void RunStage(PluginStage stage)
+        public void RunStage(PluginStage stage) => RunStage(stage, null);
+
+        /// <summary>Run the systems of a stage that <paramref name="owner"/> added (all of them when null).</summary>
+        public void RunStage(PluginStage stage, string owner)
         {
             if (!_systems.TryGetValue(stage, out var systems)) return;
-            foreach (var sys in systems)
+            foreach (var sys in systems.ToArray())
             {
+                if (owner != null && sys.Owner != owner) continue;
                 try { sys.Run(); }
                 catch (Exception ex)
                 {

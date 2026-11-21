@@ -223,7 +223,7 @@ namespace POGLib.RuntimeDriver
         // game's result, independent of the library's own bookkeeping.
         void CheckShopRules()
         {
-            var records = POGLib.Items.Content.Shops.Slots;
+            var records = POGLib.Shops.ShopsApi.Slots;
             Log($"shops: {records.Count} slot record(s)");
             var items = UnityEngine.Object.FindObjectsOfType<InventoryItem>(true).Where(i => !POGLib.Shops.ShopScene.IsTemplate(i.transform)).ToArray();
             foreach (var kv in records.OrderBy(k => k.Key))
@@ -329,7 +329,7 @@ namespace POGLib.RuntimeDriver
 
         bool DevToolsStep()
         {
-            _tools ??= typeof(POGLib.Plugin).Assembly.GetType("POGLib.Shops.Dev.ShopDevTools");
+            _tools ??= typeof(POGLib.Shops.ShopsPlugin).Assembly.GetType("POGLib.Shops.Dev.ShopDevTools");
             var pref = MelonPreferences.GetEntry<bool>("POGLib_ShopTools", "Enabled");
             string target = _cfg.TryGetValue("devslot", out var t) ? t : null;
             switch (_dev++)
@@ -423,7 +423,7 @@ namespace POGLib.RuntimeDriver
                     foreach (var sp in POGLib.Shops.ShopScene.SellersInLoadedScenes())
                         Log($"dungeon: seller {POGLib.Shops.ShopScene.SellerId(sp)} root {sp.transform.root.name} slots {sp.m_itemsForSale.Length}");
                     CheckShopRules();
-                    var mine = POGLib.Items.Content.Shops.Slots.Values.Where(r => r.SlotId.Contains("#")).OrderBy(r => r.SlotId).ToList();
+                    var mine = POGLib.Shops.ShopsApi.Slots.Values.Where(r => r.SlotId.Contains("#")).OrderBy(r => r.SlotId).ToList();
                     foreach (var r in mine) Log($"dungeon: mod merchant slot {r.SlotId} picked {r.Picked}");
                     if (Checks.Enabled) Checks.MerchantChecks(mine);
                     if (mine.Count > 0 && mine[0].Slot != null && LookAtTransform(mine[0].Slot.transform)) Log("shot merchant");
@@ -433,7 +433,7 @@ namespace POGLib.RuntimeDriver
                 case 3:
                 {
                     _override = false;
-                    _tools ??= typeof(POGLib.Plugin).Assembly.GetType("POGLib.Shops.Dev.ShopDevTools");
+                    _tools ??= typeof(POGLib.Shops.ShopsPlugin).Assembly.GetType("POGLib.Shops.Dev.ShopDevTools");
                     MelonPreferences.GetEntry<bool>("POGLib_ShopTools", "Enabled").Value = true;
                     Call("SetMode", ModeValue("Aim"));
                     SetField("_freeze", true);
@@ -479,7 +479,7 @@ namespace POGLib.RuntimeDriver
             string scene = SceneManager.GetActiveScene().name;
             if (!_jumpWaiting)
             {
-                _tools ??= typeof(POGLib.Plugin).Assembly.GetType("POGLib.Shops.Dev.ShopDevTools");
+                _tools ??= typeof(POGLib.Shops.ShopsPlugin).Assembly.GetType("POGLib.Shops.Dev.ShopDevTools");
                 Call("JumpTo", target);
                 Log($"jump: to {target}; status '{GetField("_status")}'");
                 _jumpWaiting = true; _jumpDeadline = Time.unscaledTime + 90f; _next = Time.unscaledTime + 2f; return false;
@@ -507,9 +507,9 @@ namespace POGLib.RuntimeDriver
                 var draft = (POGLib.Shops.Model.ShopFile)GetField("_draft");
                 var sel = (string)GetField("_selected");
                 var def = draft.Slots.First(x => draft.Mod + ":" + x.Id == sel);
-                var templates = typeof(POGLib.Plugin).Assembly.GetType("POGLib.Shops.SlotTemplates");
+                var templates = typeof(POGLib.Shops.ShopsPlugin).Assembly.GetType("POGLib.Shops.SlotTemplates");
                 var template = templates.GetMethod("Get", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                    .Invoke(null, new object[] { POGLib.Items.Content.Shops.Catalog.ModSlots.Keys.First() }) as ShopLocation;
+                    .Invoke(null, new object[] { POGLib.Shops.ShopsApi.Catalog.ModSlots.Keys.First() }) as ShopLocation;
                 if (template == null || def.PriceTag == null) { Log("tagcheck: no template or no priceTag"); return; }
                 var parent = new GameObject("DriverTagCheck"); parent.SetActive(false);
                 var copy = UnityEngine.Object.Instantiate(template.gameObject, parent.transform);

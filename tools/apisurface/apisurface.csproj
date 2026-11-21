@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Prints the public surface of a .NET assembly (what another mod can call) from its metadata alone, one sorted line
+       per type and member; with check, compares it to a baseline file and fails on any difference. Usage: Program.cs. -->
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><Nullable>disable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+</Project>

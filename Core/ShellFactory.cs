@@ -3,6 +3,7 @@ using Il2Cpp;
 using MelonLoader;
 using UnityEngine;
 using Unity.Netcode;
+using POGLib.Items;
 
 namespace POGLib.Core
 {
@@ -11,25 +12,11 @@ namespace POGLib.Core
     /// vanilla shell prefab must be cloned. The clone gets a DETERMINISTIC GlobalObjectIdHash
     /// (otherwise NGO resolves the spawn to the shell — the old mod's core bug).
     /// </summary>
-    public class ShellFactory
+    internal class ShellFactory
     {
         private readonly ContentRegistry _registry;
 
         public ShellFactory(ContentRegistry registry) { _registry = registry; }
-
-        /// <summary>
-        /// Recommended shells. Diamond is the default (has InventoryItem+NetworkObject+Rigidbody,
-        /// no VoIP/VFX/spawnOnDestroy). SpeakingStone is deliberately NOT offered as a shell —
-        /// it drags voice/VFX and m_spawnOnDestroy (infinite-spawn risk).
-        /// </summary>
-        public enum ItemShellKind
-        {
-            Diamond,     // default
-            Coin,
-            Gem,
-            /// <summary>A big item, carried in both hands (the item's <c>Big</c> picks it on its own).</summary>
-            BigItem,
-        }
 
         public static string ShellPrefabName(ItemShellKind kind) => kind switch
         {

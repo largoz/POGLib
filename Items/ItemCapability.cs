@@ -512,8 +512,8 @@ namespace POGLib.Items
         public string SourceChildName;    // e.g. "VFX_SpeakingStone"
 
         // — Source B: your own particle prefab from a bundle —
-        public string BundlePath;
-        public string BundleAssetName;
+        internal string BundlePath;
+        internal string BundleAssetName;
 
         // — Placement —
         public Vector3 LocalOffset = Vector3.zero;
@@ -537,7 +537,7 @@ namespace POGLib.Items
             => new ParticleEffect { EffectId = effectId, SourcePrefabName = sourcePrefabName, SourceChildName = sourceChildName };
 
         /// <summary>Instantiate your own particle prefab from an AssetBundle.</summary>
-        public static ParticleEffect FromBundle(string effectId, string bundlePath, string assetName)
+        internal static ParticleEffect FromBundle(string effectId, string bundlePath, string assetName)
             => new ParticleEffect { EffectId = effectId, BundlePath = bundlePath, BundleAssetName = assetName };
 
         /// <summary>Position/rotate/scale the effect inside the item (fluent).</summary>

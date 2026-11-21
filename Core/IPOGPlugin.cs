@@ -7,7 +7,7 @@ namespace POGLib.Core
     /// A stage may run MORE THAN ONCE (e.g. BeforeSessionStart fires on every
     /// StartHost/StartClient, including lobby rejoin), so systems must be idempotent.
     /// </summary>
-    public enum PluginStage
+    internal enum PluginStage
     {
         /// <summary>OnInitializeMelon: register services, use-handlers, data contracts.
         /// Il2Cpp is ready, but the game scene is not loaded yet — no game prefabs in memory.</summary>
@@ -36,7 +36,7 @@ namespace POGLib.Core
     /// A modular POGLib plugin (Bevy-style Plugin). Each domain (Items, Mobs,
     /// Levels…) implements it and contributes its systems to the graph per stage.
     /// </summary>
-    public interface IPOGPlugin
+    internal interface IPOGPlugin
     {
         /// <summary>Unique plugin name (e.g. "Items").</summary>
         string Name { get; }

@@ -67,18 +67,61 @@ Done when: the answers and the names are written in this file.
 - [ ] 1.4 R4: a new slot at a seller as the main path. A slot needs coordinates, and today they come from the
       in-game tools: either the library places a slot by itself next to the seller's own, or the tools ship (1.5).
       Try the first; decide then.
+      **The user, 2026-11-21 (LAN run 22, looking at the starter shop):** "why are the goods at his face? Slots can
+      be made on the ground." The sample's `berry_stand` sits on the counter, 0.17 m above and 0.3 m behind the
+      bread slot (as written: the host's log puts it 0.35 m from the bread slot, the file says 0.38 m, so `pos` is in
+      metres as SHOPS.md says; a suspected scale error was checked and is not there). The shopkeeper is short, so
+      the counter is at his face. The game's own goods lie in a row on the mat, about 0.45 m apart (torch, bread,
+      key, rock at x 8.8, z -11.7 … -13.1). Idea to try: `"after": "<a seller's slot id>"` places the new slot one
+      step beyond that slot along the row, at its height and turn (a second one goes a step further), so a modder
+      writes no coordinates. The sample also still `add`s to the vanilla bread slot, which 0.3 keeps from mods.
 - [ ] 1.5 R3: the shop tools out of the library, into a mod of their own on the public API. **The user, 2026-11-20:
       a separate mod** (only mod authors need them; today 630 lines ship to every player). Packages then: the core,
       Shops on it, the tools on Shops; content mods on the core, and on Shops when they have a shop file. Nothing
       depends on the tools, so they can be released later than Shops, unless 1.4 leaves them the only way to get
       a slot's coordinates. A human has never used them: the user tries them once before they are documented.
-- [ ] 1.6 The package boundary (question 3): Shops as a mod of its own, the core without balance decisions. It
+- [~] 1.6 The package boundary (question 3): Shops as a mod of its own, the core without balance decisions. It
       needs the same public API as 1.5.
-- [ ] 1.7 The C# surface: what a pack calls (`Content.Items.Register`, `ModItemDefinition`, the capabilities) is
+      **Split 2026-11-21:** `Shops/` builds into `POGShops.dll` (`Shops/POGShops.csproj`, MelonInfo "POGShops"
+      0.1.0, priority -900: after POGLib, before content mods); `POGLib.dll` holds no shop code (`Content.Shops` is
+      `POGLib.Shops.ShopsApi` now). POGShops adds its plugin after POGLib has booted (`PluginRegistry.Add` builds a
+      late plugin into the running graph and runs its Boot systems), patches its own classes (`HarmonyPatcher`,
+      shared with the core), runs its own compatibility probe, and **starts only on the POGLib major.minor it was
+      built against** (the core's version is a const, `LibraryVersion.VERSION`, compiled into POGShops; with another
+      POGLib it logs why and stays off). It reaches the core through `InternalsVisibleTo`, so the two are released
+      together; the rule that keeps that safe: what POGShops uses of the core changes only in a minor version. For
+      POG Mod Check it is `same-version` (host and client speak "shops.slot"; a player without it can still join).
+      The game references are one list (`GameReferences.props`) for both projects. In game, run checks-10-split
+      (PC, 2026-11-21): 0 failures (7/7 driver checks, 29/29 expectations), both mods start, each probe OK (78 and
+      11 members), 13 + 7 patch classes, each patch once, the shops behave as before. **Over LAN, `lan-1/run22`**
+      (PC host, laptop client, both with POGLib + POGShops 0.1.0, same builds by hash): POG Mod Check lists POGShops
+      as "same version" on both and first stopped the client over POG Timer 1.1.0 against the host's 1.1.1 (right:
+      the timer is marked so; the client ran again without it). Then the client joined, its slot copy took the
+      host's name `POGShopSlot|ShopDemo:berry_stand` at the host's position (SlotSync over HostBridge works across
+      the two DLLs), bought a berry from the vanilla bread slot (gold 14 → 7) and ate it (health 100 → 110), bought
+      the stand's berry (7 → 0) and passed it through the bucket to the host. No error on either side.
+      Still open: whether POGShops gets its own repository before its release (the user's rule: one repository
+      per mod), and its settings names (`POGLib_Shops`, `UserData/POGLib/Shops`) with the package name (0.4).
+- [~] 1.7 The C# surface: what a pack calls (`Content.Items.Register`, `ModItemDefinition`, the capabilities) is
       listed in the README, everything else is `internal`. `Content.ContentAssemblies` is a contract already: the
       published POG Mod Check reads it by reflection.
-- [ ] 1.8 Remove what is dead: the Steam-lobby parity layer (no callback fires on this game; POG Mod Check does that
-      job), its three patches and its entries in the compatibility probe.
+      **2026-11-21, the core:** the plugin graph, registries, shells, loot injector, assets, names, probes and
+      `ItemsPlugin` are `internal`; POGShops and the runtime driver reach them through `InternalsVisibleTo`. Public:
+      `Content` (`Items`, `ContentAssemblies`), `ItemsApi`, `ModItemDefinition`, `ItemShellKind` (moved out of
+      `ShellFactory`), `ItemVisual` (only `Obj` and `GameMesh`; `Bundle`, `Png` and the placement fields are
+      internal until a bundle is shown), `LootPlacement`/`LootCategory` (moved to `POGLib.Items`), the capabilities
+      and their base classes (the extension seam stays open: no privileged core), `UseContext`,
+      `ModItemUseHandler`, `HostBridge` (its constructor and plumbing internal), `ModItemHandle` (public only
+      because the game's class injection needs it; its members are internal), `Plugin`. `Content.Diagnostics` and
+      the content version (`IContentVersion`, a parity-only field) are gone from the surface.
+      **The list is held by a check:** `api/POGLib.txt` is the surface line by line; `tools/apisurface <dll> check
+      api/POGLib.txt` fails on any difference (`write` records a change that is meant). 160 lines. POGShops has its
+      own file (`api/POGShops.txt`, 194 lines), not narrowed yet: that is its own 1.7, with 1.2-1.5.
+      Still open here: which unproven pack features stay public (2.12).
+- [x] 1.8 Remove what is dead: the Steam-lobby parity layer (no callback fires on this game; POG Mod Check does that
+      job), its three patches and its entries in the compatibility probe. **Removed 2026-11-21:** `Core/Parity*.cs`
+      (4 files), the three `SteamRuntimeManager` patches, the by-name probe entries, `GameNames.Steam`,
+      `Content.Parity`, the content version that only parity read, and the two Steam assembly references.
 
 Done when: unit tests hold each rule, the asserting run is green, and `SHOPS.md` describes only what is left.
 
@@ -95,7 +138,8 @@ Each line is a run on both machines with screenshots and both logs, written into
 - [ ] 2.4 G4, the rest: theft, and the seller's death making a new slot's item free.
 - [ ] 2.5 G5: a seller that is absent on a visit (hubs draw some sellers at random): the slot is not placed, and
       the log says why.
-- [ ] 2.6 G6: a real pack. POGCustomStones rebuilt on the library, its use handlers included.
+- [ ] 2.6 G6: a real pack. ~~POGCustomStones rebuilt on the library~~ (the user, 2026-11-21: the stones are not
+      ready, only the library is prepared now): POGCustomItems (Ember Lantern: an OBJ model, glow) and the sample.
 - [ ] 2.7 Loot. A mod item put into a loot table and found by a client; no such run is recorded. Or the injector
       stays out of the first release.
 - [ ] 2.8 Dungeon merchants: with a client and after R2, or out of the first release.
@@ -108,6 +152,14 @@ Each line is a run on both machines with screenshots and both logs, written into
       nothing in the game: the same network prefab list, no shop or loot change (LethalLib #103 shows what users
       expect).
 
+- [ ] 2.12 Every pack feature that is public has a run, or leaves the public surface before the release (its code
+      stays, the user's rule: dead code that will live again is kept). Shown so far: OBJ model, `IconFile`, journal
+      group, eating (`EatCapability`), a big item, shop cost and standing point. Not shown anywhere: `GameMesh`,
+      `MeleeWeaponCapability`, `ThrowableCapability`, `UsableCapability`, `ParticleEffect`, `SpawnOnConsume`,
+      `Tint`, `PickupStaminaPenalty` / `MovementFactorWhenHeld`, `Consumable` / `MaxUses` with a use handler (2.1),
+      localisation keys, loot (2.7). Glow: the Ember Lantern loaded with it on both machines (D2); whether the glow
+      itself showed is not written down.
+
 Done when: every feature the README promises has its run.
 
 ### Phase 3. The first release
@@ -119,8 +171,8 @@ Done when: every feature the README promises has its run.
 - [ ] 3.3 The package: `manifest.json`, the icon (the user's), `CHANGELOG.md` with the date in its header, the
       MelonLoader dependency. The stale parts of this file, of the README and `RUNTIME_TESTS.md` rewritten or
       removed.
-- [ ] 3.4 Publish on the user's word: the library, the Shops mod, then one pack built on them (POGCustomItems or
-      the stones), so the store shows something that works. Check the store pages through the API afterwards.
+- [ ] 3.4 Publish on the user's word: the library, the Shops mod, then one pack built on them (POGCustomItems; the
+      stones are not ready), so the store shows something that works. Check the store pages through the API afterwards.
 - [ ] 3.5 **POG Mod Check 0.1.2 before the library**: the published 0.1.1 finds the library by the old name
       (`POGContentLib`), so with POGLib it would not mark content mods as required by itself. The code knows POGLib
       since 2026-11-21 (not released).

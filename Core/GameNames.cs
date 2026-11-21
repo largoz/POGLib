@@ -7,7 +7,7 @@ namespace POGLib.Core
     /// makes a version bump a one-file edit instead of a hunt through the code (anti-hardcode).
     /// The <see cref="CompatibilityProbe"/> checks the members here exist on the current game build.
     /// </summary>
-    public static class GameNames
+    internal static class GameNames
     {
         /// <summary>Vanilla shell prefabs cloned as item templates (ShellFactory).</summary>
         public static class Shells
@@ -81,38 +81,6 @@ namespace POGLib.Core
             public const string InventoryItem_StartPrimaryAction = "StartPrimaryAction";
             public const string ItemContainer_FromContainerData = "FromContainerData";
             // NetworkManager Start*/Shutdown are referenced via nameof() (compile-checked) at their call sites.
-        }
-
-        /// <summary>
-        /// Steam/Facepunch + game-networking members the multiplayer parity layer binds to REFLECTIVELY
-        /// (ParitySteamBridge) — the Facepunch interop is not referenced at compile time, so these are
-        /// resolved by name at runtime and checked by the probe. The lobby carries our parity manifest
-        /// as a metadata key so a joining client can compare it BEFORE the ForceSamePrefabs check fails.
-        /// </summary>
-        public static class Steam
-        {
-            /// <summary>Facepunch lobby type in interop (exposes SetData/GetData).</summary>
-            public const string LobbyTypeFullName = "Il2CppSteamworks.Data.Lobby";
-            /// <summary>
-            /// Static game class owning the current Steam lobby. Runtime-verified: the lobby is here,
-            /// NOT on NetworkHandler (the compatibility probe caught that wrong binding in-game).
-            /// </summary>
-            public const string SteamManagerTypeFullName = "Il2CppGame.Platform.SteamRuntimeManager";
-            /// <summary>
-            /// INSTANCE property -> Nullable&lt;Lobby&gt; (runtime-verified: not static, and the class is
-            /// not a MonoBehaviour, so the instance is captured from the callbacks below instead).
-            /// </summary>
-            public const string SteamManager_Lobby = "Lobby";
-
-            /// <summary>Lobby callbacks patched to capture the manager instance (joiner / host / update).</summary>
-            public const string OnSteamLobbyEntered = "OnSteamLobbyEntered";
-            public const string OnSteamLobbyGameCreated = "OnSteamLobbyGameCreated";
-            public const string OnSteamLobbyDataChanged = "OnSteamLobbyDataChanged";
-            public const string Lobby_SetData = "SetData";              // (string key, string value)
-            public const string Lobby_GetData = "GetData";              // (string key) -> string
-
-            /// <summary>Our own lobby metadata key holding the serialized parity manifest (not a game string).</summary>
-            public const string ParityMetadataKey = "pog_parity";
         }
     }
 }
