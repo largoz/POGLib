@@ -59,6 +59,33 @@ namespace POGLib.Shops.Tests
             Assert.Contains(d, x => x.Severity == Severity.Error && x.Message.Contains(reason.Replace("\\\"", "\"")));
         }
 
+        // "after" places a slot in the row of the seller's goods, instead of "pos" (ROADMAP 1.4, 2026-11-21).
+        private const string AfterSlot = @"{ ""format"": 1, ""mod"": ""BerryMod"",
+  ""slots"": [ { ""id"": ""berry_stand"", ""scene"": ""PitOfGoblin_Lobby"", ""seller"": ""vanilla:NPC_X"",
+                 ""after"": ""vanilla:PitOfGoblin_Lobby/StarterShop/T"", ""pool"": [ { ""item"": ""HealingBerry"", ""weight"": 1 } ] } ] }";
+
+        [Fact]
+        public void AfterTakesThePlaceOfPos()
+        {
+            var d = new List<Diagnostic>();
+            var f = Parse(AfterSlot, d);
+            Assert.NotNull(f);
+            Assert.Empty(d);
+            Assert.Equal("vanilla:PitOfGoblin_Lobby/StarterShop/T", f.Slots[0].After);
+            Assert.Null(f.Slots[0].Pos);
+        }
+
+        [Theory]
+        [InlineData("\"after\"", "\"pos\": [0, 0, 0], \"after\"", "both \"after\" and \"pos\"")]
+        [InlineData("\"after\"", "\"anchor\": \"vanilla:A\", \"after\"", "both \"after\" and \"anchor\"")]
+        [InlineData("\"after\": \"vanilla:PitOfGoblin_Lobby/StarterShop/T\",", "", "pos must be")]
+        public void AfterWithCoordinatesOrWithoutEitherIsRefused(string from, string to, string reason)
+        {
+            var d = new List<Diagnostic>();
+            Assert.Null(Parse(AfterSlot.Replace(from, to), d));
+            Assert.Contains(d, x => x.Severity == Severity.Error && x.Message.Contains(reason));
+        }
+
         [Fact]
         public void DuplicateSlotIdIsRefused()
         {

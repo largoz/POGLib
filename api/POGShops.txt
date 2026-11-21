@@ -117,6 +117,7 @@ POGLib.Shops.Model.ShopIds | static class
 POGLib.Shops.Model.SlotDef | prop POGLib.Shops.Model.TagDef PriceTag { get; set; }
 POGLib.Shops.Model.SlotDef | prop Single[] Pos { get; set; }
 POGLib.Shops.Model.SlotDef | prop Single[] Rot { get; set; }
+POGLib.Shops.Model.SlotDef | prop String After { get; set; }
 POGLib.Shops.Model.SlotDef | prop String Anchor { get; set; }
 POGLib.Shops.Model.SlotDef | prop String Faction { get; set; }
 POGLib.Shops.Model.SlotDef | prop String Id { get; set; }

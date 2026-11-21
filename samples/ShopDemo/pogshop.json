@@ -6,42 +6,13 @@
       "id": "berry_stand",
       "scene": "PitOfGoblin_Lobby",
       "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",
-      "anchor": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread",
-      "pos": [
-        0.2077,
-        0.1616,
-        -0.2714
-      ],
-      "rot": [
-        0,
-        186.8954,
-        0
-      ],
-      "priceTag": {
-        "pos": [
-          0.0064,
-          0.698,
-          0.2404
-        ],
-        "rot": [
-          53.5979,
-          184.1979,
-          4.785
-        ]
-      },
+      "after": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Torch_Unlit",
       "pool": [
         {
           "item": "GlowBerry",
           "weight": 10
         }
       ]
-    }
-  ],
-  "add": [
-    {
-      "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread",
-      "item": "GlowBerry",
-      "weight": 10
     }
   ]
 }

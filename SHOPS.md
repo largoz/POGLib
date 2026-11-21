@@ -45,13 +45,22 @@ the mods' items come up). Write your weights against 10 all the same.
   "slots": [                         // new slots you place
     {
       "id": "berry_stand",
+      "scene": "PitOfGoblin_Lobby",
+      "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",   // who sells it: faction, theft, the seller's death
+      // where it stands: next to one of the seller's own slots, in the row of its goods (no coordinates) ...
+      "after": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Torch_Unlit",
+      "pool": [ { "item": "GlowBerry", "weight": 10 }, { "item": "nothing", "weight": 2 } ]
+    },
+    {
+      "id": "shelf_spot",
       "scene": "PitOfGoblin_InBetween",
-      "seller": "vanilla:NPC_ShopKeeper_...",   // who sells it: faction, theft, the seller's death
+      "seller": "vanilla:NPC_ShopKeeper_...",
+      // ... or anywhere, by coordinates: "anchor" + "pos" instead of "after"
       "anchor": "vanilla:PitOfGoblin_InBetween/...",  // position is relative to this (default: seller)
       "pos": [0.35, 0, 0],           // metres, in the anchor's space
       "rot": [0, 90, 0],             // degrees, optional
       "priceTag": { "pos": [0, 0.3, 0.3] },     // optional, relative to the slot
-      "pool": [ { "item": "GlowBerry", "weight": 10 }, { "item": "nothing", "weight": 2 } ]
+      "pool": [ { "item": "GlowBerry", "weight": 10 } ]
     }
   ],
   "add": [                           // your items in anyone's slots (vanilla or mod)
@@ -72,6 +81,13 @@ the mods' items come up). Write your weights against 10 all the same.
   ]
 }
 ```
+
+### Where a new slot stands
+
+`"after"` names one of the seller's own slots **at an end of the row** its goods form (the hub's starter shop lays
+them out in a line on its mat). The new slot goes one step past it along that row, at its height and turn; a second
+slot after the same one goes a step further. A slot in the middle of the row, or a seller whose slots stand in no
+row, is refused with the reason in the log. Use `"anchor"` and `"pos"` instead when the slot belongs somewhere else.
 
 ### Ids
 

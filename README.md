@@ -45,7 +45,7 @@ once, so systems are idempotent:
 ## Usage (for content-pack authors)
 
 ```csharp
-using POGLib.Items;  // Content, ModItemDefinition, ItemShellKind, LootPlacement, LootCategory
+using POGLib.Items;  // Content, ModItemDefinition, ItemShellKind
 
 public override void OnInitializeMelon()
 {
@@ -69,8 +69,6 @@ public override void OnInitializeMelon()
         Consumable = true,
         MaxUses = 1,
         UseHandlerId = "heal",
-        // Natural drops (optional): appears in all Food loot; weight = copies appended.
-        Loot = LootPlacement.In(LootCategory.Food).WithWeight(2),
     });
 }
 ```
@@ -79,7 +77,11 @@ public override void OnInitializeMelon()
 > `Content.Items.*` from your `OnInitializeMelon` is safe. Templates build on scene load;
 > spawning/consume happen host-side.
 
-### Natural loot placement
+### Natural loot placement (not in 0.1)
+
+**Not offered in 0.1** (`LootPlacement` is internal): loot puts copies of an item into the game's own tables, so a
+weight there means something against vanilla content, and that is decided together with vanilla shop slots after the
+first release. What follows is how the code works today, for that version.
 
 Bias is emergent — there is **no rarity field** (see
 the item-system research notes §5). Weight = copies appended;

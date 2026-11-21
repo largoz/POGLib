@@ -3,6 +3,8 @@
   "format": 1,
   "mod": "DriverChecks",
   "add": [
+    // The host's own file may add to a vanilla slot (a mod's may not in 0.1): the sample's berry in the bread slot.
+    { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread", "item": "ShopDemo:GlowBerry", "weight": 10 },
     { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread", "item": "vanilla:Item_Apple", "weight": 1 },
     { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread", "item": "NoSuchItem", "weight": 1 },
     { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread", "item": "FreeThing", "weight": 1 },

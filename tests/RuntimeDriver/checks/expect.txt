@@ -28,6 +28,9 @@ vanilla weight 0 \(player setting\)
 # The sample's new slot is still placed and stocked once; the vanilla slot is rolled once although
 # OnNetworkSpawn runs more than once (G3).
 placed ShopDemo:berry_stand
+# 1.4 (2026-11-21): the sample's stand has no coordinates; it goes in the row of the starter shop's goods.
+placed ShopDemo:berry_stand at .* in the row after Game\.Spawning\.ShopLocation Item_Torch_Unlit
+!cannot go after
 # R1 (2026-11-19): a new slot is a copy of the game's own slot prefab; the library registers no slot prefab.
 Slot templates ready: [0-9]+ \(copied from the game's 'ShopLocation(Slim)?', network hash [0-9]+; nothing new to register\)
 !G2 prefab [0-9]+ POGShopSlot

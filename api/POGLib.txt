@@ -62,21 +62,6 @@ POGLib.Items.ItemsApi | public Void Register(POGLib.Items.ModItemDefinition defi
 POGLib.Items.ItemsApi | public Void Register(POGLib.Items.ModItemDefinition definition, String handlerId, POGLib.Items.ModItemUseHandler handler)
 POGLib.Items.ItemsApi | public Void RegisterUseHandler(String handlerId, POGLib.Items.ModItemUseHandler handler)
 POGLib.Items.ItemsApi | sealed class
-POGLib.Items.LootCategory | enum
-POGLib.Items.LootCategory | value Big = 3
-POGLib.Items.LootCategory | value Food = 1
-POGLib.Items.LootCategory | value Shop = 4
-POGLib.Items.LootCategory | value Treasure = 0
-POGLib.Items.LootCategory | value Useful = 2
-POGLib.Items.LootPlacement | field Int32 Weight
-POGLib.Items.LootPlacement | field String[] TableNames
-POGLib.Items.LootPlacement | field System.Nullable`1<POGLib.Items.LootCategory> Category
-POGLib.Items.LootPlacement | public POGLib.Items.LootPlacement RestrictTo(String[] names)
-POGLib.Items.LootPlacement | public POGLib.Items.LootPlacement WithWeight(Int32 w)
-POGLib.Items.LootPlacement | public ctor()
-POGLib.Items.LootPlacement | public static POGLib.Items.LootPlacement In(POGLib.Items.LootCategory category)
-POGLib.Items.LootPlacement | public static POGLib.Items.LootPlacement InTables(String[] names)
-POGLib.Items.LootPlacement | sealed class
 POGLib.Items.MeleeWeaponCapability | field Int32 DurabilityLossOnDestructibleHit
 POGLib.Items.MeleeWeaponCapability | field Int32 DurabilityLossOnEntityHit
 POGLib.Items.MeleeWeaponCapability | field Int32 MaxDurability
@@ -96,7 +81,6 @@ POGLib.Items.ModItemDefinition | prop Int32 MaxUses { get; set; }
 POGLib.Items.ModItemDefinition | prop Int32 ShopCost { get; set; }
 POGLib.Items.ModItemDefinition | prop POGLib.Items.ItemShellKind ShellKind { get; set; }
 POGLib.Items.ModItemDefinition | prop POGLib.Items.ItemVisual Visual { get; set; }
-POGLib.Items.ModItemDefinition | prop POGLib.Items.LootPlacement Loot { get; set; }
 POGLib.Items.ModItemDefinition | prop Single MovementFactorWhenHeld { get; set; }
 POGLib.Items.ModItemDefinition | prop Single PickupStaminaPenalty { get; set; }
 POGLib.Items.ModItemDefinition | prop String ContentId { get; set; }

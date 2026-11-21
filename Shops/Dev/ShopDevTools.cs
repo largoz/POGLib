@@ -313,7 +313,8 @@ namespace POGLib.Shops.Dev
             var want = new HashSet<string>(_draft?.Slots.Where(s => s.Scene == scene).Select(s => s.Id) ?? Enumerable.Empty<string>());
             foreach (var gone in _previews.Keys.Where(k => !want.Contains(k)).ToList()) { if (_previews[gone] != null) UnityEngine.Object.Destroy(_previews[gone]); _previews.Remove(gone); }
             if (_draft == null) return;
-            foreach (var s in _draft.Slots.Where(s => s.Scene == scene))
+            // A slot placed "after" another has no coordinates of its own: the game shows where it went.
+            foreach (var s in _draft.Slots.Where(s => s.Scene == scene && string.IsNullOrEmpty(s.After)))
             {
                 var anchor = ShopScene.FindAnchor(string.IsNullOrEmpty(s.Anchor) ? s.Seller : s.Anchor);
                 if (anchor == null) continue;

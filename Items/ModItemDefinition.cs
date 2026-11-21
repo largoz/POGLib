@@ -76,8 +76,8 @@ namespace POGLib.Items
         }
     }
 
-    /// <summary>Loot table category (an array in Il2Cpp.LootTable).</summary>
-    public enum LootCategory { Treasure, Food, Useful, Big, Shop }
+    /// <summary>Loot table category (an array in Il2Cpp.LootTable). Internal in 0.1, as is <see cref="LootPlacement"/>.</summary>
+    internal enum LootCategory { Treasure, Food, Useful, Big, Shop }
 
     /// <summary>
     /// Natural-drop placement. There is no rarity/weight field in the game — bias is emergent:
@@ -91,7 +91,12 @@ namespace POGLib.Items
     ///  • Il2CppInventory.InventoryLootTable — growable List (ore veins, shop pools, gambling,
     ///    reward chests, dungeon-piece overrides). Target by explicit table name(s).
     /// </summary>
-    public sealed class LootPlacement
+    /// <remarks>
+    /// Not offered to packs in 0.1 (the user, 2026-11-21): loot puts copies of an item into the game's own tables, so a
+    /// weight there means something against vanilla content, the same question that keeps vanilla shop slots out of the
+    /// first release. The code stays; it opens with that answer and a run where a client finds the item (ROADMAP 2.7).
+    /// </remarks>
+    internal sealed class LootPlacement
     {
         /// <summary>LootTable array to append to (null = don't touch fixed-array tables).</summary>
         public LootCategory? Category;
@@ -194,8 +199,8 @@ namespace POGLib.Items
         public System.Collections.Generic.List<ItemCapability> Capabilities { get; } =
             new System.Collections.Generic.List<ItemCapability>();
 
-        // — Natural drops (optional) —
-        public LootPlacement Loot { get; set; }
+        // — Natural drops: not in 0.1 (see LootPlacement) —
+        internal LootPlacement Loot { get; set; }
 
         // — How the item stands on a shop counter —
         /// <summary>

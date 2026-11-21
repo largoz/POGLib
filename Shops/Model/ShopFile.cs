@@ -45,7 +45,14 @@ namespace POGLib.Shops.Model
         public string Seller { get; set; }
         /// <summary>Object the position is relative to (a vanilla seller or slot id). Default: the seller.</summary>
         public string Anchor { get; set; }
+        /// <summary>Metres in the anchor's space. Not with <see cref="After"/>.</summary>
         public float[] Pos { get; set; }
+        /// <summary>
+        /// Instead of <see cref="Pos"/>: a slot id at one end of the row the seller's own slots form. The new slot goes one
+        /// step past it along the row (a second one "after" the same slot a step further), at its height and turn
+        /// (<see cref="SlotRow"/>). No coordinates to find, and it stays in line with the seller's goods.
+        /// </summary>
+        public string After { get; set; }
         public float[] Rot { get; set; }
         /// <summary>Price tag offset relative to the slot. Null = where the template slot has it.</summary>
         public TagDef PriceTag { get; set; }
@@ -136,20 +143,26 @@ namespace POGLib.Shops.Model
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
 
-        // Known keys per object kind, to flag typos ("pirceTag") that JSON would otherwise ignore silently.
+        // Known keys per object kind, to flag typos ("pirceTag") that JSON would otherwise ignore silently. Taken from the
+        // model's own properties, so a key added to the model is known here too (2026-11-21: a hand-kept list missed
+        // "after" and warned "typo?" about a valid file).
         private static readonly Dictionary<string, HashSet<string>> KnownKeys = new Dictionary<string, HashSet<string>>
         {
-            ["file"] = Keys("format", "mod", "requires", "slots", "add", "patch", "sellers", "items"),
-            ["display"] = Keys("item", "standing"),
-            ["slot"] = Keys("id", "scene", "seller", "anchor", "pos", "rot", "priceTag", "template", "faction", "pool"),
-            ["tag"] = Keys("pos", "rot"),
-            ["entry"] = Keys("item", "weight"),
-            ["add"] = Keys("slot", "item", "weight"),
-            ["patch"] = Keys("slot", "item", "weight", "remove", "replaceWith"),
-            ["seller"] = Keys("id", "preset", "weight", "slots"),
+            ["file"] = Keys(typeof(ShopFile)),
+            ["display"] = Keys(typeof(ItemDisplayDef)),
+            ["slot"] = Keys(typeof(SlotDef)),
+            ["tag"] = Keys(typeof(TagDef)),
+            ["entry"] = Keys(typeof(PoolEntry)),
+            ["add"] = Keys(typeof(AddOp)),
+            ["patch"] = Keys(typeof(PatchOp)),
+            ["seller"] = Keys(typeof(SellerDef)),
         };
 
-        private static HashSet<string> Keys(params string[] k) => new HashSet<string>(k, StringComparer.OrdinalIgnoreCase);
+        private static HashSet<string> Keys(Type model) => new HashSet<string>(
+            model.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                 .Where(p => p.GetCustomAttributes(typeof(JsonIgnoreAttribute), true).Length == 0)
+                 .Select(p => JsonNamingPolicy.CamelCase.ConvertName(p.Name)),
+            StringComparer.OrdinalIgnoreCase);
 
         /// <summary>Parse and check one file. Returns null when the file cannot be used at all.</summary>
         public static ShopFile Parse(string json, string sourcePath, List<Diagnostic> diagnostics)
@@ -235,8 +248,16 @@ namespace POGLib.Shops.Model
                 if (string.IsNullOrEmpty(s.Id) || s.Id.IndexOf(':') >= 0) Err($"{at}.id must be a local id without ':' (got '{s.Id}')");
                 else if (!slotIds.Add(s.Id)) Err($"{at}.id '{s.Id}' is used twice");
                 if (string.IsNullOrEmpty(s.Scene)) Err($"{at}.scene is required");
-                if (string.IsNullOrEmpty(s.Seller) && string.IsNullOrEmpty(s.Anchor)) Err($"{at} needs a seller or an anchor to be placed relative to");
-                if (!IsVec3(s.Pos)) Err($"{at}.pos must be [x, y, z]");
+                if (!string.IsNullOrEmpty(s.After))
+                {
+                    if (s.Pos != null) Err($"{at} has both \"after\" and \"pos\": \"after\" places it, so leave \"pos\" out");
+                    if (!string.IsNullOrEmpty(s.Anchor)) Err($"{at} has both \"after\" and \"anchor\": \"after\" places it next to that slot, so leave \"anchor\" out");
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(s.Seller) && string.IsNullOrEmpty(s.Anchor)) Err($"{at} needs a seller or an anchor to be placed relative to (or \"after\": a slot to stand next to)");
+                    if (!IsVec3(s.Pos)) Err($"{at}.pos must be [x, y, z] (or use \"after\": a slot to stand next to)");
+                }
                 if (s.Rot != null && !IsVec3(s.Rot)) Err($"{at}.rot must be [x, y, z] degrees");
                 if (s.PriceTag != null && ((s.PriceTag.Pos != null && !IsVec3(s.PriceTag.Pos)) || (s.PriceTag.Rot != null && !IsVec3(s.PriceTag.Rot))))
                     Err($"{at}.priceTag pos/rot must be [x, y, z]");

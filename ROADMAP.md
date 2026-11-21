@@ -75,6 +75,15 @@ Done when: the answers and the names are written in this file.
       key, rock at x 8.8, z -11.7 … -13.1). Idea to try: `"after": "<a seller's slot id>"` places the new slot one
       step beyond that slot along the row, at its height and turn (a second one goes a step further), so a modder
       writes no coordinates. The sample also still `add`s to the vanilla bread slot, which 0.3 keeps from mods.
+      **Done in code 2026-11-21 (the user: "роби"):** `"after": "<slot id>"` in a slot (instead of `pos`/`anchor`,
+      refused together with them), `Shops/Model/SlotRow` (fit of the seller's own slots on the floor plane, a slot
+      off the row left out, step = median gap, refused for a slot in the middle or a seller with no row; 8 unit
+      tests, calibrated on two planted bugs), `ShopRuntime.PlaceAfter` (the game's own slots of the seller; a
+      second slot after the same one goes a step further). The sample's stand now goes after the torch and adds
+      nothing to the bread slot (that rule moved to the host's own test files). Found on the way: the parser's list
+      of known keys was a second copy of the model and called `after` a typo; it is now taken from the model.
+      Run `checks-11-after` (PC): 0 failures; the stand at (8.77, 3.78, -11.30), one step past the torch
+      (8.8, 3.8, -11.7), in the row. **Not seen on screen yet, and not over LAN** (the laptop was off).
 - [ ] 1.5 R3: the shop tools out of the library, into a mod of their own on the public API. **The user, 2026-11-20:
       a separate mod** (only mod authors need them; today 630 lines ship to every player). Packages then: the core,
       Shops on it, the tools on Shops; content mods on the core, and on Shops when they have a shop file. Nothing
@@ -112,7 +121,8 @@ Done when: the answers and the names are written in this file.
       internal until a bundle is shown), `LootPlacement`/`LootCategory` (moved to `POGLib.Items`), the capabilities
       and their base classes (the extension seam stays open: no privileged core), `UseContext`,
       `ModItemUseHandler`, `HostBridge` (its constructor and plumbing internal), `ModItemHandle` (public only
-      because the game's class injection needs it; its members are internal), `Plugin`. `Content.Diagnostics` and
+      because the game's class injection needs it; its members are internal), `Plugin`. Loot left the surface the
+      same day (2.7): 144 lines now. `Content.Diagnostics` and
       the content version (`IContentVersion`, a parity-only field) are gone from the surface.
       **The list is held by a check:** `api/POGLib.txt` is the surface line by line; `tools/apisurface <dll> check
       api/POGLib.txt` fails on any difference (`write` records a change that is meant). 160 lines. POGShops has its
@@ -140,8 +150,11 @@ Each line is a run on both machines with screenshots and both logs, written into
       the log says why.
 - [ ] 2.6 G6: a real pack. ~~POGCustomStones rebuilt on the library~~ (the user, 2026-11-21: the stones are not
       ready, only the library is prepared now): POGCustomItems (Ember Lantern: an OBJ model, glow) and the sample.
-- [ ] 2.7 Loot. A mod item put into a loot table and found by a client; no such run is recorded. Or the injector
-      stays out of the first release.
+- [x] 2.7 Loot. A mod item put into a loot table and found by a client; no such run is recorded. Or the injector
+      stays out of the first release. **Out of 0.1 (the user, 2026-11-21, on the recommendation):** `LootPlacement`,
+      `LootCategory` and `ModItemDefinition.Loot` are internal (16 lines left `api/POGLib.txt`); the injector's
+      code stays. Reason: loot adds copies to the game's own tables, so its weight means something against vanilla
+      content, the question 0.3 left for after the release. It opens with vanilla slots, and a client's find.
 - [ ] 2.8 Dungeon merchants: with a client and after R2, or out of the first release.
 - [ ] 2.9 A client joining through the game's own lobby (two Steam accounts): every run so far went around it.
       Needs the user and a second player.
@@ -171,13 +184,15 @@ Done when: every feature the README promises has its run.
 - [ ] 3.3 The package: `manifest.json`, the icon (the user's), `CHANGELOG.md` with the date in its header, the
       MelonLoader dependency. The stale parts of this file, of the README and `RUNTIME_TESTS.md` rewritten or
       removed.
-- [ ] 3.4 Publish on the user's word: the library, the Shops mod, then one pack built on them (POGCustomItems; the
-      stones are not ready), so the store shows something that works. Check the store pages through the API afterwards.
+- [ ] 3.4 Publish on the user's word. **The user, 2026-11-21: "only the lib goes to Thunderstore"**: POGLib and
+      POGShops (counted as part of the library; the user was told so and may correct it), no content pack and no
+      sample (POGCustomItems, ShopDemo stay on GitHub). Check the store pages through the API afterwards.
 - [ ] 3.5 **POG Mod Check 0.1.2 before the library**: the published 0.1.1 finds the library by the old name
       (`POGContentLib`), so with POGLib it would not mark content mods as required by itself. The code knows POGLib
       since 2026-11-21 (not released).
 
-Done when: a clean profile holding only Thunderstore packages shows a mod item in a shop to a host and a client.
+Done when: a clean profile holding only the Thunderstore packages of the library, plus the sample built from a clean
+clone of this repository, shows a mod item in a shop to a host and a client.
 
 ### After the first release
 
