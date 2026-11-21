@@ -94,7 +94,7 @@ namespace POGLib.Shops
         {
             var d = new List<Diagnostic>();
             file.SourcePath ??= "code:" + file.Mod;
-            bool ok = ShopFileIO.Validate(file, d);
+            bool ok = ShopFileIO.Validate(file, d) && ShopFileIO.CheckModScope(file, d);   // a file from a mod's code is a mod's file
             Log(d);
             if (!ok) return false;
             _codeFiles.Add(file);
@@ -122,11 +122,16 @@ namespace POGLib.Shops
             // A working copy in UserData/POGLib/Shops (what the shop tools save) replaces that mod's
             // packaged files, so editing a mod's shops never loads the same slots twice.
             string userDir = Path.GetFullPath(UserShopsDirectory);
+            // Mods that ship a shop file under Mods/ (before any working copy replaces it).
+            var packaged = new HashSet<string>(files.Where(f => !IsUserFile(f, userDir)).Select(f => f.Mod), StringComparer.Ordinal);
             var overridden = new HashSet<string>(files.Where(f => IsUserFile(f, userDir)).Select(f => f.Mod), StringComparer.Ordinal);
             foreach (var mod in overridden)
                 foreach (var f in files.Where(f => f.Mod == mod && !IsUserFile(f, userDir)))
                     _loadDiagnostics.Add(new Diagnostic(Severity.Info, f.SourcePath, $"replaced by your working copy in UserData/POGLib/Shops ({mod})"));
             files = files.Where(f => !overridden.Contains(f.Mod) || IsUserFile(f, userDir)).ToList();
+            // A mod's file (packaged under Mods/, or its working copy in UserData that replaced one) may hold less than a
+            // host's own file (ShopFileIO.CheckModScope); a file in UserData of a mod id with no packaged file is the host's.
+            files = files.Where(f => !packaged.Contains(f.Mod) || ShopFileIO.CheckModScope(f, _loadDiagnostics)).ToList();
             files.AddRange(_codeFiles);
             _files = files;
             Catalog = ShopCatalog.Build(files, Options());

@@ -1,0 +1,10 @@
+{
+  // A mod's shop file that reaches a vanilla slot: refused as a whole in 0.1 (ROADMAP 1.2). run.sh deploys it into
+  // Mods/ (pass it as an extra); expect.txt wants the refusal and no rule of it applied.
+  "format": 1,
+  "mod": "ScopeCheck",
+  "slots": [ { "id": "spot", "scene": "PitOfGoblin_Lobby", "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",
+               "after": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Rock_02",
+               "pool": [ { "item": "vanilla:Item_Apple", "weight": 1 } ] } ],
+  "add": [ { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Key", "item": "vanilla:Item_Apple", "weight": 1 } ]
+}

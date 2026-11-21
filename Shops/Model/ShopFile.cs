@@ -226,6 +226,25 @@ namespace POGLib.Shops.Model
         }
 
         /// <summary>Check a parsed file; adds diagnostics and returns false when it cannot be used.</summary>
+        /// <summary>
+        /// What a mod's own shop file may hold in 0.1 (the user's decisions, 2026-11-19: slots are private, nothing vanilla
+        /// is displaced in the first release): its own slots (<c>slots</c>, each with its pool) and how its items stand
+        /// (<c>items</c>). <c>add</c>, <c>patch</c>, <c>requires</c> and <c>sellers</c> reach the game's or other mods'
+        /// content and stay with the host's own files (UserData/POGLib/Shops) until a later version opens them. A file
+        /// that has any of them is refused as a whole, each reason named, so a modder sees it before players do.
+        /// </summary>
+        internal static bool CheckModScope(ShopFile f, List<Diagnostic> d)
+        {
+            bool ok = true;
+            void Err(string m) { d.Add(new Diagnostic(Severity.Error, f.SourcePath, m)); ok = false; }
+            const string Rest = "a mod's shop file may only place its own slots (\"slots\") and say how its items stand (\"items\") in this version; the file is not used";
+            if (f.Add?.Count > 0) Err($"\"add\" puts items into slots that are not this mod's ({f.Add.Count} rule(s)): {Rest}. Put the items in a slot of your own instead");
+            if (f.Patch?.Count > 0) Err($"\"patch\" changes what others sell ({f.Patch.Count} rule(s)): {Rest}");
+            if (f.Requires?.Count > 0) Err($"\"requires\" only serves \"patch\": {Rest}");
+            if (f.Sellers?.Count > 0) Err($"\"sellers\" (dungeon merchants) changes the game's list of who stands at the entrance ({f.Sellers.Count} merchant(s)): {Rest}");
+            return ok;
+        }
+
         public static bool Validate(ShopFile f, List<Diagnostic> d)
         {
             string src = f.SourcePath ?? f.Mod ?? "?";

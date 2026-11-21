@@ -1,9 +1,14 @@
 # Selling your items: shop files
 
-POGLib lets a content mod sell its items in the game's shops without writing shop code. You
-register the item in code (as usual, `Content.Items.Register`), then describe **where it is sold** in a
-data file, `pogshop.json`, shipped next to your mod. The in-game shop tools (below) write that file
-for you.
+POGShops (a mod of its own on POGLib) lets a content mod sell its items in the game's shops without writing shop
+code. You register the item in code (as usual, `Content.Items.Register`), then describe **where it is sold** in a
+data file, `pogshop.json`, shipped next to your mod. Players who host need POGShops installed.
+
+**What a mod's file may do in this version (0.1):** place **its own slots** at the game's sellers, each with its
+own pool of items, and say how its items stand on a counter. It cannot put items into the game's slots or another
+mod's (`add`), change what others sell (`patch`), or add dungeon merchants (`sellers`): a mod's file with any of
+those is refused as a whole, and the log names each reason. Those stay with the **host's own files** (below) until
+a later version settles what a weight means next to the game's items. Nothing the game sells is displaced by a mod.
 
 Design background: `docs/design/shops.md`. Example: `samples/ShopDemo/`.
 
@@ -18,22 +23,14 @@ Design background: `docs/design/shops.md`. Example: `samples/ShopDemo/`.
 
 ## Chances are weights
 
-Every candidate in a slot has a **weight**; its chance is its weight divided by the slot's total. Mods
-never need to know about each other: three mods adding to one slot each just get their share.
+Every candidate in your slot's `pool` has a **weight**; its chance is its weight divided by the pool's total.
+`"nothing"` is a candidate too: give it a weight to make the slot sometimes empty.
 
 | Candidate | Weight | Chance |
 |---|---|---|
-| vanilla potion | 10 | 50% |
-| your berry | 5 | 25% |
-| another mod's sword | 5 | 25% |
-
-Each vanilla candidate counts as weight **10** (per occurrence in its pool), so "weight 5" means "half as
-often as a vanilla item". `"nothing"` is a candidate too: give it a weight to make a slot sometimes
-empty.
-
-Players can change the vanilla weight: `VanillaWeight` under `[POGLib_Shops]` in
-`UserData/MelonPreferences.cfg` (read on the host, from the next scene; `0` = in a slot some mod adds to, only
-the mods' items come up). Write your weights against 10 all the same.
+| your berry | 10 | 50% |
+| your berry sack | 5 | 25% |
+| nothing | 5 | 25% |
 
 ## The file
 
@@ -41,8 +38,7 @@ the mods' items come up). Write your weights against 10 all the same.
 {
   "format": 1,                       // required
   "mod": "BerryMod",                 // your mod id; unqualified ids below belong to it
-  "requires": [],                    // mods whose content your "patch" entries change
-  "slots": [                         // new slots you place
+  "slots": [                         // new slots you place (yours only: no other mod adds to them)
     {
       "id": "berry_stand",
       "scene": "PitOfGoblin_Lobby",
@@ -62,19 +58,6 @@ the mods' items come up). Write your weights against 10 all the same.
       "priceTag": { "pos": [0, 0.3, 0.3] },     // optional, relative to the slot
       "pool": [ { "item": "GlowBerry", "weight": 10 } ]
     }
-  ],
-  "add": [                           // your items in anyone's slots (vanilla or mod)
-    { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread",
-      "item": "GlowBerry", "weight": 10 }
-  ],
-  "patch": [                         // change entries others put in a slot: exactly one of
-    { "slot": "...", "item": "vanilla:Item_Bread", "weight": 0 },          // set weight
-    { "slot": "...", "item": "OtherMod:Sword", "remove": true },           // remove
-    { "slot": "...", "item": "vanilla:Item_Key", "replaceWith": "MyKey" }  // replace
-  ],
-  "sellers": [                       // dungeon merchants (copies of a vanilla merchant)
-    { "id": "berry_merchant", "preset": "EntranceCave_Shopkeeper_Curiosa", "weight": 1,
-      "slots": [ [ { "item": "GlowBerry", "weight": 1 } ] ] }
   ],
   "items": [                         // how YOUR items stand on a counter (optional)
     { "item": "GlowBerry", "standing": { "pos": [0, -0.02, 0], "rot": [0, 45, 0] } }
@@ -108,6 +91,39 @@ Every mod item has one: the shell's own (Item_Diamond's is at its pivot), or, wh
 bottom centre of the item's mesh. Move it with `StandingPoint` / `StandingRotation` on the
 `ModItemDefinition`, or in data with the `items` section (your own items only).
 
+## The host's own files
+
+A host can keep shop files of its own in `UserData/POGLib/Shops/*.json`, under a mod id that ships no shop file
+(say `"mod": "MyServer"`). Those may also do what a mod's file may not, **on that host only**. The meaning of a
+weight next to the game's items may change in a later version (ROADMAP 1.1), so treat these as settings of your
+own server, not something to publish.
+
+```jsonc
+{
+  "format": 1,
+  "mod": "MyServer",
+  "requires": [],                    // mods whose content your "patch" entries change
+  "add": [                           // items in anyone's slots (vanilla or mod)
+    { "slot": "vanilla:PitOfGoblin_Lobby/StarterShop/Game.Spawning.ShopLocation Item_Bread",
+      "item": "BerryMod:GlowBerry", "weight": 10 }
+  ],
+  "patch": [                         // change entries others put in a slot: exactly one of
+    { "slot": "...", "item": "vanilla:Item_Bread", "weight": 0 },          // set weight
+    { "slot": "...", "item": "OtherMod:Sword", "remove": true },           // remove
+    { "slot": "...", "item": "vanilla:Item_Key", "replaceWith": "MyKey" }  // replace
+  ],
+  "sellers": [                       // dungeon merchants (copies of a vanilla merchant)
+    { "id": "berry_merchant", "preset": "EntranceCave_Shopkeeper_Curiosa", "weight": 1,
+      "slots": [ [ { "item": "BerryMod:GlowBerry", "weight": 1 } ] ] }
+  ]
+}
+```
+
+In a game slot each of the game's own candidates counts as weight **10** (per occurrence in its pool), so
+"weight 5" means "half as often as a game item". `VanillaWeight` under `[POGLib_Shops]` in
+`UserData/MelonPreferences.cfg` changes that 10 (read on the host, from the next scene; `0` = in a slot a rule adds
+to, only the added items come up).
+
 ### Dungeon merchants
 
 The entrance cave of a dungeon draws one entry from `PropList_EntranceCave_MerchantOrAdventurer` (six vanilla
@@ -118,11 +134,11 @@ to that list; when the preset comes up, the host decides whose variant it is by 
 appears as often as w entries of its own would. It keeps the preset's NPC and look. Its slots are
 `<Mod>:<id>#1`, `#2`, … for other mods' `add`/`patch`.
 
-### Rules when several mods meet
+### Rules when several files meet
 
-- Order: every `slots`, then every `add`, then every `patch`. Mods are applied in dependency order
+- Order: every `slots`, then every `add`, then every `patch`. Files are applied in dependency order
   (`requires`), ties by mod id. The last `patch` wins.
-- `add` is always allowed. A `patch` that touches another mod's slot or item must list that mod in
+- In a host's file, `add` is always allowed. A `patch` that touches a mod's slot or item must list that mod in
   `requires`, otherwise it is refused with a log line. Patching vanilla content needs nothing.
 - Every change is recorded per slot: the shop tools show who added and changed what.
 - An item whose mod is not installed is left out (and logged); the remaining candidates share the chance.
@@ -133,8 +149,8 @@ The library reads:
 - `Mods/**/pogshop.json` and `Mods/**/*.pogshop.json` — ship it inside your package, e.g.
   `Mods/<Author>-<Name>/pogshop.json` (Gale keeps that path; r2modman nests the package folder; both are
   found);
-- `UserData/POGLib/Shops/*.json` — local files, where the shop tools save;
-- shop files added from code: `Content.Shops.AddFile(new ShopFile { ... })`.
+- `UserData/POGLib/Shops/*.json` — local files: the host's own, and the shop tools' working copies;
+- shop files added from a mod's code: `ShopsApi.AddFile(new ShopFile { ... })` (a mod's file, so the same limits).
 
 A file with an error is refused with a log line naming the problem (`[POGLib] [Shops] ...`);
 unknown keys are reported as probable typos.
@@ -164,7 +180,8 @@ game alone, then:
 | Enter | select the vanilla slot you look at |
 | F9 | panel: slots here with chances and "who changed what", weights (− + x), find and add items, jump to Lobby / InBetween / DarkBurg, freeze the round timer, Save |
 
-Save writes `UserData/POGLib/Shops/<mod>.pogshop.json`; copy it into your package as `pogshop.json`.
+Save writes `UserData/POGLib/Shops/<mod>.pogshop.json`; copy it into your package as `pogshop.json`. The panel's
+weights for game slots write `add`/`patch`, which only a host's own file may ship in this version.
 While that working copy exists it **replaces** your mod's packaged shop file(s) (the log says so), so the same
 slot is never loaded twice; delete it to go back to the packaged file.
 A change to a vanilla slot applies the next time the scene loads, and so does a new slot (it is a copy of the
@@ -175,6 +192,6 @@ loaded mod, so you see the real share your weight buys.
 
 The host chooses every slot's item; clients see the result through the game. **New slots** are copies of the
 game's own shop slot, so every player sees them and **only the host needs the shop files**. A player with
-POGLib gets the slot's price tag where the file puts it (the host tells it); a player without the library
-sees the tag where the game's slot has it. An item from a mod a player does not have does not appear for that
+POGShops gets the slot's price tag where the file puts it (the host tells it); a player without it sees the
+tag where the game's slot has it. An item from a mod a player does not have does not appear for that
 player: the slot looks empty there.

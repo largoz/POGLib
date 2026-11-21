@@ -103,11 +103,11 @@ tables (`DT_BonusChest_*`) casually — a removed mod then NREs on save restore;
 
 ### Selling items in shops
 
-Install POGShops too (a mod of its own on POGLib). Give the item a `ShopCost`, then describe where it is sold in a
-`pogshop.json` next to your mod — no shop code. Chances are weights, so any number of mods can share a slot; you can add new slots next to any
-seller and new dungeon merchants. The in-game shop tools (preference `[POGLib_ShopTools] Enabled`,
-then F7 while hosting alone) place slots by aiming and write the file. Full guide: [`SHOPS.md`](SHOPS.md);
-example: `samples/ShopDemo/`.
+Install POGShops too (a mod of its own on POGLib). Give the item a `ShopCost`, then place **your own slots** at
+the game's sellers in a `pogshop.json` next to your mod — no shop code. `"after"` puts a slot in the row of a
+seller's goods, so you write no coordinates. In 0.1 a mod's file cannot put items into the game's slots or another
+mod's, nor add dungeon merchants; a host's own file can. Full guide: [`SHOPS.md`](SHOPS.md); example:
+`samples/ShopDemo/`.
 
 ## Key technical decisions
 

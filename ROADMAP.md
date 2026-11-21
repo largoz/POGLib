@@ -59,10 +59,18 @@ Done when: the answers and the names are written in this file.
 
 - [ ] 1.1 What a weight means against vanilla content: the vanilla floor in place of `VanillaWeight`. *(Moved after
       the first release by the answer to 0.3; it stays here only as a reminder that it is a one-way door then.)*
-- [ ] 1.2 The shop file, format 1, final. By the answers: a mod's file may define `slots` (with its own pool
+- [~] 1.2 The shop file, format 1, final. By the answers: a mod's file may define `slots` (with its own pool
       inside each); `add`, `patch` and `requires` are not for mods in 0.1 and get an exact error. To settle here:
       whether the host's own file (`UserData/POGLib/Shops`) may still `add` to vanilla slots, which would
       keep that code path and its tests alive without promising it to mods.
+      **2026-11-21:** a mod's file is a file under `Mods/`, a working copy in UserData that replaced one, or a file
+      a mod adds from code; it may hold `slots` and `items` only. `add`, `patch`, `requires` and **`sellers`**
+      (dungeon merchants change the game's entrance list: R2, not proven, 2.8) refuse the whole file, each reason
+      named (`ShopFileIO.CheckModScope`, 5 unit tests; a planted `checks/mods/ScopeCheck.pogshop.json` in the
+      asserting run). A file in UserData under a mod id with no packaged file is the host's own and keeps every
+      section (proposed answer to the open question, so the code paths and their tests stay alive; SHOPS.md calls
+      them the host's settings that may change, not something to publish). **The user has not said yes to that
+      part yet.** SHOPS.md and the README describe only this.
 - [ ] 1.3 R5: slot and seller ids that survive a game update (seller flag + index, the path as a fallback).
 - [ ] 1.4 R4: a new slot at a seller as the main path. A slot needs coordinates, and today they come from the
       in-game tools: either the library places a slot by itself next to the seller's own, or the tools ship (1.5).

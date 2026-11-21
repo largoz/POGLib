@@ -86,6 +86,29 @@ namespace POGLib.Shops.Tests
             Assert.Contains(d, x => x.Severity == Severity.Error && x.Message.Contains(reason));
         }
 
+        // 1.2 (2026-11-21): a mod's own file may only place its own slots and say how its items stand.
+        [Fact]
+        public void AModsFileWithOnlySlotsAndItemsIsInScope()
+        {
+            var d = new List<Diagnostic>();
+            var f = Parse(AfterSlot, d);
+            Assert.True(ShopFileIO.CheckModScope(f, d));
+            Assert.Empty(d);
+        }
+
+        [Theory]
+        [InlineData("\"add\": [ { \"slot\": \"vanilla:S/A\", \"item\": \"HealingBerry\", \"weight\": 1 } ]", "\"add\" puts items")]
+        [InlineData("\"requires\": [\"OtherMod\"], \"patch\": [ { \"slot\": \"OtherMod:s\", \"item\": \"OtherMod:x\", \"remove\": true } ]", "\"patch\" changes")]
+        [InlineData("\"sellers\": [ { \"id\": \"m\", \"preset\": \"EntranceCave_Shopkeeper_Curiosa\", \"weight\": 1 } ]", "\"sellers\" (dungeon merchants)")]
+        public void AModsFileThatReachesOtherContentIsRefusedWithTheReason(string section, string reason)
+        {
+            var d = new List<Diagnostic>();
+            var f = Parse(AfterSlot.Replace("\"slots\":", section + ", \"slots\":"), d);
+            Assert.NotNull(f);                                   // a valid file for a host ...
+            Assert.False(ShopFileIO.CheckModScope(f, d));        // ... but not for a mod
+            Assert.Contains(d, x => x.Severity == Severity.Error && x.Message.Contains(reason) && x.Message.Contains("the file is not used"));
+        }
+
         [Fact]
         public void DuplicateSlotIdIsRefused()
         {
