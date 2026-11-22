@@ -5,7 +5,7 @@ using System.Linq;
 namespace POGLib.Shops.Model
 {
     /// <summary>One way an entry got into, or was changed in, a slot — the slot's "who changed what" history.</summary>
-    public sealed class HistoryRecord
+    internal sealed class HistoryRecord
     {
         public string Mod { get; }
         public string Text { get; }
@@ -14,7 +14,7 @@ namespace POGLib.Shops.Model
     }
 
     /// <summary>A candidate in a slot: an item (or "nothing") with a weight and the content that put it there.</summary>
-    public sealed class SlotEntry
+    internal sealed class SlotEntry
     {
         public string Item { get; internal set; }
         public double Weight { get; internal set; }
@@ -25,7 +25,7 @@ namespace POGLib.Shops.Model
     }
 
     /// <summary>A slot after every loaded mod has had its say.</summary>
-    public sealed class ResolvedSlot
+    internal sealed class ResolvedSlot
     {
         public string SlotId { get; }
         public IReadOnlyList<SlotEntry> Entries { get; }
@@ -70,7 +70,7 @@ namespace POGLib.Shops.Model
     }
 
     /// <summary>Content the game placed in a slot, as seen at runtime: an item and how many times it appears.</summary>
-    public readonly struct VanillaEntry
+    internal readonly struct VanillaEntry
     {
         public string Item { get; }
         public int Count { get; }
@@ -89,7 +89,7 @@ namespace POGLib.Shops.Model
     /// A patch that touches another mod's slot or item must list that mod in "requires"; otherwise it is
     /// refused (non-invasive "add" needs nothing).
     /// </summary>
-    public sealed class ShopCatalog
+    internal sealed class ShopCatalog
     {
         private enum OpKind { Add, SetWeight, Remove, Replace }
 
@@ -418,7 +418,7 @@ namespace POGLib.Shops.Model
     }
 
     /// <summary>One place a rule names an item: the item, the mod whose rule it is, the slot, and how ("add", "pool"…).</summary>
-    public sealed class ItemReference
+    internal sealed class ItemReference
     {
         public string Item { get; }
         public string Mod { get; }
@@ -428,7 +428,7 @@ namespace POGLib.Shops.Model
         public override string ToString() => $"{How} by {Mod} in {Slot}";
     }
 
-    public sealed class ShopCatalogOptions
+    internal sealed class ShopCatalogOptions
     {
         /// <summary>The weight a vanilla item gets when nobody sets one: the scale modders weigh against.</summary>
         public const double StandardVanillaWeight = 10;

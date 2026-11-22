@@ -11,7 +11,7 @@ namespace POGLib.Shops.Model
     /// The special item "nothing" means "this slot stays empty" and has a weight like any other entry.
     /// This file has no Unity dependency: the whole Model folder is unit-tested outside the game.
     /// </summary>
-    public static class ShopIds
+    internal static class ShopIds
     {
         public const string Vanilla = "vanilla";
         public const string Nothing = "nothing";

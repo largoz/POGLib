@@ -32,7 +32,11 @@ placed ShopDemo:berry_stand
 placed ShopDemo:berry_stand at .* in the row after Game\.Spawning\.ShopLocation Item_Torch_Unlit
 !cannot go after
 placed DriverChecks:right_stand at .* in the row after Game\.Spawning\.ShopLocation Item_Rock_02
-# Slots placed with "after" take the prefab without a table (holder at the origin, not 0.75 m up).
+# 2026-11-22: a slot in a row stands on the ground found under it, upright (not at the neighbour's height and tilt).
+=2 placed (ShopDemo:berry_stand|DriverChecks:right_stand) at .* in the row after .*, on the floor \(
+!no floor found within 1 m
+# Slots placed with "after" take the prefab without a table (holder at the origin, not 0.75 m up). Needs dump=1
+# (checks/driver.txt); without the dump the lines are not there and this fails.
 =2 DRIVER\]   slot POGShopSlot\|(ShopDemo:berry_stand|DriverChecks:right_stand) .*holder=ItemHolder \(0\.00, 0\.00, 0\.00\)
 !no (left|right) end at
 # 1.2 (2026-11-21): a mod's file with "add" (checks/mods/ScopeCheck.pogshop.json, deployed into Mods/) is refused as a

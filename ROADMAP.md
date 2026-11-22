@@ -109,6 +109,13 @@ Done when: the answers and the names are written in this file.
       past the torch, a host-file apple at the right end past the rock, both on the floor in line with the shop's
       goods (`look_0.png`, `look_1.png`); 0 failures, 36 checks, among them both holders at the origin
       (calibrated on `checks-13-sides`, where the table one fails it). Over LAN: not yet.
+      **2026-11-22, the user looking at the screen: "it is crooked; why not stand it on the ground surface?"** The
+      slot took the neighbour's height and tilt (the mat's slots tilt a few degrees), and past the mat the ground is
+      higher and sloped: the berry's price tag lay half in the ground. Now a slot in a row stands on the first solid
+      surface under its place (a ray from 1 m above to 1 m below, triggers and network objects skipped, so no item,
+      slot, NPC or player is taken for the floor), upright, turned like its neighbour; with no floor within 1 m it
+      keeps the row's height and says so. Run `checks-17-ground`: 0 failures, 38 checks; the berry on the rug's
+      edge (`SM_Prop_Rug_02`), the apple on the floor rock past the rock, both level on screen.
 - [ ] 1.5 R3: the shop tools out of the library, into a mod of their own on the public API. **The user, 2026-11-20:
       a separate mod** (only mod authors need them; today 630 lines ship to every player). Packages then: the core,
       Shops on it, the tools on Shops; content mods on the core, and on Shops when they have a shop file. Nothing
@@ -207,6 +214,17 @@ Each line is a run on both machines with screenshots and both logs, written into
 Done when: every feature the README promises has its run.
 
 ### Phase 3. The first release
+
+**Published 0.1.0 on the user's word, 2026-11-22 ("upload these two mods to TS for now")**, before Phase 2 was
+done: POGLib and POGShops, both in the category Libraries. What was done for it: POGShops' public surface cut from
+195 to 63 lines (`ShopsApi.AddFile`/`Reload` and the shop file's shape), store pages (`README_STORE.md`) that name
+what is shown in the game, what is experimental (2.12's list) and what is not tested (saves, use on a client, a
+client and the floor slots), changelogs, manifests (`website_url` of POGShops = this repository, which holds its
+source), the README's code sample compiled against the packed DLL, and the packed DLLs run in the game first
+(`checks-17-ground`, hashes in its `tested-dlls.sha256`). **Not done before it:** Phase 2 (LAN of the floor slots,
+saves, a dungeon round, use on a client), 3.5 (POG Mod Check 0.1.2, which knows POGLib by its name; the published
+0.1.1 looks for POGContentLib), a repository of its own for POGShops (the user's rule).
+
 
 - [ ] 3.1 The modder's first page in the README: an item in a dozen lines, a shop slot, how to see it work; written
       the way POG Mod Check's "For mod developers" is. The sample (`samples/ShopDemo`) builds from a clean clone.

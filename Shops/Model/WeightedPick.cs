@@ -7,7 +7,7 @@ namespace POGLib.Shops.Model
     /// The one weighted draw every shop choice goes through: a slot's item and a dungeon merchant's variant.
     /// Kept in one place so the distribution the unit tests measure is the one the game gets.
     /// </summary>
-    public static class WeightedPick
+    internal static class WeightedPick
     {
         /// <summary>
         /// The index drawn for a uniform <paramref name="r"/> in [0, 1): entry i comes up with chance
@@ -52,7 +52,7 @@ namespace POGLib.Shops.Model
     }
 
     /// <summary>"Did you mean": the closest ids to a misspelt one, for log lines a modder acts on.</summary>
-    public static class NearestIds
+    internal static class NearestIds
     {
         /// <summary>Up to <paramref name="max"/> candidates by edit distance (ties: ordinal order).</summary>
         public static List<string> Of(string id, IEnumerable<string> candidates, int max = 3)

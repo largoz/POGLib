@@ -223,7 +223,7 @@ namespace POGLib.RuntimeDriver
         // game's result, independent of the library's own bookkeeping.
         void CheckShopRules()
         {
-            var records = POGLib.Shops.ShopsApi.Slots;
+            var records = POGLib.Shops.ShopRuntime.Records;
             Log($"shops: {records.Count} slot record(s)");
             var items = UnityEngine.Object.FindObjectsOfType<InventoryItem>(true).Where(i => !POGLib.Shops.ShopScene.IsTemplate(i.transform)).ToArray();
             foreach (var kv in records.OrderBy(k => k.Key))
@@ -423,7 +423,7 @@ namespace POGLib.RuntimeDriver
                     foreach (var sp in POGLib.Shops.ShopScene.SellersInLoadedScenes())
                         Log($"dungeon: seller {POGLib.Shops.ShopScene.SellerId(sp)} root {sp.transform.root.name} slots {sp.m_itemsForSale.Length}");
                     CheckShopRules();
-                    var mine = POGLib.Shops.ShopsApi.Slots.Values.Where(r => r.SlotId.Contains("#")).OrderBy(r => r.SlotId).ToList();
+                    var mine = POGLib.Shops.ShopRuntime.Records.Values.Where(r => r.SlotId.Contains("#")).OrderBy(r => r.SlotId).ToList();
                     foreach (var r in mine) Log($"dungeon: mod merchant slot {r.SlotId} picked {r.Picked}");
                     if (Checks.Enabled) Checks.MerchantChecks(mine);
                     if (mine.Count > 0 && mine[0].Slot != null && LookAtTransform(mine[0].Slot.transform)) Log("shot merchant");
@@ -509,7 +509,7 @@ namespace POGLib.RuntimeDriver
                 var def = draft.Slots.First(x => draft.Mod + ":" + x.Id == sel);
                 var templates = typeof(POGLib.Shops.ShopsPlugin).Assembly.GetType("POGLib.Shops.SlotTemplates");
                 var template = templates.GetMethod("Get", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                    .Invoke(null, new object[] { POGLib.Shops.ShopsApi.Catalog.ModSlots.Keys.First() }) as ShopLocation;
+                    .Invoke(null, new object[] { POGLib.Shops.ShopsPlugin.Instance.Catalog.ModSlots.Keys.First() }) as ShopLocation;
                 if (template == null || def.PriceTag == null) { Log("tagcheck: no template or no priceTag"); return; }
                 var parent = new GameObject("DriverTagCheck"); parent.SetActive(false);
                 var copy = UnityEngine.Object.Instantiate(template.gameObject, parent.transform);

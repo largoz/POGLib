@@ -20,7 +20,7 @@ namespace POGLib.Shops
     /// e.g. "vanilla:NPC_ShopKeeper_Lobby_Hub_Curiosa"); a seller without a flag falls back to its path.
     /// Mod slots spawned by the library are named "POGShopSlot|&lt;full id&gt;".
     /// </summary>
-    public static class ShopScene
+    internal static class ShopScene
     {
         public const string ModSlotPrefix = "POGShopSlot|";
 

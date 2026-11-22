@@ -12,3 +12,6 @@ obj/
 # OS
 Thumbs.db
 .DS_Store
+
+# Thunderstore packages (tools/ThunderStoreCLI.py)
+build/

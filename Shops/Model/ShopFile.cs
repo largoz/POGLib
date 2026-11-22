@@ -32,7 +32,7 @@ namespace POGLib.Shops.Model
         public List<ItemDisplayDef> Items { get; set; } = new List<ItemDisplayDef>();
 
         /// <summary>Where the file was read from (not serialized).</summary>
-        [JsonIgnore] public string SourcePath { get; set; }
+        [JsonIgnore] internal string SourcePath { get; set; }
     }
 
     public sealed class SlotDef
@@ -122,9 +122,9 @@ namespace POGLib.Shops.Model
         public TagDef Standing { get; set; }
     }
 
-    public enum Severity { Info, Warning, Error }
+    internal enum Severity { Info, Warning, Error }
 
-    public sealed class Diagnostic
+    internal sealed class Diagnostic
     {
         public Severity Severity { get; }
         public string Source { get; }
@@ -134,7 +134,7 @@ namespace POGLib.Shops.Model
     }
 
     /// <summary>Reads and writes shop files, with checks that name the exact problem for the modder.</summary>
-    public static class ShopFileIO
+    internal static class ShopFileIO
     {
         private static readonly JsonSerializerOptions ReadOptions = new JsonSerializerOptions
         {

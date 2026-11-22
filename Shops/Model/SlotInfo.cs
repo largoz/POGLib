@@ -12,7 +12,7 @@ namespace POGLib.Shops.Model
     /// <c>-</c> when not set; the slot id comes last, so a '|' inside it cannot break the fields. Format "1": a change
     /// gets a new number.
     /// </summary>
-    public sealed class SlotInfo
+    internal sealed class SlotInfo
     {
         public const string Format = "1";
 

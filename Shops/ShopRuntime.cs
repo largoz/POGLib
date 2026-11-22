@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 namespace POGLib.Shops
 {
     /// <summary>What happened to one slot this session (read by the dev tools and the logs).</summary>
-    public sealed class SlotRecord
+    internal sealed class SlotRecord
     {
         public string SlotId { get; internal set; }
         public ShopLocation Slot { get; internal set; }
@@ -35,7 +35,7 @@ namespace POGLib.Shops
     ///    seller (faction, theft, the seller's death) and stocked the same way.
     /// Clients run none of this: they see the result through the game's own replication.
     /// </summary>
-    public static class ShopRuntime
+    internal static class ShopRuntime
     {
         private static readonly Dictionary<string, SlotRecord> _records = new Dictionary<string, SlotRecord>(StringComparer.Ordinal);
         private static System.Random _rng = new System.Random();
@@ -235,7 +235,19 @@ namespace POGLib.Shops
 
             var go = UnityEngine.Object.Instantiate(template.gameObject);
             go.name = ShopScene.ModSlotPrefix + ms.FullId;
-            var rot = anchor.rotation * Quaternion.Euler(def.Rot != null ? new Vector3(def.Rot[0], def.Rot[1], def.Rot[2]) : Vector3.zero);
+            var turn = def.Rot != null ? new Vector3(def.Rot[0], def.Rot[1], def.Rot[2]) : Vector3.zero;
+            Quaternion rot;
+            string floor = "";
+            if (!string.IsNullOrEmpty(def.After))
+            {
+                // In a row: standing on the ground found under the place, upright, turned like the slot it follows. The
+                // neighbour's height and tilt do not carry over: past the end of a mat the ground is often higher or
+                // lower and sloped (2026-11-22: the stand's price tag half in the ground at the starter shop).
+                rot = Quaternion.Euler(0f, anchor.eulerAngles.y + turn.y, 0f);
+                if (TryFloorUnder(pos, out var ground, out var hitName)) { pos = ground; floor = $", on the floor ({hitName})"; }
+                else floor = ", no floor found within 1 m: at the row's height";
+            }
+            else rot = anchor.rotation * Quaternion.Euler(turn);
             go.transform.SetPositionAndRotation(pos, rot);
             var slot = go.GetComponent<ShopLocation>();
 
@@ -252,9 +264,29 @@ namespace POGLib.Shops
 
             go.GetComponent<NetworkObject>().Spawn(true);   // OnNetworkSpawn → OnSlotSpawning makes the choice
             if (faction != Faction.None && slot.m_shopFaction != null) slot.m_shopFaction.Value = faction;
-            MelonLogger.Msg($"[POGLib] [Shops] placed {ms.FullId} at {pos:F2} {(string.IsNullOrEmpty(def.After) ? "next to" : "in the row after")} {anchor.name}{(seller != null ? $", sold by {ShopScene.SellerId(seller)} ({faction})" : "")}");
+            MelonLogger.Msg($"[POGLib] [Shops] placed {ms.FullId} at {pos:F2} {(string.IsNullOrEmpty(def.After) ? "next to" : "in the row after")} {anchor.name}{floor}{(seller != null ? $", sold by {ShopScene.SellerId(seller)} ({faction})" : "")}");
             MelonCoroutines.Start(StockIfMissed(slot, ms.FullId));
             return true;
+        }
+
+        /// <summary>
+        /// The ground under <paramref name="at"/>: the first solid surface straight down from 1 m above it to 1 m below,
+        /// skipping triggers and anything that is a network object (items, slots, NPCs, players), so a neighbour's
+        /// item or the seller is never taken for the floor.
+        /// </summary>
+        private static bool TryFloorUnder(Vector3 at, out Vector3 ground, out string hitName)
+        {
+            ground = at; hitName = null;
+            var hits = Physics.RaycastAll(at + Vector3.up, Vector3.down, 2f, ~0, QueryTriggerInteraction.Ignore);
+            if (hits == null) return false;
+            float best = float.MaxValue;
+            foreach (var h in hits)
+            {
+                var c = h.collider;
+                if (c == null || c.isTrigger || c.GetComponentInParent<NetworkObject>() != null) continue;
+                if (h.distance < best) { best = h.distance; ground = h.point; hitName = c.gameObject.name; }
+            }
+            return hitName != null;
         }
 
         // Mod slot full id -> the slot id it was placed after, so a second slot after the same one goes a step further.
