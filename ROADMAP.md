@@ -236,7 +236,9 @@ saves, a dungeon round, use on a client), 3.5 (POG Mod Check 0.1.2, which knows 
 - [ ] 3.4 Publish on the user's word. **The user, 2026-11-21: "only the lib goes to Thunderstore"**: POGLib and
       POGShops (counted as part of the library; the user was told so and may correct it), no content pack and no
       sample (POGCustomItems, ShopDemo stay on GitHub). Check the store pages through the API afterwards.
-- [ ] 3.5 **POG Mod Check 0.1.2 before the library**: the published 0.1.1 finds the library by the old name
+- [x] 3.5 **POG Mod Check 0.1.2 before the library** *(published 2026-11-22, right after the library, on the user's
+      word; run checks-18-modcheck with the packed DLL: POGLib and ShopDemo "required, network content through
+      POGLib", POGShops "same version")*: the published 0.1.1 finds the library by the old name
       (`POGContentLib`), so with POGLib it would not mark content mods as required by itself. The code knows POGLib
       since 2026-11-21 (not released).
 
