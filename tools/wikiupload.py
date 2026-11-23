@@ -11,7 +11,10 @@ Uploads wiki/NN-*.md to a package's wiki on Thunderstore (wiki/README.md says ho
 - Pages on the site that have no file here are listed, never deleted.
 - Run tools/wikicheck first: it compiles every C# block (this script does not run it).
 
-Token: $THUNDERSTORE_TOKEN or ~/.config/thunderstore/token (the publish script's). Never printed.
+Auth: a browser session, $THUNDERSTORE_SESSIONID and $THUNDERSTORE_CSRFTOKEN (the cookies of a logged-in
+thunderstore.io, as the publish script's --deprecate takes them): the service account's token publishes packages but
+may not edit a wiki ("You do not have permission to perform this action", 2026-11-23). Without the session the
+token is tried. Neither is ever printed.
 """
 import argparse, json, os, pathlib, re, sys, urllib.request
 
@@ -29,7 +32,13 @@ def token():
 def call(method, url, body=None, auth=True):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method, headers={"User-Agent": "pog-wiki-upload", "Content-Type": "application/json"})
-    if auth: req.add_header("Authorization", f"Bearer {token()}")
+    sid, csrf = os.environ.get("THUNDERSTORE_SESSIONID"), os.environ.get("THUNDERSTORE_CSRFTOKEN")
+    if auth and sid and csrf:
+        req.add_header("Cookie", f"sessionid={sid}; csrftoken={csrf}")
+        req.add_header("X-CSRFToken", csrf)
+        req.add_header("Referer", "https://thunderstore.io/")
+    elif auth:
+        req.add_header("Authorization", f"Bearer {token()}")
     with urllib.request.urlopen(req, timeout=60) as r:
         raw = r.read()
         return json.loads(raw) if raw else None
