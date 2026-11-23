@@ -123,6 +123,18 @@ Done when: the answers and the names are written in this file.
       from the bread slot (14 → 7), ate, bought from the new stand (7 → 0) and passed the berry through the bucket to
       the host. No error in the client's log. The store page of POGShops 0.1.0 still says "not yet checked on a
       client": correct it with the next version.
+      **2026-11-23, the row model on every seller of the hub, InBetween and DarkBurg** (dumped on the laptop without
+      Steam: POGLanTest hosted, the driver waited with `start=0` and jumped): two defects of the published POGShops
+      0.1.0. (1) The right end was found on one fit of the row and stepped from on another (refitted at the end
+      slot's height), which called Curiosa's and Pitaxas's right ends "the middle" and placed nothing; now one fit
+      (`SlotRow.TryPlaceAtSide`). (2) A far slot tilted the line (the Darkburg smith's rack 4 m from its table: "4.25 m
+      apart, not a row"); now the line through two slots that most slots lie on, within 0.15 m (`OffLine`; at 0.3 m
+      Curiosa's treasure display joined the table). Probe on all 10 sellers: every one gets both ends, the starter
+      shop's unchanged. 98 unit tests (Curiosa both ends, the smith; calibrated by loosening OffLine). In game,
+      `checks-20-shift`: Curiosa's right end placed, but past the table's edge, in the decoration (the ground under it
+      is a candle prop): the automatic place is only a start. **So, the user's point:** `pos` with `after` shifts the
+      slot from its automatic place (slot's axes: x sideways, y up, z forward, after it is stood on the ground) and
+      `rot` turns it with tilt; seen on screen (a test slot 0.25 m up, tilted 25°). Wiki 22 lists the sellers.
 - [ ] 1.5 R3: the shop tools out of the library, into a mod of their own on the public API. **The user, 2026-11-20:
       a separate mod** (only mod authors need them; today 630 lines ship to every player). Packages then: the core,
       Shops on it, the tools on Shops; content mods on the core, and on Shops when they have a shop file. Nothing
