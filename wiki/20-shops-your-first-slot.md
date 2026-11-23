@@ -36,6 +36,20 @@ Save this as `pogshop.json` next to your mod's DLL, in your package:
 
 The price is the item's `ShopCost`. Two slots `"after": "left"` stand one after the other.
 
+## Moving and tilting it
+
+The automatic place is a start. Past the end of a table there may be no table, so look at it in the game and
+correct it with `pos` (metres, in the slot's own axes: x sideways, y up, z forward) and `rot` (degrees: x tilts it
+forward or back, y turns it, z tilts it sideways):
+
+```json
+"after": "left",
+"pos": [0, 0.1, -0.2],
+"rot": [0, 30, 0],
+```
+
+You see a change after the scene loads again.
+
 ## See it
 
 Host a game: the slot appears when the hub loads. Other players see it too, and **only the host needs your shop

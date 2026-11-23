@@ -33,13 +33,15 @@ typo.
 | `seller` | for `after` | the game's seller: faction (price), theft, the seller's death |
 | `after` | one of `after` / `pos` | `"left"` or `"right"`: that end of the seller's row of goods. Or a game slot's id at one end of the row |
 | `anchor` | with `pos` | a seller's or a game slot's id the position is measured from (default: the seller) |
-| `pos` | one of `after` / `pos` | `[x, y, z]` in metres, in the anchor's space |
-| `rot` | no | `[x, y, z]` degrees; with `after` only the turn about the vertical (`y`) is used |
+| `pos` | with `anchor`; optional with `after` | with `anchor`: `[x, y, z]` in metres, in the anchor's space. With `after`: a shift from the automatic place, in the slot's own axes (x sideways, y up, z forward) |
+| `rot` | no | `[x, y, z]` degrees: x tilts it forward or back, y turns it, z tilts it sideways; with `after`, on top of the automatic turn |
 | `priceTag` | no | `{ "pos": [x, y, z], "rot": [x, y, z] }`, relative to the slot |
 | `template` | no | the game's slot prefab to copy: `"ShopLocation"` (holds the item on a small table, 0.75 m up) or `"ShopLocationSlim"` (on the ground). Default: slim with `after`, the table one with `pos` |
 | `pool` | yes | `[ { "item": "...", "weight": 10 }, ... ]`; `"nothing"` is an item too: an empty slot |
 
-A slot placed with `after` stands on the ground found under its place, upright, turned like the slot next to it.
+A slot placed with `after` stands on the ground found under its place, upright, turned like the slot next to it; then
+`pos` and `rot`, if you give them, move and tilt it from there. The automatic place is a start: past the end of a
+table there may be no table, so check it in the game and correct it.
 Weights are shares: `10` and `5` mean two thirds and one third.
 
 ### How your item stands

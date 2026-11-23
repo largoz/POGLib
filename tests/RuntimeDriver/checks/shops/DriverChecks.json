@@ -19,6 +19,14 @@
   // takes the game's slot prefab without a table, so the apple lies on the floor like the shop's own goods.
   "slots": [
     { "id": "right_stand", "scene": "PitOfGoblin_Lobby", "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",
+      "after": "right", "pool": [ { "item": "vanilla:Item_Apple", "weight": 1 } ] },
+    // Curiosa's right end (the orb): 0.1.0 found it on one fit of the row and stepped from another, called it the
+    // middle and placed nothing (2026-11-23).
+    // A second slot at the starter shop's right end, shifted 0.25 m up and tilted 25 degrees: "pos" and "rot" with
+    // "after" correct the automatic place (the user, 2026-11-23).
+    { "id": "shift_test", "scene": "PitOfGoblin_Lobby", "seller": "vanilla:NPC_ShopKeeperShort_Lobby_StarterShop",
+      "after": "right", "pos": [0, 0.25, 0], "rot": [0, 0, 25], "pool": [ { "item": "vanilla:Item_Apple", "weight": 1 } ] },
+    { "id": "curiosa_right", "scene": "PitOfGoblin_Lobby", "seller": "vanilla:NPC_ShopKeeper_Lobby_Hub_Curiosa",
       "after": "right", "pool": [ { "item": "vanilla:Item_Apple", "weight": 1 } ] }
   ],
   // A dungeon merchant variant (driver dungeon=1): weight 100 makes the Curiosa preset near certain at the entrance.

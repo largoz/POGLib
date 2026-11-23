@@ -39,6 +39,8 @@ placed DriverChecks:right_stand at .* in the row after Game\.Spawning\.ShopLocat
 # (checks/driver.txt); without the dump the lines are not there and this fails.
 =2 DRIVER\]   slot POGShopSlot\|(ShopDemo:berry_stand|DriverChecks:right_stand) .*holder=ItemHolder \(0\.00, 0\.00, 0\.00\)
 !no (left|right) end at
+placed DriverChecks:shift_test at .* in the row after Game\.Spawning\.ShopLocation Item_Rock_02, on the floor \(.*\), shifted by \(0, 0\.25, 0\)
+placed DriverChecks:curiosa_right at .* in the row after Game\.Spawning\.ShopLocation Item_GlowingOrb, on the floor \(
 # 1.2 (2026-11-21): a mod's file with "add" (checks/mods/ScopeCheck.pogshop.json, deployed into Mods/) is refused as a
 # whole, with the reason; its slot is not placed. The host's own files (shops/) keep "add".
 ScopeCheck\.pogshop\.json: "add" puts items into slots that are not this mod's \(1 rule\(s\)\).*the file is not used

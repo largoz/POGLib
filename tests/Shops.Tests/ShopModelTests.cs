@@ -82,6 +82,16 @@ namespace POGLib.Shops.Tests
         public void LeftAndRightAreEndsOfTheRowAnythingElseIsASlotId(string after, bool? right) => Assert.Equal(right, SlotDef.SideOf(after));
 
         [Fact]
+        public void AfterTakesAShiftAndATilt()
+        {
+            var d = new List<Diagnostic>();
+            var f = Parse(AfterSlot.Replace("\"after\"", "\"pos\": [0.1, 0, -0.2], \"rot\": [10, 0, 0], \"after\""), d);
+            Assert.NotNull(f);
+            Assert.Empty(d);
+            Assert.Equal(new[] { 0.1f, 0f, -0.2f }, f.Slots[0].Pos);
+        }
+
+        [Fact]
         public void LeftOrRightNeedsASeller()
         {
             var d = new List<Diagnostic>();
@@ -90,7 +100,7 @@ namespace POGLib.Shops.Tests
         }
 
         [Theory]
-        [InlineData("\"after\"", "\"pos\": [0, 0, 0], \"after\"", "both \"after\" and \"pos\"")]
+        [InlineData("\"after\"", "\"pos\": [0, 0], \"after\"", "with \"after\" it moves the slot")]
         [InlineData("\"after\"", "\"anchor\": \"vanilla:A\", \"after\"", "both \"after\" and \"anchor\"")]
         [InlineData("\"after\": \"vanilla:PitOfGoblin_Lobby/StarterShop/T\",", "", "pos must be")]
         public void AfterWithCoordinatesOrWithoutEitherIsRefused(string from, string to, string reason)

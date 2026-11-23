@@ -212,17 +212,17 @@ namespace POGLib.Shops
                 if (side != null)
                 {
                     if (seller == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: \"after\": \"{def.After}\" needs its seller, which is not here; not placed"); return false; }
-                    after = EndOnSide(seller, side.Value, out string sideWhy);
-                    if (after == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: no {def.After} end at {ShopScene.SellerId(seller)}: {sideWhy}; not placed"); return false; }
+                    if (!PlaceAtSide(seller, side.Value, ms.FullId, out after, out pos, out string sideWhy))
+                    { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: no {def.After} end at {ShopScene.SellerId(seller)}: {sideWhy}; not placed"); return false; }
                 }
                 else
                 {
                     after = ShopScene.FindSlot(def.After);
                     if (after == null) { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: the slot it goes after, '{def.After}', is not in scene {def.Scene}"); return false; }
                     if (seller == null) seller = after.m_shopKeeper;
+                    if (!PlaceAfter(after, seller, ms.FullId, ShopScene.SlotId(after), out pos, out string why))
+                    { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: cannot go after '{def.After}': {why}; not placed"); return false; }
                 }
-                if (!PlaceAfter(after, seller, ms.FullId, ShopScene.SlotId(after), out pos, out string why))
-                { MelonLogger.Warning($"[POGLib] [Shops] slot {ms.FullId}: cannot go after '{def.After}': {why}; not placed"); return false; }
                 anchor = after.transform;
             }
             else
@@ -243,9 +243,13 @@ namespace POGLib.Shops
                 // In a row: standing on the ground found under the place, upright, turned like the slot it follows. The
                 // neighbour's height and tilt do not carry over: past the end of a mat the ground is often higher or
                 // lower and sloped (2026-11-22: the stand's price tag half in the ground at the starter shop).
-                rot = Quaternion.Euler(0f, anchor.eulerAngles.y + turn.y, 0f);
+                // Then the file's own shift (pos, in the slot's axes) and turn (rot, tilt included): the automatic place
+                // is a start the modder can correct (the user, 2026-11-23: "position and tilt must be configurable").
+                var upright = Quaternion.Euler(0f, anchor.eulerAngles.y, 0f);
+                rot = upright * Quaternion.Euler(turn);
                 if (TryFloorUnder(pos, out var ground, out var hitName)) { pos = ground; floor = $", on the floor ({hitName})"; }
                 else floor = ", no floor found within 1 m: at the row's height";
+                if (def.Pos != null) { pos += upright * new Vector3(def.Pos[0], def.Pos[1], def.Pos[2]); floor += $", shifted by ({def.Pos[0]:0.##}, {def.Pos[1]:0.##}, {def.Pos[2]:0.##})"; }
             }
             else rot = anchor.rotation * Quaternion.Euler(turn);
             go.transform.SetPositionAndRotation(pos, rot);
@@ -296,14 +300,25 @@ namespace POGLib.Shops
         /// Where a slot "after" <paramref name="after"/> goes: one step past it along the row of its seller's own slots
         /// (<see cref="SlotRow"/>), a step further for each mod slot already standing after the same slot.
         /// </summary>
-        /// <summary>The game's own slot at the left or right end of the seller's row (<see cref="SlotRow.TryEndOnSide"/>).</summary>
-        private static ShopLocation EndOnSide(NpcSpawner seller, bool right, out string why)
+        /// <summary>
+        /// A slot at the left or right end of the seller's row: the end's slot and the place one step past it (a step
+        /// further for each mod slot already there), both from one fit of the row (<see cref="SlotRow.TryPlaceAtSide"/>).
+        /// </summary>
+        private static bool PlaceAtSide(NpcSpawner seller, bool right, string fullId, out ShopLocation end, out Vector3 pos, out string why)
         {
+            end = null; pos = default;
             var own = OwnSlots(seller);
+            var row = own.Select(s => { var p = s.transform.position; return new[] { p.x, p.y, p.z }; }).ToList();
             var sp = seller.transform.position;
-            if (!SlotRow.TryEndOnSide(own.Select(s => { var p = s.transform.position; return new[] { p.x, p.y, p.z }; }).ToList(),
-                                      new[] { sp.x, sp.y, sp.z }, right, out int i, out why)) return null;
-            return own[i];
+            var at = new[] { sp.x, sp.y, sp.z };
+            if (!SlotRow.TryEndOnSide(row, at, right, out int i, out why)) return false;
+            end = own[i];
+            string endId = ShopScene.SlotId(end);
+            int before = _placedAfter.Count(kv => kv.Value == endId && kv.Key != fullId && ShopScene.FindSlot(kv.Key) != null);
+            if (!SlotRow.TryPlaceAtSide(row, at, right, before + 1, out var p3, out _, out why)) return false;
+            _placedAfter[fullId] = endId;
+            pos = new Vector3(p3[0], p3[1], p3[2]);
+            return true;
         }
 
         // The seller's own slots as the game placed them (the library's new slots left out).

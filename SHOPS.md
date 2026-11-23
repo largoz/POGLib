@@ -73,7 +73,10 @@ game's slot without a table, so the item lies where the seller's goods lie. `"af
 seller's own slots **at an end of the row** its goods form (the hub's starter shop lays
 them out in a line on its mat). The new slot goes one step past it along that row, at its height and turn; a second
 slot after the same one goes a step further. A slot in the middle of the row, or a seller whose slots stand in no
-row, is refused with the reason in the log. Use `"anchor"` and `"pos"` instead when the slot belongs somewhere else.
+row, is refused with the reason in the log. The slot stands on the ground found under its place, upright, turned like
+its neighbour; `"pos"` (metres in the slot's own axes: x sideways, y up, z forward) and `"rot"` (degrees, tilt
+included) then move it from there, since the automatic place is only a start (past the end of a table there may be
+no table). Use `"anchor"` and `"pos"` instead when the slot belongs somewhere else.
 
 ### Ids
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using POGLib.Shops.Model;
 using Xunit;
 
@@ -126,6 +127,42 @@ namespace POGLib.Shops.Tests
             Assert.Equal(3, left);    // dice
             Assert.True(SlotRow.TryPlaceAfter(Curiosa, left, 1, out var p, out why), why);
             Near(12.32f, p[1], 0.001f);   // at the table's height, not the cog's
+        }
+
+        // 2026-11-23, both sides through TryPlaceAtSide: the right end used to be found on one fit of the row and stepped
+        // from on another, which put Curiosa's orb in the middle and refused the slot.
+        [Fact]
+        public void BothEndsOfCuriosasTableTakeASlot()
+        {
+            Assert.True(SlotRow.TryPlaceAtSide(Curiosa, CuriosaSeller, true, 1, out var r, out int ri, out var why), why);
+            Assert.Equal(2, ri);   // past the orb
+            Assert.True(SlotRow.TryPlaceAtSide(Curiosa, CuriosaSeller, false, 1, out var l, out int li, out why), why);
+            Assert.Equal(3, li);   // past the dice
+            Near(12.34f, r[1], 0.001f); Near(12.32f, l[1], 0.001f);
+        }
+
+        // The Darkburg smith (dump 2026-11-23): dagger, axe and pickaxe on a table; an item rack 4 m away at almost the
+        // same height, an anvil, armour on a dummy. One far slot must not tilt the row.
+        static readonly List<float[]> Smith = new List<float[]>
+        {
+            new[] { 2.04f, -17.62f, 24.70f },   // 0 dagger
+            new[] { 2.66f, -17.62f, 24.96f },   // 1 axe
+            new[] { 1.41f, -17.62f, 24.49f },   // 2 pickaxe
+            new[] { 3.98f, -17.45f, 20.92f },   // 3 item rack
+            new[] { 5.58f, -17.15f, 21.18f },   // 4 anvil
+            new[] { 2.50f, -17.06f, 20.45f },   // 5 armour
+            new[] { 2.50f, -16.57f, 20.47f },   // 6 helmet
+        };
+        static readonly float[] SmithSeller = { 1.64f, -18.01f, 26.12f };
+
+        [Fact]
+        public void TheSmithsTableIsARowDespiteTheFarRack()
+        {
+            Assert.True(SlotRow.TryPlaceAtSide(Smith, SmithSeller, false, 1, out var l, out int li, out var why), why);
+            Assert.True(SlotRow.TryPlaceAtSide(Smith, SmithSeller, true, 1, out var r, out int ri, out why), why);
+            Assert.Equal(new[] { 1, 2 }, new[] { li, ri }.OrderBy(x => x).ToArray());   // the ends are the axe and the pickaxe
+            float gap = (float)Math.Sqrt(Math.Pow(r[0] - l[0], 2) + Math.Pow(r[2] - l[2], 2));
+            Assert.True(gap < 4f, $"the two new slots are {gap} m apart: the row was taken through the rack");
         }
 
         [Fact]

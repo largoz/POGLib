@@ -45,7 +45,10 @@ namespace POGLib.Shops.Model
         public string Seller { get; set; }
         /// <summary>Object the position is relative to (a vanilla seller or slot id). Default: the seller.</summary>
         public string Anchor { get; set; }
-        /// <summary>Metres in the anchor's space. Not with <see cref="After"/>.</summary>
+        /// <summary>
+        /// Metres in the anchor's space. With <see cref="After"/>: a shift from the slot's place in the row, in the slot's
+        /// own axes (x sideways, y up, z forward), after it has been stood on the ground.
+        /// </summary>
         public float[] Pos { get; set; }
         /// <summary>
         /// Instead of <see cref="Pos"/>: <c>"left"</c> or <c>"right"</c> (the end of the seller's row on that side, as a
@@ -276,7 +279,7 @@ namespace POGLib.Shops.Model
                 if (string.IsNullOrEmpty(s.Scene)) Err($"{at}.scene is required");
                 if (!string.IsNullOrEmpty(s.After))
                 {
-                    if (s.Pos != null) Err($"{at} has both \"after\" and \"pos\": \"after\" places it, so leave \"pos\" out");
+                    if (s.Pos != null && !IsVec3(s.Pos)) Err($"{at}.pos must be [x, y, z]: with \"after\" it moves the slot from its place in the row");
                     if (!string.IsNullOrEmpty(s.Anchor)) Err($"{at} has both \"after\" and \"anchor\": \"after\" places it next to that slot, so leave \"anchor\" out");
                     if (SlotDef.SideOf(s.After) != null && string.IsNullOrEmpty(s.Seller)) Err($"{at}.after \"{s.After}\" is an end of the seller's row, so the slot needs a \"seller\"");
                 }
