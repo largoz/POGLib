@@ -116,6 +116,13 @@ Done when: the answers and the names are written in this file.
       slot, NPC or player is taken for the floor), upright, turned like its neighbour; with no floor within 1 m it
       keeps the row's height and says so. Run `checks-17-ground`: 0 failures, 38 checks; the berry on the rug's
       edge (`SM_Prop_Rug_02`), the apple on the floor rock past the rock, both level on screen.
+      **Over LAN, `lan-1/run23` (2026-11-23), with the DLLs downloaded back from Thunderstore (POGLib 0.1.0
+      2195078…, POGShops 0.1.0 631684b7…, POG Mod Check 0.1.2 355f9309…):** the host stood the stand on the rug past
+      the torch; the client's copy took the host's name and position ((8.8, 3.9, -11.3), tilt 0) on the slim prefab,
+      showed the berries and the "7" tag in the row on the rug (`run23/lap-shots/client-204248-01-look.png`), bought
+      from the bread slot (14 → 7), ate, bought from the new stand (7 → 0) and passed the berry through the bucket to
+      the host. No error in the client's log. The store page of POGShops 0.1.0 still says "not yet checked on a
+      client": correct it with the next version.
 - [ ] 1.5 R3: the shop tools out of the library, into a mod of their own on the public API. **The user, 2026-11-20:
       a separate mod** (only mod authors need them; today 630 lines ship to every player). Packages then: the core,
       Shops on it, the tools on Shops; content mods on the core, and on Shops when they have a shop file. Nothing
