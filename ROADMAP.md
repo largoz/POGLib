@@ -188,6 +188,15 @@ Each line is a run on both machines with screenshots and both logs, written into
       off). Send the request through `HostBridge` (it works since R1), or say so in the README.
 - [ ] 2.2 Saves. A save with mod items loaded with the mod and without it; no run of the save guard is recorded.
       The player's saves are backed up first and the test uses a slot of its own.
+      **2026-11-23, from the game's code (`_research/SAVES_NATIVE.md`, not run):** a slot is plain JSON in Steam
+      Cloud (`remote/Save_<slot>.sav`); **nothing is saved without Steam**, so this test needs Steam (not the Wine
+      prefix, not the laptop). An item is saved by its GlobalObjectIdHash only, so a mod item comes back with its mod
+      and is silently dropped without it (bucket, storage); reward chests throw on it, which `SaveGuard` catches.
+      The test: the driver hosts slot index 2, buys a berry, saves with `GameMode_Goblin.SaveCurrentGame` (what the
+      bucket does); the save file itself is the oracle (the berry's hash 473DB177 = 1195225463 in `BucketStorage`).
+      Then a run with the mod loads the slot and finds the berry in the bucket; a run without ShopDemo loads it with no
+      error and no berry. Steam Cloud syncs `remote/`: ask the user before writing a slot file there, and remove it
+      afterwards the way the user wants.
 - [ ] 2.3 A round in the dungeon with a client: a mod item carried down, used, carried up in the bucket, the round
       ended; a late join in the dungeon.
 - [ ] 2.4 G4, the rest: theft, and the seller's death making a new slot's item free.
