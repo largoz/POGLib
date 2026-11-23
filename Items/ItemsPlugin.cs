@@ -254,7 +254,7 @@ namespace POGLib.Items
                 try
                 {
                     cap.Attach(item);
-                    MelonLogger.Msg($"[POGLib.Items] Capability '{cap.Name}' attached to {def.ContentId} (EXPERIMENTAL).");
+                    MelonLogger.Msg($"[POGLib.Items] Capability '{cap.Name}' attached to {def.ContentId}.");
                 }
                 catch (Exception ex)
                 {

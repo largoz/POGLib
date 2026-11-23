@@ -194,7 +194,9 @@ namespace POGLib.Items
         /// </summary>
         public string SpawnOnConsume { get; set; }
 
-        // — Capabilities (EXPERIMENTAL, v0.2) — declarative sibling components (eat/weapon/throw).
+        // — Capabilities — declarative sibling components (eat/weapon/throw). Which are shown in the game and which are
+        //   experimental is said in the store page and the wiki (00 Start here), not here: the log no longer labels them
+        //   (it called eating EXPERIMENTAL after eating was shown, 2026-11-23). —
         //   See ItemCapability. Attached at template build; validate on-item in Milestone 0. —
         public System.Collections.Generic.List<ItemCapability> Capabilities { get; } =
             new System.Collections.Generic.List<ItemCapability>();
