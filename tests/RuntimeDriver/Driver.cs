@@ -107,6 +107,9 @@ namespace POGLib.RuntimeDriver
                     Log($"main menu up; login {menu.m_currentLoginState}; {Role()}");
                     if (Checks.Enabled) Checks.SetVanillaWeight(0);   // must reach the hub's picks: the next scene load
                     if (Explore.Enabled) Explore.AtMenu();
+                    // start=0: another mod hosts (POGLanTest on a machine without Steam, where only its LAN hosting
+                    // works); the driver only waits for the hub as host.
+                    if (Cfg("start", 1) == 0) { Log("start=0: waiting for someone else to host"); _step = Step.WaitHub; _deadline = Time.unscaledTime + 240f; _next = Time.unscaledTime + 1f; return; }
                     _step = Step.OpenSaves; _next = Time.unscaledTime + 3f;
                     return;
 

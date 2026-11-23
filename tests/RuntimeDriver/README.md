@@ -35,6 +35,7 @@ loads `PitOfGoblin_Lobby`. Default slot = the last one, so slot 1 stays the play
 | `jumps=<scene>;<scene>` | the tools' scene jump to each scene, dump its shops, shoot `jump_N` |
 | `dungeon=1` | down the bucket: list sellers, mod merchant slots, shoot `merchant`; then the tools' round-timer freeze for 8 s and 8 s unfrozen |
 | `stay=N` | seconds before `done` |
+| `start=0` | do not start a save slot; wait for another mod to host (POGLanTest `Auto = "host"` on a machine without Steam) |
 | `checks=1` | the asserting run (below): registers a test item with no price, sets the vanilla-weight setting to 0 at the menu (back to 10 at the end), and in the hub prints `PASS`/`FAIL` lines, the game's network prefab list (`G2 …`) and every `ShopLocation.OnNetworkSpawn` with the caller's stack for repeats (`G3 …`) |
 
 ## Asserting run
