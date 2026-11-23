@@ -49,9 +49,9 @@ Full guide, ids and the host's own files: [SHOPS.md](https://github.com/largoz/P
 
 ## Status of 0.1.0
 
-Shown in the game (build 26668562): a mod's new slot in the hub's starter shop, its item chosen and stocked; over
-LAN, a client sees the new slot, buys from it and passes the item on. A mod file with `add` is refused.
-`"after": "left" | "right"` and the floor look were shown on the host; **not yet checked on a client.**
+Shown in the game (build 26668562), on a host and a client over LAN: a mod's new slot at the end of the hub's
+starter shop's row, on the floor; the client sees it where the host does, buys from it and passes the item on. A
+mod file with `add` is refused.
 Not checked yet: other scenes (InBetween, DarkBurg), sellers the game draws only on some visits, dungeon merchants.
 
 Source and issues: [github.com/largoz/POGLib](https://github.com/largoz/POGLib)
