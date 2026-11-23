@@ -21,6 +21,7 @@
     <Reference Include="Il2Cppmscorlib"><HintPath>$(InteropDir)\Il2Cppmscorlib.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(InteropDir)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.PhysicsModule"><HintPath>$(InteropDir)\UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppPlatform"><HintPath>$(InteropDir)\Il2CppPlatform.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Assembly-CSharp"><HintPath>$(InteropDir)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.Netcode.Runtime"><HintPath>$(InteropDir)\Unity.Netcode.Runtime.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.Addressables"><HintPath>$(InteropDir)\Unity.Addressables.dll</HintPath><Private>false</Private></Reference>

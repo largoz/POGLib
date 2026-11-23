@@ -57,6 +57,36 @@ namespace POGLib.Core
             _registered = true;
             MelonLogger.Msg($"[POGLib] Network prefabs registered: {ok} ok, {fail} failed" +
                             (already > 0 ? $", {already} already registered from an earlier session." : "."));
+            AddToGameList(prefabs);
+        }
+
+        /// <summary>
+        /// Puts the mod prefabs into the game's own network prefab list too (NetworkHandler's loaded
+        /// <c>NetworkPrefabsList</c>), straight into its <c>List</c> so NGO is not asked to register them a second time.
+        /// The game finds a saved item by its hash in that list, not in NGO's table: restoring the bucket and the hub's
+        /// storage (<c>StorageVessel.LoadStorage</c>, through <c>NetworkHandler.NetworkPrefabsList</c>) skipped every mod
+        /// item, so a mod item vanished from a save it was in (found 2026-11-23, test save-3: the saved torches and
+        /// spear came back, the berry did not). Idempotent: an entry with the same hash is not added twice.
+        /// </summary>
+        private static void AddToGameList(List<NetworkObject> prefabs)
+        {
+            var list = GamePrefabs.Loaded?.List;
+            if (list == null) { MelonLogger.Warning("[POGLib] The game's network prefab list is not loaded: mod items will not come back from saves this session."); return; }
+            var present = new HashSet<uint>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                var no = list[i]?.Prefab != null ? list[i].Prefab.GetComponent<NetworkObject>() : null;
+                if (no != null) present.Add(no.GlobalObjectIdHash);
+            }
+            int added = 0;
+            foreach (var prefab in prefabs)
+            {
+                if (prefab == null || present.Contains(prefab.GlobalObjectIdHash)) continue;
+                list.Add(new NetworkPrefab { Prefab = prefab.gameObject });
+                present.Add(prefab.GlobalObjectIdHash);
+                added++;
+            }
+            if (added > 0) MelonLogger.Msg($"[POGLib] Added {added} mod prefab(s) to the game's own prefab list (saves find items there).");
         }
 
         private enum RegisterResult { Registered, AlreadyRegistered, Failed }

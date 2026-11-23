@@ -28,7 +28,7 @@ namespace POGLib.RuntimeDriver
     {
         const string HubScene = "PitOfGoblin_Lobby";
 
-        enum Step { WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, DevTools, Jumps, Dungeon, Stay, Done }
+        enum Step { WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
 
         Step _step = Step.WaitMenu;
         float _next;
@@ -83,8 +83,16 @@ namespace POGLib.RuntimeDriver
             return nm.IsHost ? "host" : nm.IsServer ? "server" : "client";
         }
 
+        bool _deleting;   // savetest=delete: at the main menu, then done
+
         public override void OnUpdate()
         {
+            if (_deleting)
+            {
+                try { if (SaveTest.Delete(Cfg("slot", 2))) { _deleting = false; Finish("done"); } }
+                catch (Exception ex) { Log($"save: delete FAILED {ex.GetType().Name}: {ex.Message}"); _deleting = false; Finish("done"); }
+                return;
+            }
             if (_step == Step.Done || Time.unscaledTime < _next) return;
             try { Tick(); }
             catch (Exception ex)
@@ -107,6 +115,7 @@ namespace POGLib.RuntimeDriver
                     Log($"main menu up; login {menu.m_currentLoginState}; {Role()}");
                     if (Checks.Enabled) Checks.SetVanillaWeight(0);   // must reach the hub's picks: the next scene load
                     if (Explore.Enabled) Explore.AtMenu();
+                    if (_cfg.TryGetValue("savetest", out var st) && st == "delete") { _deleting = true; return; }
                     // start=0: another mod hosts (POGLanTest on a machine without Steam, where only its LAN hosting
                     // works); the driver only waits for the hub as host.
                     if (Cfg("start", 1) == 0) { Log("start=0: waiting for someone else to host"); _step = Step.WaitHub; _deadline = Time.unscaledTime + 240f; _next = Time.unscaledTime + 1f; return; }
@@ -196,8 +205,13 @@ namespace POGLib.RuntimeDriver
                         _next = Time.unscaledTime + 5f;   // run.sh shoots ~2.2 s after the line
                         return;
                     }
-                    _step = Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps;
+                    _step = _cfg.ContainsKey("savetest") ? Step.SaveTest : Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps;
                     _next = Time.unscaledTime + 1f;
+                    return;
+
+                case Step.SaveTest:
+                    if (SaveTest.Tick(_cfg["savetest"])) { _step = Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps; }
+                    _next = Time.unscaledTime + 0.5f;
                     return;
 
                 case Step.DevTools:

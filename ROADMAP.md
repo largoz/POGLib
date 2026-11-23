@@ -186,7 +186,21 @@ Each line is a run on both machines with screenshots and both logs, written into
 
 - [ ] 2.1 Use on a client. An item with a use handler of its own is host-only today (the client's click is put
       off). Send the request through `HostBridge` (it works since R1), or say so in the README.
-- [ ] 2.2 Saves. A save with mod items loaded with the mod and without it; no run of the save guard is recorded.
+- [x] 2.2 Saves. A save with mod items loaded with the mod and without it; no run of the save guard is recorded.
+      **Done 2026-11-23 (PC, Steam), runs `save-1` … `save-6`, and it found a defect of the published 0.1.0 (D16):**
+      the driver (`savetest=buy`) bought the berry as the host and saved like the bucket does: "Succeeded"; the file
+      `remote/Save_2.sav` (plain JSON, the oracle) held the berry in `BucketStorage.Items` with ObjectHash 1195225463
+      (= 0x473DB177, POGLib's hash of ShopDemo:GlowBerry) next to two torches and a spear. Loading it with the mod
+      (`savetest=load`) brought back the torches and the spear **but not the berry** (save-3). Cause, from the game's
+      code: `StorageVessel.LoadStorage` finds a saved item in the game's own `NetworkHandler.NetworkPrefabsList`, and
+      POGLib registered its prefabs only with NGO. Fix (`NetworkRegistrar.AddToGameList`): the mod prefabs go into
+      that list too, straight into its `List` (no second NGO registration). Loading again with the fix (save-4): the
+      berry back in the bucket, 0 exceptions in Player.log; the same test failed on 0.1.0, so it tells the two apart.
+      Without ShopDemo (save-5): the save loads with 0 exceptions, the vanilla items come back, the berry does not,
+      and the file is not rewritten by loading (the berry stays in it until the game saves again: the bucket reaching
+      the hub or a round's end). The slot was deleted through the game afterwards (save-6, "Empty"); `remote/` holds
+      only `MetaData_3.sav` again. Reward chests were not tested (no mod item reaches one in 0.1).
+      **The fix is not released: POGLib 0.1.0 on Thunderstore drops mod items from saves.**
       The player's saves are backed up first and the test uses a slot of its own.
       **2026-11-23, from the game's code (`_research/SAVES_NATIVE.md`, not run):** a slot is plain JSON in Steam
       Cloud (`remote/Save_<slot>.sav`); **nothing is saved without Steam**, so this test needs Steam (not the Wine
