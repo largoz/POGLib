@@ -28,7 +28,7 @@ namespace POGLib.Shops
     /// </summary>
     public sealed class ShopsMod : MelonMod
     {
-        internal const string VERSION = "0.1.0";
+        internal const string VERSION = "0.1.1";
         private const string Tag = "[POGShops]";
 
         // Compiled in from the POGLib this was built against (a const is copied into this assembly at build time).

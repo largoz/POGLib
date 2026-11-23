@@ -14,7 +14,7 @@ items of its own.
 
 ## For mod developers
 
-Reference `POGLib.dll`, add `Largo-POGLib-0.1.0` to your manifest's dependencies, and register items in your
+Reference `POGLib.dll`, add `Largo-POGLib-0.1.1` to your manifest's dependencies, and register items in your
 `OnInitializeMelon`:
 
 ```csharp
@@ -55,7 +55,7 @@ Everything public is listed line by line in
 [`api/POGLib.txt`](https://github.com/largoz/POGLib/blob/main/api/POGLib.txt); the rest of the library is internal.
 What that file lists stays through 0.x, **except the parts marked experimental below**.
 
-## Status of 0.1.0
+## Status of 0.1.1
 
 Shown in the game (build 26668562), on a host and on a client over LAN:
 
@@ -69,7 +69,8 @@ Shown in the game (build 26668562), on a host and on a client over LAN:
 `PickupStaminaPenalty`, `MovementFactorWhenHeld`, `Consumable` / `MaxUses` with a use handler. **Use handlers run on
 the host only**: a client's use is not sent to the host yet.
 
-**Not tested yet: saves with mod items** (loading a save made with the mod, and without it). Back up your saves.
+**Saves** (0.1.1): a mod item saved in the bucket comes back when the save loads; without its mod the save loads
+with no error and the item is gone. (0.1.0 lost mod items from saves.)
 
 Not in 0.1: natural loot drops, AssetBundle models, mobs, levels.
 

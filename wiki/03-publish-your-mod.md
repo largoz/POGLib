@@ -29,8 +29,8 @@ finds your `pogshop.json` there.
   "description": "Glow berries in the hub's starter shop.",
   "dependencies": [
     "LavaGang-MelonLoader-0.7.2",
-    "Largo-POGLib-0.1.0",
-    "Largo-POGShops-0.1.0"
+    "Largo-POGLib-0.1.1",
+    "Largo-POGShops-0.1.1"
   ]
 }
 ```

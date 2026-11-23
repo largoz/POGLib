@@ -7,6 +7,6 @@ namespace POGLib.Core
     /// </summary>
     internal static class LibraryVersion
     {
-        internal const string VERSION = "0.1.0";
+        internal const string VERSION = "0.1.1";
     }
 }

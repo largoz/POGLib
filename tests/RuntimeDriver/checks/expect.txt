@@ -12,7 +12,7 @@ Closest slot ids here: vanilla:PitOfGoblin_Lobby/StarterShop/Game\.Spawning\.Sho
 # of its own since 2026-11-21, checks its own the same way.
 \[POGLib\] Harmony: [0-9]+ game method\(s\) patched; each patch once
 \[POGShops\] Harmony: [0-9]+ game method\(s\) patched; each patch once
-\[POGShops\] 0\.1\.0 started on POGLib 0\.1\.0
+\[POGShops\] 0\.1\.1 started on POGLib 0\.1\.1
 \[POGLib\] Registered plugin: Shops
 \[POGLib\] Compatibility OK
 \[POGShops\] Compatibility OK

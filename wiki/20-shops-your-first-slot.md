@@ -1,7 +1,7 @@
 # 20 Shops: your first slot
 
 Sell your item at one of the game's sellers. You need [POGShops](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGShops/)
-(add `Largo-POGShops-0.1.0` to your manifest's dependencies) and an item with a `ShopCost`
+(add `Largo-POGShops-0.1.1` to your manifest's dependencies) and an item with a `ShopCost`
 ([02 Your first item](02-your-first-item.md)). No code: a file.
 
 ## The file

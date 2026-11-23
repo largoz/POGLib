@@ -35,8 +35,9 @@ Give your item a `ShopCost` (POGLib), then ship `pogshop.json` in your package:
 ```
 
 - `"after": "left"` or `"right"` puts the slot at that end of the seller's row of goods, as a customer facing the
-  seller sees it, on the floor like the seller's own goods. No coordinates; it names no slot of the game, so a game
-  update that renames slots does not break it. (`"anchor"` + `"pos"` place a slot anywhere instead.)
+  seller sees it, on the ground like the seller's own goods. No coordinates; it names no slot of the game, so a game
+  update that renames slots does not break it. `"pos"` and `"rot"` shift and tilt it from there; `"anchor"` +
+  `"pos"` place a slot anywhere instead.
 - The slot belongs to the seller: the seller's faction sets the price, it can be stolen from, and it is free when
   the seller dies. The price is the item's `ShopCost`.
 - `pool`: your items with weights; `"nothing"` sometimes leaves the slot empty.
@@ -47,11 +48,13 @@ with each reason in the log. A host can do those in a file of its own in `UserDa
 
 Full guide, ids and the host's own files: [SHOPS.md](https://github.com/largoz/POGLib/blob/main/SHOPS.md).
 
-## Status of 0.1.0
+## Status of 0.1.1
 
 Shown in the game (build 26668562), on a host and a client over LAN: a mod's new slot at the end of the hub's
 starter shop's row, on the floor; the client sees it where the host does, buys from it and passes the item on. A
 mod file with `add` is refused.
-Not checked yet: other scenes (InBetween, DarkBurg), sellers the game draws only on some visits, dungeon merchants.
+Both ends of the row are found for every seller of the hub, InBetween and DarkBurg (from a dump of each scene); in
+the game, slots were looked at in the hub. The automatic place is a start: correct it with `"pos"` and `"rot"`.
+Not checked yet: slots in InBetween and DarkBurg looked at in the game, dungeon merchants.
 
 Source and issues: [github.com/largoz/POGLib](https://github.com/largoz/POGLib)
