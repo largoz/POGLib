@@ -1,6 +1,6 @@
 {
   "name": "POGLib",
-  "version_number": "0.1.0",
+  "version_number": "0.1.1",
   "website_url": "https://github.com/largoz/POGLib",
   "description": "A library for content mods: new items with their own model and icon that work in co-op. Install it when a mod asks for it; it adds no items of its own.",
   "dependencies": [

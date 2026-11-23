@@ -1,6 +1,6 @@
 {
   "name": "POGShops",
-  "version_number": "0.1.0",
+  "version_number": "0.1.1",
   "website_url": "https://github.com/largoz/POGLib",
   "description": "Lets mods sell their items in the game's shops: a mod places its own slots beside a seller's goods with a small data file. Only the host needs the shop files. Built on POGLib.",
   "dependencies": [
