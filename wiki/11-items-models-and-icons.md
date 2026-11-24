@@ -23,7 +23,7 @@ the sample looks for the file under `Mods/` (`samples/ShopDemo/ShopDemoMod.cs`, 
   model's bounds: less exact, never worse.
 
 **Export from Blender** with Y up and -Z forward (the exporter's defaults): the model arrives upright and facing
-the right way. The sample's berry is about 7 to 8 cm across in its OBJ and looks berry-sized in the game; start from
+the right way. **Use POGLib 0.1.2 or newer**: 0.1.0 and 0.1.1 draw such a model inside out. The sample's berry is about 7 to 8 cm across in its OBJ and looks berry-sized in the game; start from
 that scale. The model replaces the look of the shell (the game item yours is built from), so it is carried, dropped
 and shown in shops like the shell.
 

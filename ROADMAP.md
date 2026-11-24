@@ -302,6 +302,35 @@ clone of this repository, shows a mod item in a shop to a host and a client.
 In this order unless the user says otherwise. Each starts with its smallest experiment, and its data contract is
 written after the experiment, not before.
 
+- **Cosmetics, a section of POGLib** (the user, 2026-11-25: "so we can make a section about cosmetics, for POGLib").
+  The facts: `_Modding/ModSource/_research/COSMETICS_NATIVE.md`. In this order:
+  - [~] C1 **Host half done 2026-11-25** (runs `goblin-2b`, `goblin-5`, local launches without Steam): a new NPC in a look
+        of the game's parts, and in our own hat and coat (`_assets/NoirGoblin`), on screen, 0 exceptions in Player.log.
+        Left: a client with the mod, a client without it. As planned: a game seller in a look made of the game's own parts (long jacket, hood or hat, thief mask, dark colours),
+        set by the host: seen on screen by the host and by a client without the mod. Decides whether a seller of our
+        own can be made without models.
+  - [ ] C2 A hat of a mod's own (OBJ, head anchor, `Static`): in the wardrobe, on the player, seen by a client with
+        the mod; a client without it sees the goblin without the hat; the game without the mod loads a look that
+        names it. The part is Unlocked, so the player's `MetaData` (Steam Cloud) stays as it was: checked by a diff.
+  - [ ] C3 Whether mod parts may turn up on random goblins and on new players (`GetRandom`): decide, then hold it.
+  - [~] C4 **The coat is worn and moves with the body (host, run `goblin-5`)**: our mesh, weights by our own rule per place.
+        Left: walking, crouching, dying in it; a client. As planned: a coat of a mod's own (`Stitched`, needs bone weights): the game's jacket with another material first;
+        a new mesh only after the bundle round trip or a weight transfer from the game's jacket is shown.
+  - Then the API (`Content.Cosmetics`), the wiki section (a free ten: 30 is reserved for mobs) and a seller with a look of its own
+    (POGShops), the first consumer being the noir black-market goblin that sells the stones.
+- **Spy goblins, a faction of their own** (the user, 2026-11-25, seeing three noir goblins side by side: "maybe it will
+  be a whole faction? Spy goblins? They will trade information of some kind. But for now in the plans"). Not started;
+  after the first noir seller works. To find out first: what a faction is in the game (the `Faction` enum, reputation
+  per faction) and whether one can be added or an existing one borrowed.
+- **D17 (found 2026-11-25, in the published 0.1.0 and 0.1.1; fixed in 0.1.2): an OBJ as modelling tools write
+  it is drawn inside out.** The loader negated Z and left the triangles' order alone; the sample's berry hid it (504 of
+  its 520 triangles are written the wrong way round). `Core/ObjWinding`: where a face has normals they decide, else the
+  order is turned. 4 unit tests; in the game: our hat, inside out in run `goblin-4`, right in `goblin-5`; the berry the
+  same as before (`goblin-6-berry`). The Ember Lantern (a normal
+  Blender export), read back from its mesh in the game: 0 of 2000 faces outward on 0.1.1, 2000 on 0.1.2 (runs
+  `lantern-old`, `lantern-new`, seen on screen too). The asserting run holds it now (`objcheck`). Release run:
+  `checks-22-release012` (0 failures of 41), the published POGShops 0.1.1 DLL on POGLib 0.1.2. The sample's berry is
+  written the usual way now.
 - **Vanilla slots**, if 0.3 left them out: the vanilla floor, `add`, a POG Config page for the host.
 - **Bundle models.** Needs the game's Unity editor (6000.3.24f1) installed, with the user's Unity account. First
   the round trip (a cube from a bundle shown in the game), then D5. Mob models and animation wait for this.

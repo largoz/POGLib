@@ -87,6 +87,29 @@ namespace POGLib.RuntimeDriver
             }
         }
 
+        /// <summary>D17: every triangle of an OBJ item's mesh in the game faces the way its normals point (Unity draws the
+        /// side cross(b - a, c - a) points to). Read from the mesh the item carries, not from the loader.</summary>
+        public static void ObjFacesOutward(string itemName)
+        {
+            var item = POGLib.Core.GameAssets.FindItemPrefab(itemName);
+            if (item == null) { Check("OBJ faces outward", false, itemName + " not found"); return; }
+            int good = 0, bad = 0; string meshes = "";
+            foreach (var mf in item.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var m = mf.sharedMesh;
+                if (m == null || !m.isReadable || m.normals == null || m.normals.Length != m.vertexCount) continue;
+                var v = m.vertices; var n = m.normals; var t = m.triangles;
+                meshes += (meshes.Length > 0 ? ", " : "") + m.name + " " + t.Length / 3;
+                for (int i = 0; i + 2 < t.Length; i += 3)
+                {
+                    var cross = Vector3.Cross(v[t[i + 1]] - v[t[i]], v[t[i + 2]] - v[t[i]]);
+                    float d = Vector3.Dot(cross, n[t[i]] + n[t[i + 1]] + n[t[i + 2]]);
+                    if (d > 0f) good++; else if (d < 0f) bad++;
+                }
+            }
+            Check("OBJ faces outward (" + itemName + ")", good > 0 && bad == 0, $"{good} outward, {bad} inward; meshes {meshes}");
+        }
+
         /// <summary>In the dungeon: the mod merchant variant came up and its slots hold what the library chose.</summary>
         public static void MerchantChecks(System.Collections.Generic.List<POGLib.Shops.SlotRecord> merchantSlots)
         {

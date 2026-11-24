@@ -20,6 +20,7 @@ Everything POGLib and POGShops notice goes to `MelonLoader/Latest.log` in your m
 | `Invalid ModItemDefinition` / `Invalid content definition (empty ModId/ContentId)` | an id is missing | set `ModId` and `ContentId` |
 | `Post-verify FAILED: <item> not registered` | the item could not join the game's network list | report it with the log |
 | `OBJ not found: <path>` / `OBJ load failed` / `OBJ has no geometry` | your model's path or file | log the path you pass; open the file in a 3D tool |
+| (no line) your model looks hollow or inside out | POGLib 0.1.0 or 0.1.1, or faces turned inwards in a file without normals | update POGLib; export normals |
 | `MTL not found next to the OBJ` | the .mtl is missing or named differently | ship it beside the .obj, as the .obj names it |
 | `a model of its own but no icon` | your item shows the shell's icon | set `IconFile` ([11](11-items-models-and-icons.md)) |
 | `EatCapability: CopyFrom '<name>' unavailable` / `no item prefab named` / `has no ActiveItem_Eat` | the food you copy from is misspelt or is not food | use a food of the game, e.g. `Item_Apple` |

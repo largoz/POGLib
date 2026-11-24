@@ -90,7 +90,8 @@ r2modman it can sit deeper. `samples/ShopDemo/ShopDemoMod.cs` searches `Mods/` f
 next to it.
 
 **Exporting.** Use **Y up / -Z forward** (the Blender default) and triangulate. OBJ is right-handed, Unity is
-left-handed, so the loader negates Z; the model arrives upright and unmirrored. One Blender unit = one metre =
+left-handed, so the loader negates Z and turns the triangles over (since 0.1.2; before that a model came out inside
+out); the model arrives upright and unmirrored. Export normals: where a face has them, they say which side is out. One Blender unit = one metre =
 one Unity unit, so model at real scale (a hand-held item is about 0.1–0.2 m), with the origin at the bottom centre.
 
 **Materials.** `Kd` → `_BaseColor`, `Ke` → `_EmissiveColor`, `Pm` → `_Metallic`, `Pr` → `_Smoothness`

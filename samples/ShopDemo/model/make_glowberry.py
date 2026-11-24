@@ -22,8 +22,8 @@ def sphere(cx, cy, cz, r, mat, rings=8, segs=12):
         for j in range(segs):
             a, b = idx[i, j], idx[i, (j + 1) % segs]
             c, d = idx[i + 1, (j + 1) % segs], idx[i + 1, j]
-            if i > 0: F.append((mat, [a, c, b]))           # counter-clockwise seen from outside (OBJ, right-handed)
-            if i < rings - 1: F.append((mat, [a, d, c]))
+            if i > 0: F.append((mat, [a, b, c]))           # counter-clockwise seen from outside (OBJ, right-handed)
+            if i < rings - 1: F.append((mat, [a, c, d]))
 
 def cylinder(x0, y0, z0, x1, y1, z1, r, mat, segs=6):
     # along a straight line; good enough for a stem

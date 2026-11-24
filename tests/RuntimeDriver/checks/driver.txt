@@ -1,3 +1,4 @@
 checks=1
 dump=1
 stay=5
+objcheck=ModItem_ShopDemo_GlowBerry

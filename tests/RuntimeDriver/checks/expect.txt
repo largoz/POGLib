@@ -12,7 +12,7 @@ Closest slot ids here: vanilla:PitOfGoblin_Lobby/StarterShop/Game\.Spawning\.Sho
 # of its own since 2026-11-21, checks its own the same way.
 \[POGLib\] Harmony: [0-9]+ game method\(s\) patched; each patch once
 \[POGShops\] Harmony: [0-9]+ game method\(s\) patched; each patch once
-\[POGShops\] 0\.1\.1 started on POGLib 0\.1\.1
+\[POGShops\] 0\.1\.1 started on POGLib 0\.1\.2
 \[POGLib\] Registered plugin: Shops
 \[POGLib\] Compatibility OK
 \[POGShops\] Compatibility OK
@@ -58,5 +58,7 @@ Slot templates ready: [0-9]+ \(copied from the game's 'ShopLocation(Slim)?', net
 # (2026-11-14, no mod item in loot there; not checked against a vanilla run).
 player: !^  at Game\.Spawning\.(ShopLocation|SpawnerBase|ItemSpawner)
 player: !^  at ActiveItem_
+# D17 (2026-11-25): the model from the OBJ is not inside out, read from the mesh in the game (objcheck).
+\[DRIVER\] PASS OBJ faces outward \(ModItem_ShopDemo_GlowBerry\)
 # The driver's own PASS/FAIL lines are counted by run.sh; this one proves it got to the end.
 \[DRIVER\] checks: [0-9]+ pass, [0-9]+ fail

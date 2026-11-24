@@ -28,7 +28,7 @@ namespace POGLib.RuntimeDriver
     {
         const string HubScene = "PitOfGoblin_Lobby";
 
-        enum Step { WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
+        enum Step { WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, Outfit, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
 
         Step _step = Step.WaitMenu;
         float _next;
@@ -190,6 +190,7 @@ namespace POGLib.RuntimeDriver
                     if (Cfg("dump", 1) == 1) DumpShops();
                     CheckShopRules();
                     if (Checks.Enabled) { Checks.DumpNetworkPrefabs(); Checks.HubChecks(); }
+                    foreach (var o in (_cfg.TryGetValue("objcheck", out var oc) ? oc : "").Split(';', StringSplitOptions.RemoveEmptyEntries)) Checks.ObjFacesOutward(o.Trim());
                     LogStandingPoints();
                     _looks = (_cfg.TryGetValue("look", out var l) ? l : "").Split(';', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
                     _step = Step.Look; _next = Time.unscaledTime + 1f;
@@ -205,8 +206,12 @@ namespace POGLib.RuntimeDriver
                         _next = Time.unscaledTime + 5f;   // run.sh shoots ~2.2 s after the line
                         return;
                     }
-                    _step = _cfg.ContainsKey("savetest") ? Step.SaveTest : Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps;
+                    _step = Step.Outfit;
                     _next = Time.unscaledTime + 1f;
+                    return;
+
+                case Step.Outfit:
+                    if (OutfitStep()) _step = _cfg.ContainsKey("savetest") ? Step.SaveTest : Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps;
                     return;
 
                 case Step.SaveTest:
@@ -290,11 +295,8 @@ namespace POGLib.RuntimeDriver
             if (_override && Camera.main != null) Camera.main.transform.SetPositionAndRotation(_ovPos, _ovRot);
         }
 
-        bool LookAt(string id) => LookAtTransform(POGLib.Shops.ShopScene.FindAnchor(id));
-
-        bool LookAtTransform(Transform target)
+        void HookCamera()
         {
-            if (target == null) return false;
             if (_beginCam == null)
             {
                 _beginCam = Il2CppInterop.Runtime.DelegateSupport.ConvertDelegate<Il2CppSystem.Action<UnityEngine.Rendering.ScriptableRenderContext, Camera>>(
@@ -305,6 +307,14 @@ namespace POGLib.RuntimeDriver
                 UnityEngine.Rendering.RenderPipelineManager.add_beginContextRendering(_beginContext);
                 Log($"main camera: {(Camera.main != null ? Camera.main.name : "none")}; cameras: {string.Join(", ", Camera.allCameras.Select(c => c.name + "@" + c.depth))}");
             }
+        }
+
+        bool LookAt(string id) => LookAtTransform(POGLib.Shops.ShopScene.FindAnchor(id));
+
+        bool LookAtTransform(Transform target)
+        {
+            if (target == null) return false;
+            HookCamera();
             var slot = target.GetComponent<ShopLocation>();
             var focus = slot != null && slot.m_itemHolder != null ? slot.m_itemHolder.position : target.position + Vector3.up;
             var keeper = slot != null && slot.m_shopKeeper != null ? slot.m_shopKeeper.transform : null;
@@ -319,6 +329,41 @@ namespace POGLib.RuntimeDriver
         }
 
         void DestroyLookCamera() => _override = false;
+
+        // Goblins in looks of our own (Outfit.cs): dump, spawn, then one shot from the front and one from the side each.
+        int _of;
+        bool OutfitStep()
+        {
+            if (_of == 0)
+            {
+                if (Cfg("outfits", 0) == 1) Outfit.Dump(Log);
+                Outfit.Make(_cfg, Log);
+                _of = 1; _next = Time.unscaledTime + (Outfit.Made.Count > 0 ? 5f : 0.5f);
+                return false;
+            }
+            int shot = _of - 1, i = shot / 2;
+            if (i >= Outfit.Made.Count) { DestroyLookCamera(); _next = Time.unscaledTime + 1f; return true; }
+            var g = Outfit.Made[i];
+            bool side = shot % 2 == 1;
+            if (!side) Outfit.Report(g);
+            if (shot == 0 && g.Npc != null && _cfg.TryGetValue("rigdump", out var rigPath))
+                try { RigDump.Write(g.Npc, rigPath, Log); } catch (Exception ex) { Log($"rigdump FAILED {ex.GetType().Name}: {ex.Message}"); }
+            _of++;
+            if (g.Npc == null) { _next = Time.unscaledTime + 0.1f; return false; }
+            var t = g.Npc.transform;
+            HookCamera();
+            var focus = t.position + Vector3.up * CfgF("goblinfocus", 0.75f);
+            var dir = side ? (t.forward + t.right).normalized : t.forward;
+            _ovPos = focus + dir * CfgF("goblindist", 1.9f) + Vector3.up * 0.25f;
+            _ovRot = Quaternion.LookRotation(focus - _ovPos);
+            _override = true;
+            Log($"shot {g.Key}_{(side ? "side" : "front")}");
+            _next = Time.unscaledTime + 5f;
+            return false;
+        }
+
+        float CfgF(string key, float fallback) =>
+            _cfg.TryGetValue(key, out var v) && float.TryParse(v, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : fallback;
 
         // Where items stand: the shell-built mod item vs. a vanilla item sold in the same shop.
         void LogStandingPoints()

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 (2026-11-25)
+
+- **Models from OBJ files are drawn the right way round.** In 0.1.0 and 0.1.1 an OBJ as Blender and other tools export
+  it was drawn inside out: you saw its far inner side instead of the near outer one. If you turned your faces over to
+  make up for it, you need not change your file: where a face has normals, they decide which side is the outside.
+
 ## 0.1.1 (2026-11-23)
 
 - **Mod items come back from saves.** In 0.1.0 an item a player carried or left in the bucket was saved, but on

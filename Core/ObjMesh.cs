@@ -22,9 +22,9 @@ namespace POGLib.Core
     /// path demands. Textures ride along as loose PNGs (see <see cref="AssetLoader"/>).
     ///
     /// Coordinate handling: OBJ is right-handed and Y-up; Unity is left-handed and Y-up. The loader
-    /// negates Z on positions and normals, which converts handedness and — because mirroring reverses
-    /// apparent winding — leaves the triangle order alone. Export from Blender with Y up / -Z forward
-    /// (the exporter's default) and the model arrives upright, unmirrored and correctly facing.
+    /// negates Z on positions and normals, which converts handedness, and turns the triangles over so
+    /// that their outsides stay outside (<see cref="ObjWinding"/>). Export from Blender with Y up / -Z
+    /// forward (the exporter's default) and the model arrives upright, unmirrored and correctly facing.
     /// </summary>
     internal static class ObjMesh
     {
@@ -388,14 +388,23 @@ namespace POGLib.Core
             if (corners < 3) return;
 
             Span<int> resolved = corners <= 16 ? stackalloc int[corners] : new int[corners];
+            bool named = true;   // every corner names a normal
             for (int c = 0; c < corners; c++)
+            {
                 resolved[c] = ResolveVertex(parts[c + 1], positions, normals, uvs, vertexIndex, outPos, outNor, outUv);
+                var bits = parts[c + 1].Split('/');
+                int ni = Idx(bits, 2, normals.Count);
+                named &= ni >= 0 && ni < normals.Count;
+            }
 
             for (int c = 1; c < corners - 1; c++)
             {
-                triangles.Add(resolved[0]);
-                triangles.Add(resolved[c]);
-                triangles.Add(resolved[c + 1]);
+                int i0 = resolved[0], i1 = resolved[c], i2 = resolved[c + 1];
+                bool turn = ObjWinding.MustTurn(Xyz(outPos[i0]), Xyz(outPos[i1]), Xyz(outPos[i2]),
+                                                named ? Xyz(outNor[i0] + outNor[i1] + outNor[i2]) : null);
+                triangles.Add(i0);
+                triangles.Add(turn ? i2 : i1);
+                triangles.Add(turn ? i1 : i2);
             }
         }
 
@@ -418,6 +427,8 @@ namespace POGLib.Core
             vertexIndex[token] = index;
             return index;
         }
+
+        private static float[] Xyz(Vector3 v) => new[] { v.x, v.y, v.z };
 
         /// <summary>OBJ indices are 1-based, and negative values count back from the end.</summary>
         private static int Idx(string[] bits, int slot, int count)
