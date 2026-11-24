@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""wikiupload.py [--dry-run] [--package Largo/POGLib] [--wiki <dir>]
+"""wikiupload.py [--dry-run] [--browser PORT] [--package Largo/POGLib] [--wiki <dir>]
 
 Uploads wiki/NN-*.md to a package's wiki on Thunderstore (wiki/README.md says how the wiki is organised).
 
@@ -11,37 +11,54 @@ Uploads wiki/NN-*.md to a package's wiki on Thunderstore (wiki/README.md says ho
 - Pages on the site that have no file here are listed, never deleted.
 - Run tools/wikicheck first: it compiles every C# block (this script does not run it).
 
-Auth: a browser session, $THUNDERSTORE_SESSIONID and $THUNDERSTORE_CSRFTOKEN (the cookies of a logged-in
-thunderstore.io, as the publish script's --deprecate takes them): the service account's token publishes packages but
-may not edit a wiki ("You do not have permission to perform this action", 2026-11-23). Without the session the
-token is tried. Neither is ever printed.
+Auth: the wiki can be written only by a member of the team, not by a service account (the site's own rule: the
+publish token gets 403). So the requests are sent from inside a logged-in thunderstore.io tab of a Chromium started
+with --remote-debugging-port, over its DevTools port: --browser PORT (default 9224). The page reads its own session
+and sends it; the session never leaves the browser, is not printed and is not stored. Reading the wiki (and --dry-run)
+needs no login. Needs Python's websockets.
 """
-import argparse, json, os, pathlib, re, sys, urllib.request
+import argparse, asyncio, json, pathlib, re, sys, time, urllib.error, urllib.request
 
 API = "https://thunderstore.io/api/experimental"
 SITE = "https://thunderstore.io/c/pit-of-goblin/p"
 
 
-def token():
-    t = os.environ.get("THUNDERSTORE_TOKEN")
-    if t: return t.strip()
-    p = pathlib.Path.home() / ".config" / "thunderstore" / "token"
-    return p.read_text().strip()
+def get(url):
+    # The site's CDN caches answers, a 404 too: a cached one would make every page "new" and upload it twice.
+    req = urllib.request.Request(f"{url}?nocache={time.time_ns()}", headers={"User-Agent": "pog-wiki-upload"})
+    with urllib.request.urlopen(req, timeout=60) as r: return json.loads(r.read())
 
 
-def call(method, url, body=None, auth=True):
-    data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers={"User-Agent": "pog-wiki-upload", "Content-Type": "application/json"})
-    sid, csrf = os.environ.get("THUNDERSTORE_SESSIONID"), os.environ.get("THUNDERSTORE_CSRFTOKEN")
-    if auth and sid and csrf:
-        req.add_header("Cookie", f"sessionid={sid}; csrftoken={csrf}")
-        req.add_header("X-CSRFToken", csrf)
-        req.add_header("Referer", "https://thunderstore.io/")
-    elif auth:
-        req.add_header("Authorization", f"Bearer {token()}")
-    with urllib.request.urlopen(req, timeout=60) as r:
-        raw = r.read()
-        return json.loads(raw) if raw else None
+# Runs in the page: its session cookie is readable to the site's own scripts (the site sends it the same way).
+IN_PAGE = """(async (url, body) => {
+  if (location.host !== "thunderstore.io") return JSON.stringify({error: "not on thunderstore.io"});
+  const m = document.cookie.match(/(?:^|;\\s*)sessionid=([^;]+)/);
+  if (!m) return JSON.stringify({error: "not logged in"});
+  const r = await fetch(url, {method: "POST", credentials: "omit", body: JSON.stringify(body),
+    headers: {"Content-Type": "application/json", "Authorization": "Session " + m[1]}});
+  return JSON.stringify({status: r.status, text: await r.text()});
+})(%s, %s)"""
+
+
+async def evaluate(port, expression):
+    import websockets
+    tabs = json.load(urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=10))
+    tab = next((t for t in tabs if t["type"] == "page" and t["url"].startswith("https://thunderstore.io/")), None)
+    if tab is None: sys.exit("no thunderstore.io tab in that browser")
+    async with websockets.connect(tab["webSocketDebuggerUrl"], max_size=None) as ws:
+        await ws.send(json.dumps({"id": 1, "method": "Runtime.evaluate", "params": {
+            "expression": expression, "awaitPromise": True, "returnByValue": True}}))
+        while True:
+            r = json.loads(await ws.recv())
+            if r.get("id") == 1: return r["result"]["result"].get("value")
+
+
+def post(port, url, body):
+    raw = asyncio.run(evaluate(port, IN_PAGE % (json.dumps(url), json.dumps(body))))
+    r = json.loads(raw or '{"error": "the page gave no answer"}')
+    if "error" in r: sys.exit(r["error"])
+    if r["status"] not in (200, 201): sys.exit(f"HTTP {r['status']}: {r['text'][:300]}")
+    return json.loads(r["text"])
 
 
 def load_pages(wiki_dir):
@@ -65,13 +82,14 @@ def link(markdown, addresses):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--browser", type=int, default=9224, metavar="PORT")
     ap.add_argument("--package", default="Largo/POGLib")
     ap.add_argument("--wiki", default=str(pathlib.Path(__file__).resolve().parent.parent / "wiki"))
     a = ap.parse_args()
     ns, name = a.package.split("/")
     pages = load_pages(a.wiki)
     try:
-        site = call("GET", f"{API}/package/{ns}/{name}/wiki/", auth=False)
+        site = get(f"{API}/package/{ns}/{name}/wiki/")
         existing = {p["title"]: p for p in site.get("pages", [])}
     except urllib.error.HTTPError as e:
         if e.code != 404: raise
@@ -92,15 +110,16 @@ def main():
     for p in pages:
         body = {"title": p["title"], "markdown_content": p["markdown"]}
         if p["title"] in existing: body["id"] = existing[p["title"]]["id"]
-        r = call("POST", f"{API}/package/{ns}/{name}/wiki/", body)
+        r = post(a.browser, f"{API}/package/{ns}/{name}/wiki/", body)
         ids[p["file"]] = (r["id"], r["slug"])
-        print(f"pass 1: {p['title']} -> {r['id']}-{r['slug']}")
+        print(f"pass 1: {p['title']} -> {r['slug']}")
     # Pass 2: links to the real addresses.
-    addresses = {f: f"{SITE}/{ns}/{name}/wiki/{i}-{s}/" for f, (i, s) in ids.items()}
+    # The slug already starts with the id ("6976-00-start-here").
+    addresses = {f: f"{SITE}/{ns}/{name}/wiki/{slug}/" for f, (_, slug) in ids.items()}
     for p in pages:
         linked = link(p["markdown"], addresses)
         if linked != p["markdown"]:
-            call("POST", f"{API}/package/{ns}/{name}/wiki/", {"id": ids[p["file"]][0], "title": p["title"], "markdown_content": linked})
+            post(a.browser, f"{API}/package/{ns}/{name}/wiki/", {"id": ids[p["file"]][0], "title": p["title"], "markdown_content": linked})
             print(f"pass 2: links in {p['title']}")
     print(f"{len(pages)} page(s): {SITE}/{ns}/{name}/wiki/")
 

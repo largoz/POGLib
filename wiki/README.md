@@ -1,17 +1,20 @@
 # The wiki: how it is organised
 
 The modder's documentation lives here as Markdown files and is uploaded to the **POGLib package's wiki on
-Thunderstore** by a script (Thunderstore's API: `POST /api/experimental/package/Largo/POGLib/wiki/`, the same token
-as publishing). One copy of the text, in git; nothing is edited by hand on the site. POGShops' wiki holds one page
-that points here. Agreed with the user, 2026-11-23.
+Thunderstore** by `tools/wikiupload.py` (Thunderstore's API: `POST /api/experimental/package/Largo/POGLib/wiki/`).
+Only a member of the team may write a wiki, the publish token may not, so the script sends from a logged-in browser
+tab. One copy of the text, in git; nothing is edited by hand on the site. POGShops' wiki holds one page that points
+here: `shops/00-start-here.md` (`--package Largo/POGShops --wiki wiki/shops`). Agreed with the user, 2026-11-23.
 
 ## What Thunderstore's wiki is (checked 2026-11-23 through its API and other packages' wikis)
 
 - One wiki per package; pages are flat: a title and Markdown, no sub-pages.
 - Pages are listed **alphabetically by title**, so the order comes from a number at the start of each title.
-- Links between pages are ordinary full URLs (`…/p/Largo/POGLib/wiki/<id>-<slug>/`); the id is known only after a
-  page is created, so the upload script creates pages first and rewrites links second.
-- Links to a place inside a page: on a package's page the headings carry no anchors; on wiki pages not checked yet.
+- Links between pages are ordinary full URLs (`…/p/Largo/POGLib/wiki/<slug>/`; the slug the API returns already
+  starts with the id, `6976-00-start-here`); the id is known only after a page is created, so the upload script creates pages first and rewrites links second.
+- Links to a place inside a page do not work: headings carry no anchors, on package pages and on wiki pages
+  (checked on the live wiki 2026-11-25).
+- The site's CDN caches answers for about five minutes, a 404 too: a new page may show "not found" for that long.
 
 ## The map
 

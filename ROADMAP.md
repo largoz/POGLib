@@ -289,10 +289,10 @@ clone of this repository, shows a mod item in a shop to a host and a client.
 
 ### Documentation: the wiki (agreed 2026-11-23)
 
-- [ ] W1 The map and the page template: `wiki/README.md` *(written 2026-11-23)*.
-- [ ] W2 The pages marked "for 0.1" in that map, each example compiled against the current DLL.
-- [ ] W3 An upload script (Thunderstore's wiki API): creates the pages, then rewrites links to their real ids.
-- [ ] W4 Whether a link can point inside a wiki page (an anchor): check once a page is up.
+- [x] W1 The map and the page template: `wiki/README.md` *(written 2026-11-23)*.
+- [x] W2 The pages marked "for 0.1" in that map, each example compiled against the current DLL. *(2026-11-25: 12 pages up, 4 of 4 blocks build against the published 0.1.1 DLL.)*
+- [x] W3 An upload script (Thunderstore's wiki API): creates the pages, then rewrites links to their real ids. *(2026-11-25: run from a logged-in tab; read back from the API, all 12 texts equal the files, 41 links, none to a missing page; POGShops' wiki has its one page.)*
+- [x] W4 Whether a link can point inside a wiki page (an anchor): **no**, headings on a wiki page have no id (2026-11-25). Link to pages only.
 - [ ] W5 Open effect classes from other mods ("donor" mods): a page (14) and a list (95) only; a registry by name
       waits until content can be described as data, and for a second author (the user, 2026-11-23: "maybe I am
       overcomplicating it").
