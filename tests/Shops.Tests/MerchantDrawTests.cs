@@ -197,19 +197,94 @@ namespace POGLib.Shops.Tests
 
         // ---- goods ----
 
+        static PoolEntry E(string item, double weight, params string[] with) => new PoolEntry { Item = item, Weight = weight, With = with.ToList() };
+        static string[] Names(IEnumerable<PoolEntry> order) => order.Select(g => g.Item).ToArray();
+
         [Fact]
         public void GoodsComeOnceEachAndTheFirstByWeight()
         {
-            var goods = new[] { new PoolEntry { Item = "a", Weight = 3 }, new PoolEntry { Item = "b", Weight = 1 }, new PoolEntry { Item = "c", Weight = 0 } };
+            var goods = new[] { E("a", 3), E("b", 1), E("c", 0) };
             var rng = new Random(7);
             int aFirst = 0; const int N = 100_000;
             for (int i = 0; i < N; i++)
             {
-                var o = MerchantDraw.GoodsOrder(goods, rng.NextDouble);
+                var o = Names(MerchantDraw.GoodsOrder(goods, 5, rng.NextDouble));
                 Assert.Equal(new[] { "a", "b" }, o.OrderBy(x => x, StringComparer.Ordinal));
                 if (o[0] == "a") aFirst++;
             }
             Assert.InRange(aFirst / (double)N, 0.743, 0.757);
+        }
+
+        [Fact]
+        public void NoMoreGoodsThanPlaces()
+        {
+            var goods = new[] { E("a", 1), E("b", 1), E("c", 1) };
+            Assert.Equal(new[] { "a", "b" }, Names(MerchantDraw.GoodsOrder(goods, 2, () => 0)));
+            Assert.Empty(MerchantDraw.GoodsOrder(goods, 0, () => 0));
+        }
+
+        [Fact]
+        public void WhatComesWithAThingIsPutOutRightAfterItAndOnce()
+        {
+            // The crossbow first brings them; "bolts" first by themselves, and the crossbow is put in beside them.
+            var goods = new[] { E("bolts", 1), E("crossbow", 1, "bolts"), E("dagger", 1) };
+            Assert.Equal(new[] { "crossbow", "bolts", "dagger" }, Names(MerchantDraw.GoodsOrder(goods, 5, () => 0)));
+            var apart = new[] { E("dagger", 1), E("bolts", 1), E("ward", 1), E("crossbow", 1, "bolts") };
+            Assert.Equal(new[] { "dagger", "crossbow", "bolts", "ward" }, Names(MerchantDraw.GoodsOrder(apart, 5, () => 0)));
+            var rolls = new Queue<double>(new[] { 0.5, 0.0 });   // the middle one of three, then the only one left
+            Assert.Equal(new[] { "crossbow", "bolts", "dagger" }, Names(MerchantDraw.GoodsOrder(goods, 5, rolls.Dequeue)));
+            Assert.Empty(rolls);
+        }
+
+        [Fact]
+        public void AThingOnlyEverStandsWithItsCompanions()
+        {
+            var mayStandAlone = new[] { E("crossbow", 3, "bolts"), E("bolts", 2), E("dagger", 3), E("ward", 2), E("tome1", 1) };
+            var rng = new Random(3);
+            int alone = 0;
+            for (int i = 0; i < 20_000; i++)
+            {
+                var o = Names(MerchantDraw.GoodsOrder(mayStandAlone, 3, rng.NextDouble));
+                if (o.Contains("crossbow")) Assert.Equal("bolts", o[Array.IndexOf(o, "crossbow") + 1]);
+                else if (o.Contains("bolts")) alone++;
+            }
+            Assert.True(alone > 1000);
+
+            var goods = new[] { E("crossbow", 3, "bolts"), E("bolts", 0), E("dagger", 3), E("ward", 2), E("tome1", 1), E("tome2", 1) };
+            int crossbow = 0, bolts = 0;
+            for (int i = 0; i < 20_000; i++)
+                for (int places = 1; places <= 6; places++)
+                {
+                    var o = Names(MerchantDraw.GoodsOrder(goods, places, rng.NextDouble));
+                    Assert.True(o.Length <= places && o.Distinct().Count() == o.Length, string.Join(",", o));
+                    Assert.Equal(o.Contains("crossbow"), o.Contains("bolts"));   // weight 0: never by itself
+                    if (o.Contains("crossbow")) { crossbow++; Assert.True(places >= 2); Assert.Equal("bolts", o[Array.IndexOf(o, "crossbow") + 1]); }
+                    if (places == 6) Assert.Equal(6, o.Length);   // room for all: nothing is passed over
+                    bolts += o.Contains("bolts") ? 1 : 0;
+                }
+            Assert.True(crossbow > 10_000 && crossbow == bolts);
+        }
+
+        [Fact]
+        public void OneThatNoLongerFitsIsPassedOverAndTheNextIsTaken()
+        {
+            var goods = new[] { E("dagger", 1), E("crossbow", 1, "bolts"), E("bolts", 0), E("ward", 1) };
+            Assert.Equal(new[] { "dagger", "ward" }, Names(MerchantDraw.GoodsOrder(goods, 2, () => 0)));
+        }
+
+        [Fact]
+        public void CompanionsOfCompanionsComeTooAndARingEnds()
+        {
+            var goods = new[] { E("a", 1, "b"), E("b", 0, "c", "a"), E("c", 0, "a") };
+            Assert.Equal(new[] { "a", "b", "c" }, Names(MerchantDraw.GoodsOrder(goods, 3, () => 0)));
+            Assert.Empty(MerchantDraw.GoodsOrder(goods, 2, () => 0));
+        }
+
+        [Fact]
+        public void ACompanionThatIsNotLoadedHoldsNothingBack()
+        {
+            // The stall passes the loaded goods only.
+            Assert.Equal(new[] { "crossbow" }, Names(MerchantDraw.GoodsOrder(new[] { E("crossbow", 1, "bolts") }, 1, () => 0)));
         }
 
         // ---- mistakes ----
@@ -238,14 +313,18 @@ namespace POGLib.Shops.Tests
         public void ACopyDoesNotFollowTheOriginal()
         {
             var a = Good(); a.Title = "Berries"; a.Merchants[0].Look = () => "{}"; a.Merchants[0].Weight = 7;
+            a.Merchants[0].Name = "Nobody"; a.Merchants[0].LeftHand = "vanilla:Item_Key"; a.Merchants[0].RightHand = "Stick";
+            a.Merchants[0].Goods[0].Endless = true; a.Merchants[0].Goods[0].With.Add("vanilla:Item_Key");
             var b = a.Copy();
+            a.Merchants[0].Name = a.Merchants[0].LeftHand = a.Merchants[0].RightHand = null; a.Merchants[0].Goods[0].Endless = false; a.Merchants[0].Goods[0].With.Clear();
             a.Chance = 1; a.Merchants[0].Weight = 0; a.Merchants[0].Stalls.Clear(); a.Merchants[0].Goods[0].Weight = 99; a.Merchants[0].Goods.RemoveAt(1);
             a.Merchants.Add(new MerchantDef { Id = "late" });
             Assert.Equal(("Berry", "Berries", 0.1), (b.ModId, b.Title, b.Chance));
             var m = Assert.Single(b.Merchants);
             Assert.Equal(("trader", 7.0, "{}"), (m.Id, m.Weight, m.Look()));
             Assert.Equal(new[] { "Curiosa" }, m.Stalls);
-            Assert.Equal(new[] { "GlowBerry|2", "vanilla:Item_Key|1" }, m.Goods.Select(g => $"{g.Item}|{g.Weight}"));
+            Assert.Equal(("Nobody", "vanilla:Item_Key", "Stick"), (m.Name, m.LeftHand, m.RightHand));
+            Assert.Equal(new[] { "GlowBerry|2|True|vanilla:Item_Key", "vanilla:Item_Key|1|False|" }, m.Goods.Select(g => $"{g.Item}|{g.Weight}|{g.Endless}|{string.Join(",", g.With)}"));
             Assert.Null(new MerchantClass { Merchants = null }.Copy().Merchants);
         }
 
@@ -268,7 +347,33 @@ namespace POGLib.Shops.Tests
             new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[0].Item = "nothing"), "not an item id" },
             new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[0].Weight = 0), "must be a number > 0" },
             new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[1].Item = "Berry:GlowBerry"), "in Goods twice" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[0].Weight = double.NaN), "must be a number > 0" },
+            new object[] { (Action<MerchantClass>)(c => { c.Merchants[0].Goods[0].With.Add("vanilla:Item_Key"); c.Merchants[0].Goods[1].Weight = -1; }), "must be a number > 0" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[0].With.Add("Stick")), "'Berry:Stick', which is not in Goods" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[0].With.Add(null)), "'', which is not in Goods" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Goods[0].With.Add("GlowBerry")), "With itself" },
+            new object[] { (Action<MerchantClass>)(c => { foreach (var g in c.Merchants[0].Goods) g.Weight = 0; c.Merchants[0].Goods[0].With.Add("vanilla:Item_Key"); c.Merchants[0].Goods[1].With.Add("GlowBerry"); }), "nothing can come up" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Name = " "), "Name must be" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Name = new string('x', 41)), "Name must be" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].Name = "a\nb"), "Name must be" },
+            new object[] { (Action<MerchantClass>)(c => c.Merchants[0].LeftHand = "Stick"), "only for a merchant with a Look" },
+            new object[] { (Action<MerchantClass>)(c => { c.Merchants[0].Look = () => "{}"; c.Merchants[0].RightHand = "nothing"; }), "RightHand 'nothing' is not an item id" },
         };
+
+        [Fact]
+        public void AMerchantMayHaveANameThingsInHandAndGoodsThatOnlyComeWithOthers()
+        {
+            var c = Good();
+            var m = c.Merchants[0];
+            m.Look = () => "{}"; m.Name = new string('x', 40); m.LeftHand = "Stick"; m.RightHand = "vanilla:Item_Key";
+            m.Goods[0].Weight = 0; m.Goods[1].With.Add("GlowBerry"); m.Goods[1].Endless = true;
+            Assert.Empty(MerchantDraw.Validate(c));
+            Assert.Equal(("Berry:Stick", "vanilla:Item_Key"), (m.LeftHand, m.RightHand));
+            Assert.Equal(new[] { "Berry:GlowBerry" }, m.Goods[1].With);
+            m.Goods[0].With = null; m.Name = null; m.LeftHand = ""; m.RightHand = null;
+            Assert.Empty(MerchantDraw.Validate(c));
+            Assert.Null(m.LeftHand);
+        }
 
         [Theory]
         [MemberData(nameof(Mistakes))]

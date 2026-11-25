@@ -37,7 +37,7 @@ typo.
 | `rot` | no | `[x, y, z]` degrees: x tilts it forward or back, y turns it, z tilts it sideways; with `after`, on top of the automatic turn |
 | `priceTag` | no | `{ "pos": [x, y, z], "rot": [x, y, z] }`, relative to the slot |
 | `template` | no | the game's slot prefab to copy: `"ShopLocation"` (holds the item on a small table, 0.75 m up) or `"ShopLocationSlim"` (on the ground). Default: slim with `after`, the table one with `pos` |
-| `pool` | yes | `[ { "item": "...", "weight": 10 }, ... ]`; `"nothing"` is an item too: an empty slot |
+| `pool` | yes | `[ { "item": "...", "weight": 10 }, ... ]`; `"nothing"` is an item too: an empty slot. `"endless": true` on an entry (POGShops 0.1.4): the place does not run out, every buyer gets a copy |
 
 A slot placed with `after` stands on the ground found under its place, upright, turned like the slot next to it; then
 `pos` and `rot`, if you give them, move and tilt it from there. The automatic place is a start: past the end of a

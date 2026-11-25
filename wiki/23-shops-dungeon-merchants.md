@@ -1,9 +1,10 @@
 # 23 Shops: dungeon merchants
 
 A merchant of your own at a dungeon's entrance, with your goods, instead of the game's merchant on some visits. Added from
-code with [POGShops](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGShops/) 0.1.2 or later (0.1.3 if
-some of your places may stay empty). **Shown in the game on a host and a client**: the Curiosa stall with a mod's goods, prices and
-look; both buy there. **Not looked at yet:** the other five stalls.
+code with [POGShops](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGShops/) 0.1.4 or later (0.1.2 has no `With`, `Endless`,
+`Name` and hands). **Shown in the game** at all six stalls on a host, and at the Curiosa
+stall over LAN: the goods, prices, name and weapon the same for a client, a client buys twice from a place that does not run out, and
+one who joins inside the dungeon sees the merchant as the host does (the game lets them buy only from the next level on).
 
 ## How it is decided
 
@@ -28,7 +29,7 @@ Only the dungeon: the same stalls in the towns stay the game's.
 ## The smallest merchant
 
 Reference `POGShops.dll` beside `POGLib.dll`, name both in `[assembly: MelonAdditionalDependencies("POGLib", "POGShops")]`, add
-`Largo-POGShops-0.1.2` to your manifest's dependencies, and:
+`Largo-POGShops-0.1.4` to your manifest's dependencies, and:
 
 ```csharp
 using MelonLoader;
@@ -54,8 +55,10 @@ namespace BerryMod
                         Stalls = { "Curiosa", "Antique" },
                         Goods =
                         {
-                            new PoolEntry { Item = "GlowBerry", Weight = 2 },
-                            new PoolEntry { Item = "vanilla:Item_Key", Weight = 1 },
+                            new PoolEntry { Item = "GlowBerry", Weight = 2, Endless = true },
+                            new PoolEntry { Item = "vanilla:Item_Crossbow", With = { "vanilla:Item_CrossbowBolt" } },
+                            new PoolEntry { Item = "vanilla:Item_CrossbowBolt", Weight = 0 },
+                            new PoolEntry { Item = "vanilla:Item_Key" },
                         },
                     },
                 },
@@ -65,8 +68,10 @@ namespace BerryMod
 }
 ```
 
-Only the host's merchants count; what they sell and how they look reaches the other players through the game. A mod's item
-itself is needed by everyone who plays, as always.
+Here the berries never run out, the crossbow never stands without its bolts, and the bolts never come alone.
+
+Only the host's merchants count; what they sell and how they look reaches the other players through the game, their name
+through POGShops. A mod's item itself is needed by everyone who plays, as always.
 
 ## MerchantClass
 
@@ -85,7 +90,21 @@ itself is needed by everyone who plays, as always.
 | `Weight` | number | 1 | against your other merchants only |
 | `Stalls` | list | required | `Antique`, `Curiosa`, `Foodlover`, `MysticTent`, `Smith`, `Tinkerer` |
 | `Goods` | list of `PoolEntry` | empty | what is sold: drawn by weight, no item twice on a stall; a place nothing is left for stays empty. Empty list: the stall's own goods |
-| `Look` | function | none | gives the seller's look as the game's own outfit text; the seller's armour, hat and hand items then come off. `null` from it: the merchant cannot come now |
+| `Name` | text | the seller's own | over their head, up to 40 characters. A player without POGShops sees the seller's own |
+| `Look` | function | none | gives the seller's look as the game's own outfit text (`Content.Cosmetics.LookJson` writes it, [50](50-cosmetics-your-first-part.md)); the seller's armour, hat and hand items then come off. `null` from it: the merchant cannot come now |
+| `LeftHand` | item id | none | only with a `Look`: their weapon, as the shiv of the game's sellers. Hidden until somebody hurts them, gone when they die; how it looks, not how hard they stab |
+| `RightHand` | item id | none | only with a `Look`: what they hold all the time |
+
+## PoolEntry in Goods
+
+| Field | Type | Default | Means |
+|---|---|---|---|
+| `Item` | text | required | `"GlowBerry"` is your own, `"vanilla:Item_Key"` the game's, `"OtherMod:Thing"` another mod's |
+| `Weight` | number | 1 | against the other goods; 0 only for an item another one comes `With` |
+| `Endless` | yes/no | no | the place does not run out: every buyer gets a copy, as with the bread of the starter shop. When the seller dies, the item itself can be taken, once |
+| `With` | list of text | empty | other entries of the same `Goods` put out right after this one. If not all of them find a place, this one is passed over |
+
+The stalls have few places: Antique, Foodlover, Smith and Tinkerer 3, MysticTent 4, Curiosa 5.
 
 A merchant of a mod has the base price and no faction, so killing them costs no reputation.
 
@@ -117,6 +136,8 @@ Read when a stall is decided, so a change works from the next dungeon. To see yo
 | `... this mod has its class already` | `AddMerchants` was called twice | put all merchants into one class |
 | `... no stall 'curiosa'; there are Antique, Curiosa, ...` | a stall's name is misspelt (capitals count) | use one of those the line offers |
 | `merchant <id>: none of their goods is loaded; they do not come` | no item of `Goods` exists | check the ids |
+| `... comes With 'X', which is not in Goods` | the companion is no entry of its own | add it to `Goods` (`Weight = 0` if it only comes with another) |
+| `merchant <id>: X and what comes with it need 4 places, the stall has 3; it is left out there` | too many companions for that stall | fewer companions, or leave it to the bigger stalls |
 | `merchant <id>: no look now; they do not come` | your `Look` gave `null` | fine if you meant it |
 | `merchant <id>: Look threw ...` | your `Look` failed | fix it; the merchant stays out, nothing else is hurt |
 

@@ -32,8 +32,10 @@ namespace POGLib.Shops
             public MerchantClass Class;
             public MerchantDef Merchant;
             public string Look;
-            /// <summary>What is left to put out; null when the goods are not the merchant's own list.</summary>
-            public Queue<string> Goods;
+            /// <summary>What is put out, place by place along the row; null when the goods are not the merchant's own list.</summary>
+            public List<PoolEntry> Goods;
+            /// <summary>The places (GetInstanceID) along the row, so what comes together stands side by side.</summary>
+            public List<int> Row;
             public Transform Root;
             public bool Ours => Merchant != null;
             public string FullId => Ours ? Class.ModId + ":" + Merchant.Id : null;
@@ -102,35 +104,63 @@ namespace POGLib.Shops
         {
             var s = new Stall { Name = ShopScene.CleanName(root.name).Substring(PresetPrefix.Length), Root = root };
             var looks = new Dictionary<MerchantDef, string>();
-            var o = MerchantDraw.Draw(_all, s.Name, MerchantSettings.Ceiling, MerchantSettings.ChanceOf, (c, m) => Ready(c, m, looks), ShopRuntime.NextRandom);
+            s.Row = RowOf(root);
+            int places = s.Row.Count > 0 ? s.Row.Count : int.MaxValue;
+            var o = MerchantDraw.Draw(_all, s.Name, MerchantSettings.Ceiling, MerchantSettings.ChanceOf, (c, m) => Ready(c, m, places, looks), ShopRuntime.NextRandom);
             if (o.Merchant != null)
             {
                 s.Class = o.Class;
                 s.Merchant = o.Merchant;
                 looks.TryGetValue(o.Merchant, out s.Look);
                 if (!o.Merchant.FromFile && o.Merchant.Goods.Count > 0)
-                    s.Goods = new Queue<string>(MerchantDraw.GoodsOrder(o.Merchant.Goods.Where(g => ShopScene.ResolveItemPrefab(g.Item) != null), ShopRuntime.NextRandom));
+                    s.Goods = MerchantDraw.GoodsOrder(Loaded(o.Merchant), places, ShopRuntime.NextRandom);
             }
             MelonLogger.Msg($"[POGLib] [Shops] merchant stall {s.Name}: {s.FullId ?? "the game's own"} " +
                             $"({string.Join(", ", o.Shares.Select(x => $"{x.c.ModId} {100 * x.share:0.#}%").Concat(new[] { $"the game's own {100 * o.GameShare:0.#}%" }))})");
             return s;
         }
 
+        private static List<PoolEntry> Loaded(MerchantDef m) => m.Goods.Where(g => ShopScene.ResolveItemPrefab(g.Item) != null).ToList();
+
+        // Along the row: every preset has its counter along its own x (read from the game's files, 26791993).
+        private static List<int> RowOf(Transform root)
+        {
+            var slots = root.GetComponentsInChildren<ShopLocation>(true).ToList();
+            if (slots.Any(x => x.gameObject.activeInHierarchy)) slots.RemoveAll(x => !x.gameObject.activeInHierarchy);   // none on: the preset is not shown yet
+            return slots.OrderBy(x => root.InverseTransformPoint(x.transform.position).x).Select(x => x.GetInstanceID()).ToList();
+        }
+
+        /// <summary>What stands at this place, null for nothing.</summary>
+        public static PoolEntry GoodAt(Stall s, ShopLocation slot)
+        {
+            int id = slot.GetInstanceID();
+            if (!s.Row.Contains(id)) s.Row.Add(id);
+            int i = s.Row.IndexOf(id);
+            return i < s.Goods.Count ? s.Goods[i] : null;
+        }
+
         // Everything the merchant needs is here now; a merchant that lacks something takes no part, and the log says what.
-        private static bool Ready(MerchantClass c, MerchantDef m, Dictionary<MerchantDef, string> looks)
+        private static bool Ready(MerchantClass c, MerchantDef m, int places, Dictionary<MerchantDef, string> looks)
         {
             string id = c.ModId + ":" + m.Id;
             if (!m.FromFile && m.Goods.Count > 0)
             {
-                int there = 0;
                 foreach (var g in m.Goods)
                 {
                     var prefab = ShopScene.ResolveItemPrefab(g.Item);
-                    if (prefab == null) { ShopChecks.NotLoaded(g.Item, id); continue; }
-                    ShopChecks.CheckPrice(g.Item, prefab, id);
-                    there++;
+                    if (prefab == null) ShopChecks.NotLoaded(g.Item, id);
+                    else ShopChecks.CheckPrice(g.Item, prefab, id);
                 }
-                if (there == 0) { Once(id + "|goods", $"merchant {id}: none of their goods is loaded; they do not come."); return false; }
+                var loaded = Loaded(m);
+                var none = new List<PoolEntry>();
+                bool any = false;
+                foreach (var g in loaded.Where(g => WeightedPick.Usable(g.Weight)))
+                {
+                    int needs = MerchantDraw.Together(g, loaded, none).Count;
+                    if (needs <= places) any = true;
+                    else Once($"{id}|{g.Item}|{places}", $"merchant {id}: {g.Item} and what comes with it need {needs} places, the stall has {places}; it is left out there.");
+                }
+                if (!any) { Once(id + "|goods", $"merchant {id}: none of their goods {(loaded.Count == 0 ? "is loaded" : "can be put out here")}; they do not come."); return false; }
             }
             if (m.Look == null) return true;
             string look = null;
@@ -177,6 +207,7 @@ namespace POGLib.Shops
             if (s == null) return;
             // The base price, and no reputation to lose by killing them: the stall's faction is not theirs.
             npc.m_decreaseFactionReputationOnDeath = Faction.None;
+            if (s.Merchant.Name != null) npc.m_npcName = s.Merchant.Name;   // the other players ask for it (SellerSync)
             if (s.Look == null) return;
             if (npc.Appearance == null) { MelonLogger.Error($"[POGLib] [Shops] {s.FullId}: the seller of the {s.Name} stall cannot be dressed (no goblin of parts on this build); they keep their own look."); return; }
             npc.m_useCosmetics = true;
@@ -184,14 +215,30 @@ namespace POGLib.Shops
             npc.m_predefinedCosmeticsJson = s.Look;
         }
 
-        /// <summary>Before a seller's own armour, hat and hand items are spawned: over a look of a mod's they are not (the Tinkerer wears a barrel).</summary>
+        /// <summary>
+        /// Before a seller's own armour, hat and hand items are spawned: over a look of a mod's they are not (the Tinkerer wears a barrel),
+        /// and their hands get what the merchant holds, through the game's own equipment tables.
+        /// </summary>
         public static void BeforeEquipment(EnemyInventory inventory)
         {
             var npc = inventory != null ? inventory.GetComponent<NPCEntity>() : null;
             var s = npc != null ? StallOf(npc) : null;
             if (s?.Look == null) return;
             inventory.m_torsoSlot = null; inventory.m_headSlot = null; inventory.m_backSlot = null;
-            inventory.m_leftHandSlot = null; inventory.m_rightHandSlot = null;
+            inventory.m_leftHandSlot = InHand(s, s.Merchant.LeftHand);
+            inventory.m_rightHandSlot = InHand(s, s.Merchant.RightHand);
+        }
+
+        private static InventoryLootTable InHand(Stall s, string id)
+        {
+            if (id == null) return null;
+            var prefab = ShopScene.ResolveItemPrefab(id);
+            var item = prefab != null ? prefab.GetComponent<Il2Cpp.InventoryItem>() : null;
+            if (item == null) { Once($"{s.FullId}|{id}", $"merchant {s.FullId}: {id} for their hand is not loaded; the hand stays empty."); return null; }
+            var table = ScriptableObject.CreateInstance<InventoryLootTable>();
+            table.Items = new Il2CppSystem.Collections.Generic.List<Il2Cpp.InventoryItem>();
+            table.Items.Add(item);
+            return table;
         }
     }
 }

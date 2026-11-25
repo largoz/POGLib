@@ -49,6 +49,13 @@ namespace POGLib.Core
             return sprite;
         }
 
+        /// <summary>A picture's own bytes (PNG or JPEG) → Texture2D, or null when they are neither.</summary>
+        public static Texture2D LoadTexture(byte[] data)
+        {
+            var tex = new Texture2D(2, 2) { hideFlags = HideFlags.DontUnloadUnusedAsset };
+            return ImageConversion.LoadImage(tex, data) ? tex : null;
+        }
+
         public void UnloadAll()
         {
             foreach (var b in _bundles.Values) if (b != null) b.Unload(false);

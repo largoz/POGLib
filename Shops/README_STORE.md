@@ -49,7 +49,8 @@ Give your item a `ShopCost` (POGLib), then ship `pogshop.json` in your package:
   `"pos"` place a slot anywhere instead.
 - The slot belongs to the seller: the seller's faction sets the price, it can be stolen from, and it is free when
   the seller dies. The price is the item's `ShopCost`.
-- `pool`: your items with weights; `"nothing"` sometimes leaves the slot empty.
+- `pool`: your items with weights; `"nothing"` sometimes leaves the slot empty; `"endless": true` on an item: the slot does not
+  run out, every buyer gets a copy.
 
 **In 0.1 a mod's file places only its own slots** (and says how its items stand on a counter). It cannot put items
 into the game's slots or another mod's, change what others sell, or add dungeon merchants: such a file is refused,
@@ -66,14 +67,20 @@ ShopsApi.AddMerchants(new MerchantClass
     {
         Id = "trader", Weight = 3,                                    // against this class's other merchants only
         Stalls = { "Curiosa", "Antique" },
-        Goods = { new PoolEntry { Item = "GlowBerry", Weight = 2 } },
+        Goods =
+        {
+            new PoolEntry { Item = "GlowBerry", Weight = 2, Endless = true },                          // never runs out
+            new PoolEntry { Item = "vanilla:Item_Crossbow", With = { "vanilla:Item_CrossbowBolt" } },  // never without its bolts
+            new PoolEntry { Item = "vanilla:Item_CrossbowBolt", Weight = 0 },                          // only with the crossbow
+        },
+        Name = "Berta",                                               // over their head
     } },
 });
 ```
 
 Full guide, ids and the host's own files: [SHOPS.md](https://github.com/largoz/POGLib/blob/main/SHOPS.md).
 
-## Status of 0.1.3
+## Status of 0.1.4
 
 Shown in the game (the host on build 26791993), on a host and a client over LAN: a mod's new slot at the end of the hub's
 starter shop's row, on the floor; the client sees it where the host does, buys from it and passes the item on. A
@@ -84,7 +91,10 @@ Dungeon merchants, on a host and a client over LAN: a mod's merchant at the Curi
 each buys, a thing too dear is refused, the merchant's death costs no reputation and leaves the goods to take. A client without
 any of the mods buys there too and sees the merchant in what its game has. On a host: a merchant that cannot come left
 out, the limit at 0% (the game's own merchant and goods), the settings page. The odds are held by unit tests.
-Not checked yet: dungeon merchants at the other five stalls; a player who joins inside a dungeon; slots in InBetween and
-DarkBurg looked at in the game.
+0.1.4, on a host at all six stalls: goods that come together stand side by side, a place that does not run out sells again and
+again, the merchant's name and weapon; over LAN the same for a client with POGShops and without it (that one sees the seller's own
+name), and for a player who joins inside the dungeon.
+Not checked yet: slots in InBetween and DarkBurg looked at in the game; how often a merchant comes, measured in the game (the odds
+are held by unit tests).
 
 Source and issues: [github.com/largoz/POGLib](https://github.com/largoz/POGLib)

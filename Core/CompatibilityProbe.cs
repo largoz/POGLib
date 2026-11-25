@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 using Il2Cpp;
 using Il2CppGame.Gameplay;
+using Il2CppGame.Players;
 using Il2CppI2.Loc;
 using Il2CppInventory;
 using Il2CppItems;
@@ -51,6 +52,14 @@ namespace POGLib.Core
             (typeof(ItemContainer), new[] { GameNames.Methods.ItemContainer_FromContainerData }),
             (typeof(SpeakingStone), new[] { GameNames.Methods.SpeakingStone_Start, GameNames.Methods.SpeakingStone_SetEnabled }),
             (typeof(LocalizationManager), new[] { GameNames.Methods.LocalizationManager_GetTranslation }),
+            // Cosmetics.
+            (typeof(CustomGoblinService), new[]
+            {
+                "m_horns", "m_hairs", "m_chests", "m_legs", "m_feet", "m_accessories", "m_partCache",
+                nameof(CustomGoblinService.OnAwake), nameof(CustomGoblinService.GetPartList),
+            }),
+            (typeof(CosmeticItem), new[] { "m_id", "m_thumbnail", "m_itemType", "m_lockType" }),
+            (typeof(EntityCosmetics), new[] { nameof(EntityCosmetics.Awake), nameof(EntityCosmetics.SetObject), "m_currentPartsFP", "m_goblinCosmetics", "m_rigObjectTP", "m_headAnchor_TP" }),
             (typeof(NetworkManager), new[]
             {
                 "AddNetworkPrefab", nameof(NetworkManager.StartHost), nameof(NetworkManager.StartClient),
@@ -82,6 +91,9 @@ namespace POGLib.Core
             ("SpeakingStone", () => typeof(SpeakingStone)),
             ("LocalizationManager", () => typeof(LocalizationManager)),
             ("NetworkManager", () => typeof(NetworkManager)),
+            ("CustomGoblinService", () => typeof(CustomGoblinService)),
+            ("CosmeticItem", () => typeof(CosmeticItem)),
+            ("EntityCosmetics", () => typeof(EntityCosmetics)),
         };
 
         /// <summary>Check the library's own members; log a clear warning listing any that are missing.</summary>

@@ -20,7 +20,9 @@ namespace POGLib.Shops.Model
         public double Weight { get; internal set; }
         /// <summary>"vanilla" or the mod id that added the entry.</summary>
         public string AddedBy { get; }
-        public SlotEntry(string item, double weight, string addedBy) { Item = item; Weight = weight; AddedBy = addedBy; }
+        /// <summary>The place does not run out (<see cref="PoolEntry.Endless"/>).</summary>
+        public bool Endless { get; }
+        public SlotEntry(string item, double weight, string addedBy, bool endless = false) { Item = item; Weight = weight; AddedBy = addedBy; Endless = endless; }
         public override string ToString() => $"{Item} x{Weight} ({AddedBy})";
     }
 
@@ -346,7 +348,7 @@ namespace POGLib.Shops.Model
                 foreach (var e in ms.Def.Pool ?? new List<PoolEntry>())
                 {
                     if (e == null) continue;
-                    entries.Add(new SlotEntry(ShopIds.Qualify(e.Item, ms.Mod), e.Weight, ms.Mod));
+                    entries.Add(new SlotEntry(ShopIds.Qualify(e.Item, ms.Mod), e.Weight, ms.Mod, e.Endless));
                     history.Add(new HistoryRecord(ms.Mod, $"pool: {ShopIds.Qualify(e.Item, ms.Mod)} weight {e.Weight:0.##}"));
                 }
             }
@@ -356,7 +358,7 @@ namespace POGLib.Shops.Model
                 foreach (var e in ss.pool)
                 {
                     if (e == null) continue;
-                    entries.Add(new SlotEntry(ShopIds.Qualify(e.Item, ss.mod), e.Weight, ss.mod));
+                    entries.Add(new SlotEntry(ShopIds.Qualify(e.Item, ss.mod), e.Weight, ss.mod, e.Endless));
                     history.Add(new HistoryRecord(ss.mod, $"merchant stock: {ShopIds.Qualify(e.Item, ss.mod)} weight {e.Weight:0.##}"));
                 }
             }

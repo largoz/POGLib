@@ -2,7 +2,7 @@
 //
 // driver.txt:
 //   outfits=1                 dump every part (id, name, how it attaches, lock), the palettes and every NPC's look
-//   goblin1=<look>            a new NPC in that look, in front of the starter shop's seller; goblin2=, goblin3= ...
+//   goblin1=<look>            a new NPC in that look, on the stage (Stage.cs); goblin2=, goblin3= ...
 //   goblinprefab=<name>       the network prefab they are made of (default Enemy_NPC_ShopKeeper)
 // A look is key:value pairs joined with ';':  chest, legs, feet, hair, horn = part name (as dumped);
 //   acc = part names joined with ','; chestcolor, legscolor, haircolor, horncolor, skin, eyes = palette index;
@@ -85,17 +85,19 @@ namespace POGLib.RuntimeDriver
                 return;
             }
             var seller = UnityEngine.Object.FindObjectsOfType<NpcSpawner>().FirstOrDefault(x => x.m_npcFlag != null && x.m_npcFlag.Contains("StarterShop"));
-            if (seller == null) { log("goblin: no starter shop seller to stand before"); return; }
+            bool stage = Stage.Ready(log);      // the plate; by the starter shop it is dark and crowded
+            if (seller == null && !stage) { log("goblin: no starter shop seller to stand before"); return; }
             if (cfg.ContainsKey("hat") || cfg.ContainsKey("coat")) Wearables.Register(s, prefab, cfg, log);
-            var fwd = Vector3.ProjectOnPlane(seller.transform.forward, Vector3.up).normalized;
+            var fwd = stage ? Stage.CamDir : Vector3.ProjectOnPlane(seller.transform.forward, Vector3.up).normalized;
             var right = Vector3.Cross(Vector3.up, fwd);
             for (int i = 0; i < looks.Count; i++)
             {
                 try
                 {
-                    var at = seller.transform.position + fwd * 3.2f + right * ((i - (looks.Count - 1) / 2f) * 1.3f);
+                    var at = (stage ? Stage.Spot : seller.transform.position + fwd * 3.2f) + right * ((i - (looks.Count - 1) / 2f) * 1.3f);
                     if (Physics.Raycast(at + Vector3.up * 1.5f, Vector3.down, out RaycastHit hit, 4f, ~0, QueryTriggerInteraction.Ignore)) at = hit.point;
-                    string json = Json(s, looks[i].Value, out int expected, out string tag, log);
+                    string tag; int expected;
+                    string json = CosmeticsRun.Enabled || RunShow.Wanted ? CosmeticsRun.Json(looks[i].Value, out expected, out tag) : Json(s, looks[i].Value, out expected, out tag, log);
                     var go = UnityEngine.Object.Instantiate(prefab, at, Quaternion.LookRotation(fwd));
                     var npc = go.GetComponent<NPCEntity>();
                     if (npc == null) { log($"goblin: {prefabName} has no NPCEntity"); UnityEngine.Object.Destroy(go); return; }

@@ -125,23 +125,27 @@ namespace POGLib.Shops
             var chosenPrefab = chosen.Item == ShopIds.Nothing ? null : prefabs[chosen.Item];
             memo.Prefab = chosenPrefab;
             if (chosenPrefab == null) { MakeEmpty(slot, rec); return; }
+            // A slot of a mod's (or of a mod's merchant) runs out or not as its file says; the game's own slots as the game has it.
+            if (stall?.Ours == true || catalog.ModSlots.ContainsKey(id)) slot.m_setSpawnCopyOnSpawn = chosen.Endless;
             ApplyChoice(slot, chosenPrefab);
             MelonLogger.Msg($"[POGLib] [Shops] {id}: {chosen.Item} ({100 * resolved.ChanceAmong(chosen, usable):0.#}% of {resolved.Entries.Count(e => usable(e) && WeightedPick.Usable(e.Weight))} candidate(s))");
         }
 
-        // The next of the goods a mod's merchant puts out; a place nothing is left for stays empty.
+        // The good of this place among those a mod's merchant puts out; a place nothing is left for stays empty.
         private static void StockFromGoods(ShopLocation slot, MerchantStalls.Stall stall, string id, List<VanillaEntry> vanilla, Memo memo)
         {
-            var entries = stall.Merchant.Goods.Select(g => new SlotEntry(g.Item, g.Weight, stall.Class.ModId)).ToList();
+            var entries = stall.Merchant.Goods.Select(g => new SlotEntry(g.Item, g.Weight, stall.Class.ModId, g.Endless)).ToList();
             var history = entries.Select(e => new HistoryRecord(e.AddedBy, $"merchant's goods: {e.Item} weight {e.Weight:0.##}")).ToList();
             var rec = new SlotRecord { SlotId = id, Slot = slot, Resolved = new ResolvedSlot(id, entries, history, false), Vanilla = vanilla };
             _records[id] = rec;
-            string item = stall.Goods.Count > 0 ? stall.Goods.Dequeue() : ShopIds.Nothing;
+            var good = MerchantStalls.GoodAt(stall, slot);
+            string item = good?.Item ?? ShopIds.Nothing;
             rec.Picked = memo.Picked = item;
-            if (item == ShopIds.Nothing) { rec.Notes.Add("the merchant has no more goods: the place stays empty"); MakeEmpty(slot, rec); return; }
+            if (good == null) { rec.Notes.Add("the merchant has no more goods: the place stays empty"); MakeEmpty(slot, rec); return; }
             memo.Prefab = ShopScene.ResolveItemPrefab(item);
+            slot.m_setSpawnCopyOnSpawn = good.Endless;   // the game's own: ItemSpawner marks the item before it spawns, every player gets the mark with it
             ApplyChoice(slot, memo.Prefab);
-            MelonLogger.Msg($"[POGLib] [Shops] {id}: {item}");
+            MelonLogger.Msg($"[POGLib] [Shops] {id}: {item}{(good.Endless ? " (does not run out)" : "")}");
         }
 
         private static void MakeEmpty(ShopLocation slot, SlotRecord rec)

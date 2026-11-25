@@ -43,6 +43,13 @@ namespace POGLib.Shops
             try { MerchantStalls.BeforeSeller(__instance); }
             catch (Exception ex) { MelonLogger.Error($"[POGLib] [Shops] dressing a merchant failed, the game's own look stays: {ex}"); }
         }
+
+        static void Postfix(Il2CppEntities.NPCEntity __instance)
+        {
+            // After the game set the name it has: the host's answer is put over it.
+            try { SellerSync.OnClientNpcSpawned(__instance); }
+            catch (Exception ex) { MelonLogger.Warning($"[POGLib] [Shops] asking the host about a seller: {ex.GetType().Name}: {ex.Message}"); }
+        }
     }
 
     [HarmonyPatch(typeof(Il2CppInventory.EnemyInventory), nameof(Il2CppInventory.EnemyInventory.OnNetworkPostSpawn))]

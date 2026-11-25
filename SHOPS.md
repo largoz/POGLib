@@ -165,8 +165,15 @@ ShopsApi.AddMerchants(new MerchantClass          // once, from OnInitializeMelon
             Id = "trader",
             Weight = 3,                          // against the other merchants of this class only
             Stalls = { "Curiosa", "Antique" },   // Antique, Curiosa, Foodlover, MysticTent, Smith, Tinkerer
-            Goods = { new PoolEntry { Item = "GlowBerry", Weight = 2 }, new PoolEntry { Item = "vanilla:Item_Key", Weight = 1 } },
+            Goods =
+            {
+                new PoolEntry { Item = "GlowBerry", Weight = 2, Endless = true },                      // does not run out
+                new PoolEntry { Item = "vanilla:Item_Crossbow", With = { "vanilla:Item_CrossbowBolt" } },
+                new PoolEntry { Item = "vanilla:Item_CrossbowBolt", Weight = 0 },                      // 0: only with the crossbow
+            },
             Look = () => MyLook(),               // optional: the game's outfit JSON, null = cannot come now
+            Name = "Berta",                      // optional: over their head
+            LeftHand = "vanilla:Item_Weapon_Dagger",   // optional, with a Look: what they draw when hurt
         },
     },
 });
@@ -183,8 +190,19 @@ ShopsApi.AddMerchants(new MerchantClass          // once, from OnInitializeMelon
   wholly a mod's or wholly the game's.
 - The goods are put out by weight, no item twice; a place nothing is left for stays empty, without a price tag. No `Goods`: the
   stall's own.
+- **`With`** (since 0.1.4): other entries of the same `Goods` that are put out right after this one, whenever it is put out. If there is
+  no place left for all of them, the entry is passed over and another is drawn, so it never stands without them. The stalls have
+  3 places (Antique, Foodlover, Smith, Tinkerer), 4 (MysticTent) or 5 (Curiosa). An entry with `Weight = 0` comes only with another.
+  A companion whose mod is not installed holds nothing back.
+- **`Endless`** (since 0.1.4; in a file's pool too): the place does not run out. Every buyer gets a copy and the item stays, as
+  with the bread of the game's starter shop; when the seller dies, the item itself can be taken, once. Without it a place runs out, also
+  at the Smith, where one of the game's own places does not (with 0.1.2 and 0.1.3 a mod's goods there did not run out either).
 - A merchant of a mod has the base price and no faction: killing them costs no reputation. With a `Look` the seller's own
-  armour, hat and hand items are taken off.
+  armour, hat and hand items are taken off; `LeftHand` and `RightHand` (since 0.1.4) put yours in instead. The game keeps the
+  left hand's thing hidden until somebody hurts the seller (its own sellers have their shiv there) and takes it away when they die;
+  it changes how the stab looks, not how hard it is. The right hand's thing is seen all the time.
+- **`Name`** (since 0.1.4): over their head, up to 40 characters. The game sends a seller's look and goods but not the name; a client
+  with POGShops asks the host for it, a client without sees the name of the stall's own seller.
 - `ShopsApi.MerchantOf(npc)` says on the host whose a seller is (`"BerryMod:trader"`).
 - A class with a mistake is refused as a whole, each mistake named in the log.
 

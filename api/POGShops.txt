@@ -15,6 +15,9 @@ POGLib.Shops.Model.MerchantClass | public ctor()
 POGLib.Shops.Model.MerchantClass | sealed class
 POGLib.Shops.Model.MerchantDef | prop Double Weight { get; set; }
 POGLib.Shops.Model.MerchantDef | prop String Id { get; set; }
+POGLib.Shops.Model.MerchantDef | prop String LeftHand { get; set; }
+POGLib.Shops.Model.MerchantDef | prop String Name { get; set; }
+POGLib.Shops.Model.MerchantDef | prop String RightHand { get; set; }
 POGLib.Shops.Model.MerchantDef | prop System.Collections.Generic.List`1<POGLib.Shops.Model.PoolEntry> Goods { get; set; }
 POGLib.Shops.Model.MerchantDef | prop System.Collections.Generic.List`1<String> Stalls { get; set; }
 POGLib.Shops.Model.MerchantDef | prop System.Func`1<String> Look { get; set; }
@@ -27,8 +30,10 @@ POGLib.Shops.Model.PatchOp | prop String Slot { get; set; }
 POGLib.Shops.Model.PatchOp | prop System.Nullable`1<Double> Weight { get; set; }
 POGLib.Shops.Model.PatchOp | public ctor()
 POGLib.Shops.Model.PatchOp | sealed class
+POGLib.Shops.Model.PoolEntry | prop Boolean Endless { get; set; }
 POGLib.Shops.Model.PoolEntry | prop Double Weight { get; set; }
 POGLib.Shops.Model.PoolEntry | prop String Item { get; set; }
+POGLib.Shops.Model.PoolEntry | prop System.Collections.Generic.List`1<String> With { get; set; }
 POGLib.Shops.Model.PoolEntry | public ctor()
 POGLib.Shops.Model.PoolEntry | sealed class
 POGLib.Shops.Model.SellerDef | prop Double Weight { get; set; }

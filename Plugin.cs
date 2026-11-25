@@ -4,6 +4,7 @@ using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using MelonLoader;
 using POGLib.Core;
+using POGLib.Cosmetics;
 using POGLib.Items;
 
 [assembly: MelonInfo(typeof(POGLib.Plugin), "POGLib", POGLib.Core.LibraryVersion.VERSION, "largo")]
@@ -57,6 +58,7 @@ namespace POGLib
             // 4) Built-in domain plugins (each is a separate module). Shops is a mod of its own (POGShops): it adds its
             //    plugin from its own OnInitializeMelon, after this one.
             PluginRegistry.Add(new ItemsPlugin());
+            PluginRegistry.Add(new CosmeticsPlugin());
             // TODO(v2): PluginRegistry.Add(new MobsPlugin());
             // TODO(v3): PluginRegistry.Add(new LevelsPlugin());
 

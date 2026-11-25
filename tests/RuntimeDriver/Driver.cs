@@ -28,7 +28,7 @@ namespace POGLib.RuntimeDriver
     {
         const string HubScene = "PitOfGoblin_Lobby";
 
-        enum Step { Wardrobe, Client, WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, Outfit, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
+        enum Step { CosmeticsMenu, CosmeticsHub, Wardrobe, Client, WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, Outfit, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
 
         Step _step = Step.WaitMenu;
         float _next;
@@ -60,12 +60,15 @@ namespace POGLib.RuntimeDriver
             Explore.Enabled = Cfg("explore", 0) == 1;
             Noir.Init(_cfg, Log);
             if (Cfg("merchants", 0) == 1) Merchants.Register();
+            if (Cfg("cosmetics", 0) == 1) CosmeticsRun.Init(_cfg, Log);
+            if (_cfg.TryGetValue("runshow", out var clips)) { RunShow.Init(clips, Log); RunShow.PoseDump = _cfg.TryGetValue("posedump", out var pd) ? pd : null; }
             if (Cfg("noir", 0) == 1) try { Noir.Enable(HarmonyInstance, _cfg, Log); } catch (Exception ex) { Log($"noir: patch FAILED {ex.GetType().Name}: {ex.Message}"); }
         }
 
         // Every way out ends with the player's setting back at its default and the check count.
         void Finish(string how)
         {
+            if (CosmeticsRun.Enabled && !Checks.Enabled) Log("checks: " + Checks.Summary);
             if (Checks.Enabled)
             {
                 Checks.SetVanillaWeight(10);
@@ -129,12 +132,36 @@ namespace POGLib.RuntimeDriver
                     if (_cfg.TryGetValue("savetest", out var st) && st == "delete") { _deleting = true; return; }
                     // start=0: another mod hosts (POGLanTest on a machine without Steam, where only its LAN hosting
                     // works); the driver only waits for the hub as host.
+                    if (CosmeticsRun.Enabled && !CosmeticsRun.MenuDone) { _step = Step.CosmeticsMenu; _next = Time.unscaledTime + 4f; return; }
                     if (Cfg("wardrobe", 0) == 1 && _wd == 0) { _step = Step.Wardrobe; _next = Time.unscaledTime + 6f; return; }
                     if (Cfg("configpage", 0) == 1 && !_pageDone) { _pageOpen = true; _next = Time.unscaledTime + 0.5f; return; }
                     if (Cfg("client", 0) == 1) { Log("client=1: waiting for the dungeon"); _step = Step.Client; _deadline = Time.unscaledTime + 900f; _next = Time.unscaledTime + 1f; return; }
                     if (Cfg("start", 1) == 0) { Log("start=0: waiting for someone else to host"); _step = Step.WaitHub; _deadline = Time.unscaledTime + 240f; _next = Time.unscaledTime + 1f; return; }
                     _step = Step.OpenSaves; _next = Time.unscaledTime + 3f;
                     return;
+
+                case Step.CosmeticsMenu:
+                {
+                    float w = CosmeticsRun.MenuTick();
+                    if (w < 0) { _step = Step.WaitMenu; w = 1f; }
+                    _next = Time.unscaledTime + w;
+                    return;
+                }
+
+                case Step.CosmeticsHub:
+                {
+                    if (RunShow.Wanted && !RunShow.Done)
+                    {
+                        float r = RunShow.Tick((pos, rot) => { HookCamera(); _ovPos = pos; _ovRot = rot; _override = true; }, () => _override = false);
+                        _next = Time.unscaledTime + (r < 0 ? 0.5f : r);
+                        return;
+                    }
+                    if (!CosmeticsRun.Enabled) { _step = Cfg("dungeon", 0) == 1 ? Step.Dungeon : Step.Stay; _next = Time.unscaledTime + 1f; return; }
+                    float w = CosmeticsRun.HubTick((pos, rot) => { HookCamera(); _ovPos = pos; _ovRot = rot; _override = true; }, () => _override = false);
+                    if (w < 0) { _step = Cfg("dungeon", 0) == 1 ? Step.Dungeon : Step.Stay; w = _step == Step.Stay ? Cfg("stay", 20) : 1f; }
+                    _next = Time.unscaledTime + w;
+                    return;
+                }
 
                 // wardrobe=1: open the game's own wardrobe in the main menu, show accessories and chests, put on what is named
                 // (wardrobechest=, wardrobeacc= ids; wardrobecolor= clothes colour), then leave it.
@@ -314,7 +341,7 @@ namespace POGLib.RuntimeDriver
                     return;
 
                 case Step.Outfit:
-                    if (OutfitStep()) _step = _cfg.ContainsKey("savetest") ? Step.SaveTest : Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps;
+                    if (OutfitStep()) _step = CosmeticsRun.Enabled || RunShow.Wanted ? Step.CosmeticsHub : _cfg.ContainsKey("savetest") ? Step.SaveTest : Cfg("devtools", 0) == 1 ? Step.DevTools : Step.Jumps;
                     return;
 
                 case Step.SaveTest:
@@ -394,7 +421,7 @@ namespace POGLib.RuntimeDriver
         }
 
         public override void OnLateUpdate()
-        {
+        { RunShow.LateUpdate(); 
             if (_override && Camera.main != null) Camera.main.transform.SetPositionAndRotation(_ovPos, _ovRot);
         }
 
@@ -654,6 +681,13 @@ namespace POGLib.RuntimeDriver
                 }
                 case 12:
                 {
+                    if (Cfg("trade", 0) == 1 && Noir.Npc != null)
+                    {
+                        float wait;
+                        try { wait = Merchants.TradeStep(); } catch (Exception ex) { Checks.Check("trade", false, ex.ToString()); wait = 0; }
+                        if (wait > 0) { _next = Time.unscaledTime + wait; return false; }
+                        Log("checks: " + Checks.Summary);
+                    }
                     if (Cfg("presets", 0) != 1) { _override = false; return true; }
                     var list = Noir.MerchantList();
                     var all = Resources.FindObjectsOfTypeAll<GameObject>().Where(g => g != null && g.transform.parent == null && !g.scene.IsValid() && g.name.StartsWith("EntranceCave_Shopkeeper")).GroupBy(g => g.name).Select(g => g.First()).OrderBy(g => g.name).ToArray();

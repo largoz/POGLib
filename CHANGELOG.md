@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3 (2026-11-26)
+
+- **Cosmetics** (`Content.Cosmetics`): clothes, hair, horns and accessories of a mod's own, from a GLB file. A model weighted to the
+  goblin's bones moves with the body, one without weights sits on the head. They stand in the game's wardrobe and take the
+  player's colours; a part can be locked until the mod unlocks it,
+  and objects of a model can be hidden from its wearer in first person (a collar). An NPC wears them through `LookJson`. A player without the
+  mod sees the goblin without the part; random goblins never wear one; nothing enters the game's list of rewards.
+- Nothing changes for mods that do not use it.
+
 ## 0.1.2 (2026-11-25)
 
 - **Models from OBJ files are drawn the right way round.** In 0.1.0 and 0.1.1 an OBJ as Blender and other tools export

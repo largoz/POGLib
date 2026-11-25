@@ -38,6 +38,9 @@ Tens are sections, so a page can be added later without renumbering the rest. A 
 | 23 | Shops: dungeon merchants | Merchants at the dungeon's entrance: classes, chances, the host's settings | yes |
 | 30 | Mobs | Reserved | later |
 | 40 | Levels | Reserved | later |
+| 50 | Cosmetics: your first part | Clothes, hair, horns, accessories; locked parts; NPCs; first person | yes |
+| 51 | Cosmetics: the model | GLB, the goblin's measures and bones, materials | yes |
+| 52 | Cosmetics: the game's parts and colours | The game's own parts and palettes by name and index | yes |
 | 80 | Multiplayer and saves | What every player needs, saves, POG Mod Check | yes |
 | 90 | Troubleshooting | Log lines and what they mean | yes |
 | 91 | What will not change | What the library promises not to break | later |

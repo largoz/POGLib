@@ -78,4 +78,36 @@ namespace POGLib.Shops.Tests
             Assert.False(SlotInfo.TryReadAsk("", out _));
         }
     }
+
+    public class SellerInfoTests
+    {
+        [Theory]
+        [InlineData("Nobody")]
+        [InlineData("A | B")]
+        [InlineData("Дядько №7")]
+        public void RoundTripKeepsEveryField(string name)
+        {
+            Assert.True(SellerInfo.TryDecode(new SellerInfo(174, "POGBlackMarket:mask", name).Encode(), out var b));
+            Assert.Equal((174ul, "POGBlackMarket:mask", name), (b.NetworkId, b.FullId, b.Name));
+        }
+
+        [Fact]
+        public void ABarInTheIdDoesNotReachTheName()
+        {
+            Assert.True(SellerInfo.TryDecode(new SellerInfo(1, "M:a|b", "N").Encode(), out var b));
+            Assert.Equal(("M:a_b", "N"), (b.FullId, b.Name));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("2|1|M:a|N")]
+        [InlineData("1|x|M:a|N")]
+        [InlineData("1|-1|M:a|N")]
+        [InlineData("1|1||N")]
+        [InlineData("1|1|M:a|")]
+        [InlineData("1|1|M:a")]
+        [InlineData("1|1|M:a|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")]
+        public void AnythingElseIsRefused(string text) => Assert.False(SellerInfo.TryDecode(text, out _));
+    }
 }

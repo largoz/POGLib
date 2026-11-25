@@ -32,6 +32,7 @@ namespace POGLib.Shops
             if (_registered || CoreServices.Bridge == null) return;
             CoreServices.Bridge.RegisterHandler(AskAction, OnAsk);
             CoreServices.Bridge.RegisterHandler(InfoAction, OnInfo);
+            CoreServices.Bridge.RegisterHandler(SellerSync.InfoAction, SellerSync.OnInfo);
             _registered = true;
         }
 
@@ -49,7 +50,13 @@ namespace POGLib.Shops
             if (no == null) return;
             string name = slot.gameObject.name;
             if (name.StartsWith(ShopScene.ModSlotPrefix) || !name.EndsWith("(Clone)")) return;
-            _pending.Add(no.NetworkObjectId);
+            AskAbout(no.NetworkObjectId);
+        }
+
+        /// <summary>Ask the host what this object is, once this client is connected.</summary>
+        internal static void AskAbout(ulong networkId)
+        {
+            _pending.Add(networkId);
             if (_flushing) return;
             _flushing = true;
             MelonCoroutines.Start(AskWhenConnected());
@@ -106,7 +113,13 @@ namespace POGLib.Shops
             var nm = NetworkManager.Singleton;
             if (nm == null || !nm.IsServer || !SlotInfo.TryReadAsk(payload, out var id)) return;
             var slot = SpawnedSlot(nm, id);
-            if (slot == null || !slot.gameObject.name.StartsWith(ShopScene.ModSlotPrefix)) return; // the game's own slot copy
+            if (slot == null)
+            {
+                var seller = SellerSync.Describe(nm, id);
+                if (seller != null) CoreServices.Bridge?.SendToClient(sender, SellerSync.InfoAction, seller.Encode());
+                return;
+            }
+            if (!slot.gameObject.name.StartsWith(ShopScene.ModSlotPrefix)) return; // the game's own slot copy
             CoreServices.Bridge?.SendToClient(sender, InfoAction, Describe(id, slot).Encode());
         }
 

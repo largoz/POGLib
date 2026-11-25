@@ -2,7 +2,46 @@ POGLib.Core.HostBridge | public Void RegisterHandler(String action, System.Actio
 POGLib.Core.HostBridge | public Void SendToClient(UInt64 clientId, String action, String payload)
 POGLib.Core.HostBridge | public Void SendToServer(String action, String payload)
 POGLib.Core.HostBridge | sealed class
+POGLib.Cosmetics.CosmeticDefinition | prop Boolean Locked { get; set; }
+POGLib.Cosmetics.CosmeticDefinition | prop POGLib.Cosmetics.CosmeticSlot Slot { get; set; }
+POGLib.Cosmetics.CosmeticDefinition | prop String ContentId { get; set; }
+POGLib.Cosmetics.CosmeticDefinition | prop String ModId { get; set; }
+POGLib.Cosmetics.CosmeticDefinition | prop String ModelFile { get; set; }
+POGLib.Cosmetics.CosmeticDefinition | prop String ThumbnailFile { get; set; }
+POGLib.Cosmetics.CosmeticDefinition | prop System.Collections.Generic.List`1<String> HiddenInFirstPerson { get; }
+POGLib.Cosmetics.CosmeticDefinition | public ctor()
+POGLib.Cosmetics.CosmeticDefinition | sealed class
+POGLib.Cosmetics.CosmeticSlot | enum
+POGLib.Cosmetics.CosmeticSlot | value Accessory = 5
+POGLib.Cosmetics.CosmeticSlot | value Chest = 2
+POGLib.Cosmetics.CosmeticSlot | value Feet = 4
+POGLib.Cosmetics.CosmeticSlot | value Hair = 1
+POGLib.Cosmetics.CosmeticSlot | value Horns = 0
+POGLib.Cosmetics.CosmeticSlot | value Legs = 3
+POGLib.Cosmetics.CosmeticsApi | public Boolean IsUnlocked(String fullId)
+POGLib.Cosmetics.CosmeticsApi | public Boolean Register(POGLib.Cosmetics.CosmeticDefinition definition)
+POGLib.Cosmetics.CosmeticsApi | public Boolean Unlock(String fullId)
+POGLib.Cosmetics.CosmeticsApi | public String LookJson(POGLib.Cosmetics.GoblinLook look)
+POGLib.Cosmetics.CosmeticsApi | public UInt32 IdOf(String fullId)
+POGLib.Cosmetics.CosmeticsApi | sealed class
+POGLib.Cosmetics.GoblinLook | prop Int32 ChestColor { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 EyeColor { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 EyeLeft { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 EyeRight { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 HairColor { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 HornColor { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 LegsColor { get; set; }
+POGLib.Cosmetics.GoblinLook | prop Int32 Skin { get; set; }
+POGLib.Cosmetics.GoblinLook | prop String Chest { get; set; }
+POGLib.Cosmetics.GoblinLook | prop String Feet { get; set; }
+POGLib.Cosmetics.GoblinLook | prop String Hair { get; set; }
+POGLib.Cosmetics.GoblinLook | prop String Horns { get; set; }
+POGLib.Cosmetics.GoblinLook | prop String Legs { get; set; }
+POGLib.Cosmetics.GoblinLook | prop System.Collections.Generic.List`1<String> Accessories { get; }
+POGLib.Cosmetics.GoblinLook | public ctor()
+POGLib.Cosmetics.GoblinLook | sealed class
 POGLib.Items.Content | static class
+POGLib.Items.Content | static prop POGLib.Cosmetics.CosmeticsApi Cosmetics { get; }
 POGLib.Items.Content | static prop POGLib.Items.ItemsApi Items { get; }
 POGLib.Items.Content | static prop System.Collections.Generic.IReadOnlyCollection`1<String> ContentAssemblies { get; }
 POGLib.Items.EatCapability | field String BuffFrom

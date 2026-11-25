@@ -34,9 +34,10 @@ loads `PitOfGoblin_Lobby`. Default slot = the last one, so slot 1 stays the play
 | `devtools=1`, `devslot=<slot id>` | drive the shop tools: aim at the counter beside that slot, place a slot, shoot HUD and panel, Save, print and delete the file |
 | `jumps=<scene>;<scene>` | the tools' scene jump to each scene, dump its shops, shoot `jump_N` |
 | `dungeon=1` | down the bucket: list sellers, mod merchant slots, shoot `merchant`; then the tools' round-timer freeze for 8 s and 8 s unfrozen |
-| `merchants=1` | adds merchant classes through `ShopsApi.AddMerchants` (DrvSolo, DrvBroken) and tries wrong ones |
-| `expectmerchant=<who>` | with `dungeon=1 merchant=1`: checks what the game shows at the entrance's stall (`POGBlackMarket`, `DrvSolo`, `game`); the run's preferences decide who comes (`pog-runs/local/merchants.sh`) |
-| `configpage=1` | at the main menu: POG Config's page of POGShops, its rows moved, saved to the file, put back; needs `POG_AUTODELAY` |
+| `merchants=1` | adds merchant classes through `ShopsApi.AddMerchants` (DrvSolo, DrvPair, DrvBroken) and tries wrong ones |
+| `trade=1` | with `expectmerchant=`: buys there as a player who presses E (twice what does not run out, once what does), hits the seller (they draw their weapon), kills them, takes what is left |
+| `expectmerchant=<who>` | with `dungeon=1 merchant=1`: checks what the game shows at the entrance's stall (`POGBlackMarket`, `DrvSolo`, `DrvPair`, `game`); the run's preferences decide who comes (`pog-runs/local/merchants.sh`) |
+| `configpage=1` | at the main menu: POG Config's pages of POGShops and Black Market (when it is there), their rows moved, saved to the file, put back; needs `POG_AUTODELAY` |
 | `stay=N` | seconds before `done` |
 | `start=0` | do not start a save slot; wait for another mod to host (POGLanTest `Auto = "host"` on a machine without Steam) |
 | `checks=1` | the asserting run (below): registers a test item with no price, sets the vanilla-weight setting to 0 at the menu (back to 10 at the end), and in the hub prints `PASS`/`FAIL` lines, the game's network prefab list (`G2 …`) and every `ShopLocation.OnNetworkSpawn` with the caller's stack for repeats (`G3 …`) |

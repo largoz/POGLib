@@ -48,10 +48,26 @@ namespace POGLib.Shops.Model
         public List<string> Stalls { get; set; } = new List<string>();
 
         /// <summary>
-        /// What is sold, drawn by weight, no item twice on a stall; a place nothing is left for stays empty. An empty list:
-        /// the stall's own goods.
+        /// What is sold, drawn by weight, no item twice on a stall; a place nothing is left for stays empty. An entry whose
+        /// <see cref="PoolEntry.With"/> finds no place any more is passed over. An empty list: the stall's own goods.
         /// </summary>
         public List<PoolEntry> Goods { get; set; } = new List<PoolEntry>();
+
+        /// <summary>
+        /// The name over their head, for the host and every player who has POGShops (others see the game's own). Not set: the
+        /// seller's own name.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Their weapon, as the shiv of the game's sellers: hidden until somebody hurts them, then in the left hand; it is gone when they
+        /// die. Only how it looks: the game's sellers stab equally hard with anything. Only with a <see cref="Look"/>, which takes the
+        /// seller's own hand items off.
+        /// </summary>
+        public string LeftHand { get; set; }
+
+        /// <summary>An item they hold in their right hand all the time. Only with a <see cref="Look"/>.</summary>
+        public string RightHand { get; set; }
 
         /// <summary>
         /// The merchant's look as the game's own outfit text (the JSON of a goblin's parts), asked for on the host when a stall is being decided.
@@ -65,9 +81,12 @@ namespace POGLib.Shops.Model
 
         internal MerchantDef Copy() => new MerchantDef
         {
-            Id = Id, Weight = Weight, Look = Look, FromFile = FromFile,
+            Id = Id, Weight = Weight, Look = Look, FromFile = FromFile, Name = Name, LeftHand = LeftHand, RightHand = RightHand,
             Stalls = Stalls?.ToList(),
-            Goods = Goods?.Select(g => g == null ? null : new PoolEntry { Item = g.Item, Weight = g.Weight }).ToList(),
+            Goods = Goods?.Select(g => g == null ? null : new PoolEntry
+            {
+                Item = g.Item, Weight = g.Weight, Endless = g.Endless, With = g.With?.ToList() ?? new List<string>(),
+            }).ToList(),
         };
     }
 
@@ -93,6 +112,8 @@ namespace POGLib.Shops.Model
         public const double StandardCeiling = 0.75;
         /// <summary>The most a class may ask for (the host may give it more).</summary>
         public const double MaxAsk = 0.25;
+        /// <summary>The longest name of a merchant (it stands over their head).</summary>
+        public const int MaxName = 40;
 
         public static readonly string[] Stalls = { "Antique", "Curiosa", "Foodlover", "MysticTent", "Smith", "Tinkerer" };
 
@@ -148,19 +169,40 @@ namespace POGLib.Shops.Model
             return outcome;
         }
 
-        /// <summary>The goods in the order they are put out: drawn by weight, none twice.</summary>
-        public static List<string> GoodsOrder(IEnumerable<PoolEntry> goods, Func<double> next)
+        /// <summary>
+        /// The goods along a stall with this many places: drawn by weight, none twice, each with what comes with it beside it. One
+        /// whose companions find no place any more is passed over, so it never stands without them.
+        /// </summary>
+        public static List<PoolEntry> GoodsOrder(IReadOnlyList<PoolEntry> goods, int places, Func<double> next)
         {
             var left = goods.Where(g => g != null && WeightedPick.Usable(g.Weight)).ToList();
-            var order = new List<string>();
+            var order = new List<PoolEntry>();
             while (left.Count > 0)
             {
                 int i = WeightedPick.Index(left, g => g.Weight, next());
                 if (i < 0) break;
-                order.Add(left[i].Item);
+                var group = Together(left[i], goods, order);
                 left.RemoveAt(i);
+                if (order.Count + group.Count > places) continue;
+                int beside = order.FindIndex(g => group[0].With.Contains(g.Item));   // a companion that was drawn by itself before
+                order.InsertRange(beside < 0 ? order.Count : beside, group);
+                left.RemoveAll(group.Contains);
             }
             return order;
+        }
+
+        /// <summary>An entry and everything that comes with it, and with that in turn; what is out already or not in <paramref name="goods"/> is left out.</summary>
+        public static List<PoolEntry> Together(PoolEntry entry, IReadOnlyList<PoolEntry> goods, ICollection<PoolEntry> outAlready)
+        {
+            var group = new List<PoolEntry>();
+            void Add(PoolEntry g)
+            {
+                if (g == null || group.Contains(g) || outAlready.Contains(g)) return;
+                group.Add(g);
+                foreach (var id in g.With) Add(goods.FirstOrDefault(x => x != null && x.Item == id));
+            }
+            Add(entry);
+            return group;
         }
 
         /// <summary>
@@ -186,16 +228,40 @@ namespace POGLib.Shops.Model
                     foreach (var s in m.Stalls)
                         if (!Stalls.Contains(s))
                             e.Add($"{at}: no stall '{s}'; there are {string.Join(", ", Stalls)}");
+                if (m.Name != null && (m.Name.Trim().Length == 0 || m.Name.Length > MaxName || m.Name.Any(char.IsControl)))
+                    e.Add($"{at}: Name must be 1 to {MaxName} characters in one line");
+                m.LeftHand = Held(m.LeftHand, "LeftHand");
+                m.RightHand = Held(m.RightHand, "RightHand");
+                string Held(string item, string hand)
+                {
+                    if (string.IsNullOrEmpty(item)) return null;
+                    item = ShopIds.Qualify(item, c.ModId);
+                    if (item == ShopIds.Nothing || !ShopIds.TrySplit(item, out _, out _)) e.Add($"{at}: {hand} '{item}' is not an item id");
+                    if (m.Look == null) e.Add($"{at}: {hand} is only for a merchant with a Look (the seller's own hand items come off with it)");
+                    return item;
+                }
+
                 m.Goods ??= new List<PoolEntry>();
                 var items = new HashSet<string>(StringComparer.Ordinal);
                 foreach (var g in m.Goods)
                 {
                     if (g == null || string.IsNullOrEmpty(g.Item)) { e.Add($"{at}: an entry of Goods has no Item"); continue; }
                     g.Item = ShopIds.Qualify(g.Item, c.ModId);
+                    g.With = (g.With ?? new List<string>()).Select(w => string.IsNullOrEmpty(w) ? "" : ShopIds.Qualify(w, c.ModId)).ToList();
                     if (g.Item == ShopIds.Nothing || !ShopIds.TrySplit(g.Item, out _, out _)) e.Add($"{at}: '{g.Item}' is not an item id");
-                    if (!WeightedPick.Usable(g.Weight)) e.Add($"{at}: the Weight of {g.Item} must be a number > 0");
                     if (!items.Add(g.Item)) e.Add($"{at}: {g.Item} is in Goods twice (no item is sold twice on a stall)");
                 }
+                var companions = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var g in m.Goods.Where(g => g?.With != null))
+                    foreach (var w in g.With)
+                    {
+                        companions.Add(w);
+                        if (w == g.Item) e.Add($"{at}: {g.Item} comes With itself");
+                        else if (!items.Contains(w)) e.Add($"{at}: {g.Item} comes With '{w}', which is not in Goods (put it there; Weight 0 if it only comes with another)");
+                    }
+                foreach (var g in m.Goods.Where(g => g != null && !string.IsNullOrEmpty(g.Item) && !WeightedPick.Usable(g.Weight)))
+                    if (g.Weight != 0 || !companions.Contains(g.Item)) e.Add($"{at}: the Weight of {g.Item} must be a number > 0 (0 only for an item another one comes With)");
+                if (m.Goods.Count > 0 && m.Goods.All(g => g != null && g.Weight == 0)) e.Add($"{at}: every Weight in Goods is 0, so nothing can come up");
             }
             return e;
         }

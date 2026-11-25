@@ -304,20 +304,39 @@ written after the experiment, not before.
 
 - **Cosmetics, a section of POGLib** (the user, 2026-11-25: "so we can make a section about cosmetics, for POGLib").
   The facts: `_Modding/ModSource/_research/COSMETICS_NATIVE.md`. In this order:
-  - [~] C1 **Host half done 2026-11-25** (runs `goblin-2b`, `goblin-5`, local launches without Steam): a new NPC in a look
-        of the game's parts, and in our own hat and coat (`_assets/NoirGoblin`), on screen, 0 exceptions in Player.log.
-        Left: a client with the mod, a client without it. As planned: a game seller in a look made of the game's own parts (long jacket, hood or hat, thief mask, dark colours),
-        set by the host: seen on screen by the host and by a client without the mod. Decides whether a seller of our
-        own can be made without models.
-  - [ ] C2 A hat of a mod's own (OBJ, head anchor, `Static`): in the wardrobe, on the player, seen by a client with
-        the mod; a client without it sees the goblin without the hat; the game without the mod loads a look that
-        names it. The part is Unlocked, so the player's `MetaData` (Steam Cloud) stays as it was: checked by a diff.
-  - [ ] C3 Whether mod parts may turn up on random goblins and on new players (`GetRandom`): decide, then hold it.
-  - [~] C4 **The coat is worn and moves with the body (host, run `goblin-5`)**: our mesh, weights by our own rule per place.
-        Left: walking, crouching, dying in it; a client. As planned: a coat of a mod's own (`Stitched`, needs bone weights): the game's jacket with another material first;
-        a new mesh only after the bundle round trip or a weight transfer from the game's jacket is shown.
-  - Then the API (`Content.Cosmetics`), the wiki section (a free ten: 30 is reserved for mobs) and a seller with a look of its own
-    (POGShops), the first consumer being the noir black-market goblin that sells the stones.
+  - [x] C1 A seller in a look of the game's parts and in ours, host and client with and without the mod (runs `goblin-2b`, `goblin-5`,
+        `noir-lan-with`, `noir-lan-without`, LAN 2026-11-25).
+  - [x] C2 A hat of a mod's own in the wardrobe, on the player, seen by a client with the mod (`cosm-2` ... `cosm-4`, LAN `wear`). The
+        players' list of rewards stays as it was (17 before, 17 after the game's own `ConfirmUnlockedCosmetics`).
+  - [x] C3 Decided 2026-11-25: random goblins, new players and *Randomize* never wear a mod's part. Held by construction (the arrays
+        are never changed, only the answer of `GetPartList` is longer) and by 6000 random looks, none with a part of ours.
+  - [x] C4 A coat that moves with the body: GLB with weights by the bones' names. Seen running, sprinting, crouching, jumping (`run-3`, filmed
+        on the king's plate; the user: "ideal").
+  - [~] **`Content.Cosmetics` is written** (0.1.3, not committed, not released): `docs/design/cosmetics.md`, wiki 50-52, API list +39 lines, none
+        gone. 203 unit tests (the GLB reader against files Blender wrote, with planted values; nine planted faults in the reader, all caught);
+        the asserting run `cosm-6` on the last build (9e5cb848), 63 checks, 0 failures; the shop checks `checks-25-poglib013` on the same build with
+        the **published** POGShops 0.1.3, 0 failures of 41: seven groups worn in the menu, by an NPC and by the player (through the
+        network look), the wardrobe's items on the screen, locked and unlocked, the game's colours where it colours and not where
+        it does not, refusals with reasons. Black Market 0.0.6 stands on it: 531 lines became 272, no reflection, no arrays swapped.
+        **First person** (the user: "there are things that must be invisible in first person; POGLib must be able to do that"): the game
+        draws only chest, legs and feet there and keeps the own third-person parts on a layer the own camera does not draw (`LocalPlayerModel`);
+        a mod names objects of its model to leave out of the first-person copy (`HiddenInFirstPerson`). Seen: the coat's collar covered
+        half the view when looking down, without it the coat and the belt are there (`run-2`).
+        **The skirt** went through the legs in a run (seen on the first film): the game has no clothes below the hips to copy. Its weights were
+        fitted to the game's own movements outside the game: edges of the legs that cross the cloth 16.2 -> 1.6 on average, in movements
+        not fitted to as well (falling 24.3 -> 0.1), stretch 1.48 -> 1.53.
+        **Shading:** ours was faceted; the game's clothes are 84% smooth with creases at the rims (149 meshes). Ours too now.
+        **Over LAN** (PC host, laptop client without Steam; `merch-lan-all.sh wear|wearbare`, `tests/ClientProbe` dresses each player through the
+        look the wardrobe keeps): both players in the coat and the hat, each sees the other in them, in the colour each chose; the merchant the
+        same; his clothes unlocked for both by coming near, kept in the file (the next run had them already). A client with none of our
+        mods, **whose own saved look names the coat and the hat**: plays without them, sees the host without them, while the host sees the
+        client in them. No exception with the game's cosmetics in it on any client (the rest are from the missing Steam).
+        (The LAN runs are on 98b8cb47: the last build differs by two guards, a goblin of another kind waking first and a thumbnail that is no PNG.)
+        Test clothes are now cut from the body itself (`tests/RuntimeDriver/cosmetics/make_parts.py`, local only); the first ones were plain shapes and the user
+        took them for the mod's. Shots of goblins are taken on the king's plate (`Stage.cs`): by the starter shop it is dark (the user, twice).
+        Left: see "Not checked" below.
+  - **Not checked:** a look that names a removed mod's **accessory** (the code says it keeps one of the six places until *Randomize*); a part on the
+    guard, imposter and fungus goblins; a texture seen close up; the wardrobe with the mouse by a person on 0.1.3; saves through Steam.
 - **The noir goblin sells in the dungeon, not in the hub** (the user, 2026-11-25: "maybe with some chance he turns up
   instead of a merchant on the level? After all he has contraband. In the lobby he will not sell"). This is R2 with a
   look: after the game has drawn a merchant preset and before its seller is spawned (`SpawnerBase.SpawnNetworkPrefab`,
@@ -397,6 +416,30 @@ written after the experiment, not before.
   places of the dungeon's stall; `tags1` (the fix, a client without mods) and `tags2` (the fix on both) show none, and the 12 other places of the hub and
   the one good of the stall keep theirs. Not D12: there the place has an item, which the client lacks.
   The fixed build (91305752, API list unchanged, 160 unit tests) also passes the asserting host run `checks-24-shops013`, 0 failures of 41. **Published 2026-11-25** (07f2164; the package downloaded from the site holds this DLL).
+- **POGShops 0.1.4 and Black Market 0.1.0 (2026-11-25/26, the user: "finish POGShops and Black Market"; written, not committed, not
+  released).** From the game's code first: a place that does not run out is the game's own `ItemSpawner.m_setSpawnCopyOnSpawn` (the
+  starter shop's bread); the spawner marks the item before it spawns (`InventoryItem.SpawnCopyInsteadOfPickup`, sent with the item),
+  `BuyItem` then gives a copy (`SpawnCopyAndPickup`), and the seller's death clears the mark on the host. From the game's files: the
+  stalls have 3 places (Antique, Foodlover, Smith, Tinkerer), 4 (MysticTent), 5 (Curiosa), each preset's counter along its own x, and
+  the Smith's place of bolts does not run out. All six sellers hold a shiv table in the left hand; the game hides that weapon while
+  idle, draws it when hunting, and takes it away at death; a seller's stab does not depend on it.
+  API (additive, `api/POGShops.txt` +5): `PoolEntry.Endless` (also `"endless"` in a file's pool), `PoolEntry.With` (code only; weight 0
+  = only with another; a companion drawn before gets the entry put in beside it; an entry whose group no longer fits is passed over),
+  `MerchantDef.Name` (sent to clients as `shops.seller`, asked with the slot question, so an older host ignores it), `LeftHand`,
+  `RightHand` (the game's own equipment tables). Goods now go along the row, so companions stand side by side. 235 unit tests; 25
+  planted defects, 24 caught, the 25th changed nothing (the condition removed).
+  **D19 (in the published 0.1.2 and 0.1.3; fixed in 0.1.4): a mod's good at the Smith's third place did not run out.** The slot's own
+  flag stayed. Control `pog-runs/d19-control` (published 0.1.3, Black Market 0.0.6 at the Smith): its bolts there `copy True`; with
+  0.1.4 (`trade4-Smith-bm`) all three places run out.
+  **In the game, host, no Steam (`pog-runs/local/trade.sh`, driver `trade=1`):** all six stalls (`trade3-Curiosa-bm` 32/32,
+  `trade-Smith-pair`, `trade4-Smith-bm`, `trade-Antique-bm`, `trade-Tinkerer-bm`, `trade4-MysticTent-bm`, `trade4-Foodlover-pair`): name over
+  the head, weapon, companions side by side, only the endless good marked, bought twice and still there, a good that runs out sold once,
+  after the death what is left taken once. The Foodlover's seller does not draw after one hit, the game's own one neither
+  (`trade5-Foodlover-game`). A seller kills a player in seconds (`trade-MysticTent-bm` ended in the lobby). Black Market's page in POG Config:
+  moved, saved, put back (`page-bm`). **Over LAN** (`merch-lan/trade`, `late`, `tradebare`): the client sees "Nobody" (POGShops' answer),
+  buys the bolts twice (18 -> 15 -> 12) and they stay, sees the dagger drawn; a client without our mods sees the seller's own name and
+  trades the same; one who joins inside the dungeon is named and sees goods and marks, but the game makes them a ghost until the next level.
+  Not checked: the client's bag counted after buying a copy (gold and the game's "Item purchased" only); a real Steam session.
 - **Names** (the user, 2026-11-25): the mod is **Black Market** on Thunderstore; inside (DLL, repository, ids) `POGBlackMarket`.
   The POG prefix is for libraries and tools, not for content mods.
 - **Spy goblins, a faction of their own** (the user, 2026-11-25, seeing three noir goblins side by side: "maybe it will

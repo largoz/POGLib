@@ -25,6 +25,7 @@ namespace POGLib.Core
         {
             public const string BaseColor = "_BaseColor"; // HDRP/Lit primary
             public const string Color = "_Color";         // legacy fallback
+            public const string BaseColorMap = "_BaseColorMap";
             /// <summary>HDRP/Lit emissive colour — the material half of a "glow" (VisualProbe, GlowCapability).</summary>
             public const string EmissiveColor = "_EmissiveColor";
             /// <summary>Legacy/built-in emission colour, used as a fallback.</summary>
@@ -35,6 +36,17 @@ namespace POGLib.Core
             public const string HdrpLit = "HDRP/Lit";
             /// <summary>Unity's magenta fallback when a material's shader could not be resolved.</summary>
             public const string ErrorShader = "Hidden/InternalErrorShader";
+        }
+
+        /// <summary>The goblin's body and skeleton, which clothes are made for (Cosmetics).</summary>
+        public static class Goblin
+        {
+            /// <summary>The third-person body's renderer (456 vertices, 35 bones on build 26668562).</summary>
+            public const string Body = "CH_Goblin_Default";
+            public const string Hips = "mixamorig:Hips";
+            public const string Head = "mixamorig:Head";
+            /// <summary>Metres to the body mesh's own units: its renderer stands at scale 100.</summary>
+            public const float MeshUnit = 0.01f;
         }
 
         /// <summary>Child object names created by the framework itself (stable, not game assets).</summary>

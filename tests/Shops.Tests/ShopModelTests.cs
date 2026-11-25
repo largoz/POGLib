@@ -37,6 +37,24 @@ namespace POGLib.Shops.Tests
         }
 
         [Fact]
+        public void APlaceThatDoesNotRunOutIsSaidInAPoolOnly()
+        {
+            var d = new List<Diagnostic>();
+            var f = Parse(Valid.Replace(@"""HealingBerry"", ""weight"": 10", @"""HealingBerry"", ""endless"": true, ""weight"": 10"), d);
+            Assert.Empty(d);
+            Assert.Equal(new[] { true, false }, f.Slots[0].Pool.Select(e => e.Endless));
+            Assert.Equal(new[] { true, false }, ShopCatalog.Build(new[] { f }).Resolve("BerryMod:berry_stand", null).Entries.Select(e => e.Endless));
+            var text = ShopFileIO.Write(f);
+            Assert.Single(System.Text.RegularExpressions.Regex.Matches(text, "endless"));   // a place that runs out says nothing, as before
+            Assert.Equal(new[] { true, false }, Parse(text, d).Slots[0].Pool.Select(e => e.Endless));
+            Assert.Empty(d);
+
+            // "with" means something in a merchant's Goods (code) only, so a file that has it is told.
+            Parse(Valid.Replace(@"""weight"": 10", @"""weight"": 10, ""with"": [""X""]"), d);
+            Assert.Contains(d, x => x.Message.Contains("unknown key") && x.Message.Contains("with"));
+        }
+
+        [Fact]
         public void UnknownKeyIsAWarningNotAnError()
         {
             var d = new List<Diagnostic>();
@@ -339,10 +357,11 @@ namespace POGLib.Shops.Tests
         public void MerchantSlotsUseTheirOwnStockAndCanBeAddedTo()
         {
             var a = Mod("A");
-            a.Sellers.Add(new SellerDef { Id = "m", Preset = "EntranceCave_Shopkeeper_Curiosa", Slots = { new List<PoolEntry> { new PoolEntry { Item = "Berry", Weight = 1 } }, null } });
+            a.Sellers.Add(new SellerDef { Id = "m", Preset = "EntranceCave_Shopkeeper_Curiosa", Slots = { new List<PoolEntry> { new PoolEntry { Item = "Berry", Weight = 1, Endless = true } }, null } });
             var c = ShopCatalog.Build(new[] { a, WithAdd(Mod("B"), "A:m#1", "Sword", 1) });
             var r1 = c.Resolve(ShopCatalog.SellerSlotId("A:m", 1), new[] { new VanillaEntry("vanilla:Item_Torch_Unlit", 1) });
             Assert.Equal(new[] { "A:Berry", "B:Sword" }, r1.Entries.Select(e => e.Item));   // preset stock replaced
+            Assert.Equal(new[] { true, false }, r1.Entries.Select(e => e.Endless));
             var r2 = c.Resolve("A:m#2", new[] { new VanillaEntry("vanilla:Item_Key", 1) });
             Assert.True(r2.Untouched);                                                       // no stock given: preset's own
         }

@@ -83,6 +83,17 @@ namespace POGLib.Shops.Model
     {
         public string Item { get; set; }
         public double Weight { get; set; } = 1;
+        /// <summary>
+        /// The place does not run out: every buyer gets a copy, as with the bread of the game's starter shop. Once the seller is dead
+        /// the item itself can be taken, once.
+        /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public bool Endless { get; set; }
+        /// <summary>
+        /// Only in a merchant's <see cref="MerchantDef.Goods"/>: ids of other entries there that are put out whenever this one is.
+        /// </summary>
+        [JsonIgnore]
+        public List<string> With { get; set; } = new List<string>();
     }
 
     public sealed class AddOp
@@ -170,7 +181,7 @@ namespace POGLib.Shops.Model
 
         private static HashSet<string> Keys(Type model) => new HashSet<string>(
             model.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-                 .Where(p => p.GetCustomAttributes(typeof(JsonIgnoreAttribute), true).Length == 0)
+                 .Where(p => !p.GetCustomAttributes(typeof(JsonIgnoreAttribute), true).Cast<JsonIgnoreAttribute>().Any(a => a.Condition == JsonIgnoreCondition.Always))
                  .Select(p => JsonNamingPolicy.CamelCase.ConvertName(p.Name)),
             StringComparer.OrdinalIgnoreCase);
 

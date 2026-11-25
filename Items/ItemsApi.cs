@@ -50,6 +50,8 @@ namespace POGLib.Items
     public static class Content
     {
         public static ItemsApi Items { get; } = new ItemsApi();
+        /// <summary>Clothes, hair, horns and hats. They are no network content: a player without them sees the goblin without.</summary>
+        public static POGLib.Cosmetics.CosmeticsApi Cosmetics { get; } = new POGLib.Cosmetics.CosmeticsApi();
         /// <summary>
         /// The assemblies (simple names, e.g. "ShopDemo") that registered network content through this library, plus
         /// POGLib itself once any did. Every player needs these mods, with the same content: a mod-list check

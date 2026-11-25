@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.4 (2026-11-26)
+
+- **Goods that come together** (`With` in a dungeon merchant's goods): a crossbow that never stands without its bolts.
+- **A place that does not run out** (`Endless`; `"endless": true` in a shop file's pool): every buyer gets a copy, as with the bread of
+  the starter shop.
+- **A merchant's name** (`Name`) for the host and every player with POGShops, also one who joins later; **a weapon** they draw when hurt
+  (`LeftHand`) and a thing they hold (`RightHand`), where the seller's own came off with a look.
+- A mod's goods at the Smith's stall did not run out in one of its places (since 0.1.2), because the game's own there does not.
+- Needs POGLib 0.1.3. Host and players need the same POGShops, as before.
+
 ## 0.1.3 (2026-11-25)
 
 - **An empty place had a price tag of "0" for everyone but the host** (since 0.1.0: `"nothing"` in a pool, a place with no

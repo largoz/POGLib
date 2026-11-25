@@ -1,5 +1,5 @@
 // metadump <assembly> [--props-of-type <substring>] <type-name prefix>...
-//   Lists base type, properties (with types) and methods (with signatures) of every type whose full name starts
+//   Lists base type, enum values, properties (with types) and methods (with signatures) of every type whose full name starts
 //   with one of the prefixes ("" = all types). Il2CppInterop plumbing (NativeFieldInfoPtr_*, __rpc*) is skipped.
 //   --props-of-type X: instead, list every property whose type contains X, as "Type.prop : type".
 using System.Collections.Immutable;
@@ -46,6 +46,14 @@ foreach (var th in md.TypeDefinitions)
         continue;
     }
     Console.WriteLine($"== {full} : {BaseName(t.BaseType)}");
+    if (BaseName(t.BaseType) == "System.Enum")
+        foreach (var fh in t.GetFields())
+        {
+            var f = md.GetFieldDefinition(fh);
+            if (f.GetDefaultValue().IsNil) continue;
+            var blob = md.GetBlobReader(md.GetConstant(f.GetDefaultValue()).Value);
+            Console.WriteLine($"  value {md.GetString(f.Name)} = {(blob.Length == 4 ? blob.ReadInt32() : blob.Length == 2 ? blob.ReadInt16() : blob.ReadByte())}");
+        }
     foreach (var ph in t.GetProperties())
     {
         var p = md.GetPropertyDefinition(ph);
