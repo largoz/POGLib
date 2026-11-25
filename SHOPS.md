@@ -242,5 +242,5 @@ loaded mod, so you see the real share your weight buys.
 The host chooses every slot's item; clients see the result through the game. **New slots** are copies of the
 game's own shop slot, so every player sees them and **only the host needs the shop files**. A player with
 POGShops gets the slot's price tag where the file puts it (the host tells it); a player without it sees the
-tag where the game's slot has it. An item from a mod a player does not have does not appear for that
+tag where the game's slot has it. An empty place has no price tag for anyone, with or without the mod. An item from a mod a player does not have does not appear for that
 player: the slot looks empty there.

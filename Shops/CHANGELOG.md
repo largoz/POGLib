@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 (2026-11-25)
+
+- **An empty place had a price tag of "0" for everyone but the host** (since 0.1.0: `"nothing"` in a pool, a place with no
+  item left for it, a dungeon merchant with fewer goods than places). The host now hides it for every player, also for one
+  without the mod and for one who joins later. Only the host needs the update.
+
 ## 0.1.2 (2026-11-25)
 
 - **Dungeon merchants of mods, by classes** (`ShopsApi.AddMerchants`): one mod is one class; a class is drawn first, by its

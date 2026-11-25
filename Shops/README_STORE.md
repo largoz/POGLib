@@ -73,16 +73,18 @@ ShopsApi.AddMerchants(new MerchantClass
 
 Full guide, ids and the host's own files: [SHOPS.md](https://github.com/largoz/POGLib/blob/main/SHOPS.md).
 
-## Status of 0.1.2
+## Status of 0.1.3
 
 Shown in the game (the host on build 26791993), on a host and a client over LAN: a mod's new slot at the end of the hub's
 starter shop's row, on the floor; the client sees it where the host does, buys from it and passes the item on. A
 mod file with `add` is refused.
 Both ends of the row are found for every seller of the hub, InBetween and DarkBurg (from a dump of each scene); in
 the game, slots were looked at in the hub. The automatic place is a start: correct it with `"pos"` and `"rot"`.
-Dungeon merchants, on a host: a mod's merchant at the Curiosa stall with its own goods and prices, a merchant that cannot come left
+Dungeon merchants, on a host and a client over LAN: a mod's merchant at the Curiosa stall with the same goods and prices for both;
+each buys, a thing too dear is refused, the merchant's death costs no reputation and leaves the goods to take. A client without
+any of the mods buys there too and sees the merchant in what its game has. On a host: a merchant that cannot come left
 out, the limit at 0% (the game's own merchant and goods), the settings page. The odds are held by unit tests.
-Not checked yet: dungeon merchants on a client and at the other five stalls; slots in InBetween and DarkBurg looked at in the
-game.
+Not checked yet: dungeon merchants at the other five stalls; a player who joins inside a dungeon; slots in InBetween and
+DarkBurg looked at in the game.
 
 Source and issues: [github.com/largoz/POGLib](https://github.com/largoz/POGLib)

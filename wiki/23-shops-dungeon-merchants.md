@@ -1,8 +1,9 @@
 # 23 Shops: dungeon merchants
 
 A merchant of your own at a dungeon's entrance, with your goods, instead of the game's merchant on some visits. Added from
-code with [POGShops](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGShops/) 0.1.2 or later. **Shown in the game on a
-host**: the Curiosa stall with a mod's goods, prices and look. **Not looked at yet:** a client, the other five stalls.
+code with [POGShops](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGShops/) 0.1.2 or later (0.1.3 if
+some of your places may stay empty). **Shown in the game on a host and a client**: the Curiosa stall with a mod's goods, prices and
+look; both buy there. **Not looked at yet:** the other five stalls.
 
 ## How it is decided
 

@@ -381,8 +381,22 @@ written after the experiment, not before.
   build let a mod's merchant keep them there (`merch-8-town-defect`: two stalls of two); the user wants none in a lobby. Now only in `GameScene`.
   Also found: the driver's race with POGLanTest (it missed the main menu by 0.1 s and waited for ever), likely the one early local run of seven that hung.
   Forced to 0 or 100%: **no frequency was measured in the game**, the odds are held by the unit tests only.
-  Left: a LAN run (the laptop was off: a client sees the merchant and buys), the other five stalls, the client side of a merchant's name (Black
+  **Over LAN, 2026-11-25 (PC host, laptop client without Steam; `pog-runs/local/merch-lan-all.sh`, probe `tests/ClientProbe`: one DLL, the game's
+  own objects only, on both machines; build 26791993):** `full`/`full2` (POGLib, POGShops 0.1.2 and Black Market 0.0.5 on both): goods, prices, tags, look and name the same
+  on both; the client is refused a thing too dear, buys the cheapest (gold 18 -> 15 on both), the host buys; the merchant killed: reputation of all five factions
+  unchanged, what is left costs 0 and a client takes it without paying; his clothes are found by both within 6 m. `bare` (the client
+  has none of our mods): the same trade; it sees him without the hat and coat, in the trousers, gloves and mask its game has, under the
+  game's name. `solo` (one good, four empty places): found **D18**.
+  Left: the other five stalls, a player who joins inside a dungeon, the client side of a merchant's name (Black
   Market does it itself by the coat's id), `sellers` in a mod's own file.
+- **D18 (found 2026-11-25 over LAN, in the published 0.1.0-0.1.2; fixed in POGShops 0.1.3): an empty place had a price tag of "0" for every player but the host.**
+  The host hid its own copy of the tag and told nobody; the game replicates an item and its price, not "no tag". Every check until then
+  looked at the host only, and said "without price tags". `Shops/ShopEmptySlots`: the host also sends the game's own `HidePriceTagRpc` (what a sold item
+  uses, so a client needs no mod), a second after the slot spawned and again whenever a player has loaded the scene or joined.
+  Control first, the same probe and files: `tags0` (the published DLL) shows "0" on the client at the hub's torch place, at a mod's new place and at four
+  places of the dungeon's stall; `tags1` (the fix, a client without mods) and `tags2` (the fix on both) show none, and the 12 other places of the hub and
+  the one good of the stall keep theirs. Not D12: there the place has an item, which the client lacks.
+  The fixed build (91305752, API list unchanged, 160 unit tests) also passes the asserting host run `checks-24-shops013`, 0 failures of 41. **Not published yet.**
 - **Names** (the user, 2026-11-25): the mod is **Black Market** on Thunderstore; inside (DLL, repository, ids) `POGBlackMarket`.
   The POG prefix is for libraries and tools, not for content mods.
 - **Spy goblins, a faction of their own** (the user, 2026-11-25, seeing three noir goblins side by side: "maybe it will

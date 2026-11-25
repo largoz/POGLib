@@ -29,7 +29,7 @@ namespace POGLib.Shops
     /// </summary>
     public sealed class ShopsMod : MelonMod
     {
-        internal const string VERSION = "0.1.2";
+        internal const string VERSION = "0.1.3";
         private const string Tag = "[POGShops]";
 
         // Compiled in from the POGLib this was built against (a const is copied into this assembly at build time).
@@ -39,7 +39,7 @@ namespace POGLib.Shops
         private static readonly (Type type, string[] members)[] Expected =
         {
             // 2026-11-14: spawners load by address (m_networkPrefab / m_lootTable became references).
-            (typeof(ShopLocation), new[] { "m_lootTableRef", "m_itemHolder", "m_priceTagText", "LoadLootTable", "CreateShopItems" }),
+            (typeof(ShopLocation), new[] { "m_lootTableRef", "m_itemHolder", "m_priceTagText", "LoadLootTable", "CreateShopItems", "HidePriceTagRpc" }),
             (typeof(SpawnerBase), new[] { "m_networkPrefabRef", "m_loadedPrefab", "LoadNetworkPrefab", "HasNetworkPrefab" }),
             (typeof(NpcSpawner), new[] { "m_itemsForSale", "m_networkInstance" }),
             (typeof(Il2CppEntities.NPCEntity), new[] { "m_useCosmetics", "m_useRandomCosmetics", "m_predefinedCosmeticsJson", "m_decreaseFactionReputationOnDeath", "Appearance", "OnNetworkPostSpawn" }),
