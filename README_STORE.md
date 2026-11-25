@@ -9,7 +9,7 @@ items of its own.
 
 - Every player needs the same content mods. [POG Mod Check](https://thunderstore.io/c/pit-of-goblin/p/Largo/POG_Mod_Check/)
   shows a joining player what differs before anything loads.
-- A player without a content mod can still join (the game allows it on build 26668562); that mod's items simply do
+- A player without a content mod can still join (the game allowed it on build 26668562); that mod's items simply do
   not appear for them.
 
 ## For mod developers
@@ -57,7 +57,7 @@ What that file lists stays through 0.x, **except the parts marked experimental b
 
 ## Status of 0.1.2
 
-Shown in the game (build 26668562), on a host and on a client over LAN:
+Shown in the game (the host on build 26791993), on a host and on a client over LAN:
 
 - items registered from code appear for every player with the mod; bought in a shop, eaten, carried, passed
   between players, put in the bucket;

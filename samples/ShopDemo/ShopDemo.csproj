@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AssemblyName>ShopDemo</AssemblyName>
-    <GameDir Condition="'$(GameDir)' == ''">$(HOME)/.local/share/com.kesomannen.gale/pit-of-goblin/profiles/Default</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">$(HOME)/.config/r2modmanPlus-local/PitOfGoblin/profiles/Tests</GameDir>
     <MelonDir>$(GameDir)\MelonLoader\net6</MelonDir>
     <InteropDir>$(GameDir)\MelonLoader\Il2CppAssemblies</InteropDir>
   </PropertyGroup>

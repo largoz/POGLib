@@ -50,7 +50,7 @@ namespace POGLib.RuntimeDriver
                 var c = part.GetComponent<CosmeticItem>();
                 var smr = part.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length;
                 var mr = part.GetComponentsInChildren<MeshRenderer>(true).Length;
-                log($"outfit part {slot} {part.name} id={(c != null ? c.m_id.ToString() : "-")} type={(c != null ? c.m_itemType.ToString() : "-")} lock={(c != null ? c.m_lockType.ToString() : "-")} thumb={(c != null && c.m_thumbnail != null ? c.m_thumbnail.name : "-")} skinned={smr} static={mr}");
+                log($"outfit part {slot} {part.name} id={(c != null ? c.m_id.ToString() : "-")} type={(c != null ? c.m_itemType.ToString() : "-")} lock={(c != null ? c.m_lockType.ToString() : "-")} ach={(c != null && c.m_lockType == CustomGoblinService.LockType.LockedAchievement ? ((int)c.m_lockedAchievement).ToString() : "-")} reward={(c != null ? c.m_lockedId.ToString() : "-")} thumb={(c != null && c.m_thumbnail != null ? c.m_thumbnail.name : "-")} skinned={smr} static={mr}");
             }
             void Palette(string name, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<Color> p)
             {
@@ -69,8 +69,8 @@ namespace POGLib.RuntimeDriver
         {
             _log = log;
             var s = Service();
-            var looks = cfg.Where(kv => kv.Key.StartsWith("goblin") && kv.Key.Length == 7 && char.IsDigit(kv.Key[6])).OrderBy(kv => kv.Key).ToList();
-            if (looks.Count == 0) return;
+            var looks = Looks(cfg);
+            if (looks.Count == 0 || cfg.ContainsKey("noir")) return;   // noir=1: the looks are for the dungeon's merchant
             if (s == null) { log("goblin: no CustomGoblinService"); return; }
             string prefabName = cfg.TryGetValue("goblinprefab", out var p) ? p : "Enemy_NPC_ShopKeeper";
             GameObject prefab = null;
@@ -95,7 +95,7 @@ namespace POGLib.RuntimeDriver
                 {
                     var at = seller.transform.position + fwd * 3.2f + right * ((i - (looks.Count - 1) / 2f) * 1.3f);
                     if (Physics.Raycast(at + Vector3.up * 1.5f, Vector3.down, out RaycastHit hit, 4f, ~0, QueryTriggerInteraction.Ignore)) at = hit.point;
-                    string json = Json(s, looks[i].Value, out int expected, out string tag);
+                    string json = Json(s, looks[i].Value, out int expected, out string tag, log);
                     var go = UnityEngine.Object.Instantiate(prefab, at, Quaternion.LookRotation(fwd));
                     var npc = go.GetComponent<NPCEntity>();
                     if (npc == null) { log($"goblin: {prefabName} has no NPCEntity"); UnityEngine.Object.Destroy(go); return; }
@@ -122,8 +122,12 @@ namespace POGLib.RuntimeDriver
                 _log($"goblin:   {g.Key} draws {r.name} ({r.GetIl2CppType().Name}) mat {(r.sharedMaterial != null ? r.sharedMaterial.name : "-")}");
         }
 
-        private static string Json(CustomGoblinService s, string look, out int expected, out string tag)
+        internal static List<KeyValuePair<string, string>> Looks(IDictionary<string, string> cfg) =>
+            cfg.Where(kv => kv.Key.StartsWith("goblin") && kv.Key.Length == 7 && char.IsDigit(kv.Key[6])).OrderBy(kv => kv.Key).ToList();
+
+        internal static string Json(CustomGoblinService s, string look, out int expected, out string tag, Action<string> log)
         {
+            _log = log;
             var parts = Parts(s).ToList();
             uint Id(string slot, string name)
             {

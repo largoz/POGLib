@@ -6,8 +6,8 @@ data file, `pogshop.json`, shipped next to your mod. Players who host need POGSh
 
 **What a mod's file may do in this version (0.1):** place **its own slots** at the game's sellers, each with its
 own pool of items, and say how its items stand on a counter. It cannot put items into the game's slots or another
-mod's (`add`), change what others sell (`patch`), or add dungeon merchants (`sellers`): a mod's file with any of
-those is refused as a whole, and the log names each reason. Those stay with the **host's own files** (below) until
+mod's (`add`), change what others sell (`patch`), or add dungeon merchants (`sellers`; a mod adds those from code,
+below): a mod's file with any of those is refused as a whole, and the log names each reason. Those stay with the **host's own files** (below) until
 a later version settles what a weight means next to the game's items. Nothing the game sells is displaced by a mod.
 
 Design background: `docs/design/shops.md`. Example: `samples/ShopDemo/`.
@@ -130,15 +130,12 @@ In a game slot each of the game's own candidates counts as weight **10** (per oc
 `UserData/MelonPreferences.cfg` changes that 10 (read on the host, from the next scene; `0` = in a slot a rule adds
 to, only the added items come up).
 
-### Dungeon merchants
+### Dungeon merchants in a host's file
 
-The entrance cave of a dungeon draws one entry from `PropList_EntranceCave_MerchantOrAdventurer` (six vanilla
-merchants and four dead adventurers, equally likely) with the dungeon seed. A `sellers` entry is a **variant** of
-one vanilla merchant (`preset`, e.g. `EntranceCave_Shopkeeper_Curiosa`) with your own stock per slot (`slots`, in
-the preset's slot order; a missing or empty slot keeps the preset's stock). Weight w adds the preset w more times
-to that list; when the preset comes up, the host decides whose variant it is by the same weights. So your merchant
-appears as often as w entries of its own would. It keeps the preset's NPC and look. Its slots are
-`<Mod>:<id>#1`, `#2`, … for other mods' `add`/`patch`.
+A `sellers` entry is a merchant for the stall of one vanilla merchant (`preset`, e.g. `EntranceCave_Shopkeeper_Curiosa`)
+with your own stock per slot (`slots`, in the preset's slot order; a missing or empty slot keeps the stall's own). The
+file is one class of merchants, as a mod is (next section): it is drawn like one, and `weight` is the weight inside the
+class. The seller keeps their own look. Its slots are `<Mod>:<id>#1`, `#2`, … for `add`/`patch`.
 
 ### Rules when several files meet
 
@@ -148,6 +145,52 @@ appears as often as w entries of its own would. It keeps the preset's NPC and lo
   `requires`, otherwise it is refused with a log line. Patching vanilla content needs nothing.
 - Every change is recorded per slot: the shop tools show who added and changed what.
 - An item whose mod is not installed is left out (and logged); the remaining candidates share the chance.
+
+## Dungeon merchants of a mod (from code, since 0.1.2)
+
+The entrance cave of a dungeon draws one entry from `PropList_EntranceCave_MerchantOrAdventurer` (six merchants and four
+dead adventurers, equally likely) with the dungeon seed. The library leaves that draw alone. When a merchant's stall came
+up, the **host** decides once whether a mod's merchant keeps it instead of the game's own:
+
+```csharp
+ShopsApi.AddMerchants(new MerchantClass          // once, from OnInitializeMelon
+{
+    ModId = "BerryMod",                          // the class: one mod = one class
+    Title = "Berry Traders",                     // what the host sees in the settings
+    Chance = 0.1,                                // of the stalls they may take; at most 0.25
+    Merchants =
+    {
+        new MerchantDef
+        {
+            Id = "trader",
+            Weight = 3,                          // against the other merchants of this class only
+            Stalls = { "Curiosa", "Antique" },   // Antique, Curiosa, Foodlover, MysticTent, Smith, Tinkerer
+            Goods = { new PoolEntry { Item = "GlowBerry", Weight = 2 }, new PoolEntry { Item = "vanilla:Item_Key", Weight = 1 } },
+            Look = () => MyLook(),               // optional: the game's outfit JSON, null = cannot come now
+        },
+    },
+});
+```
+
+1. **The game's merchant or a mod's.** The chances of the classes that can keep this stall add up, but never past the
+   host's ceiling (75%): past it all shrink in proportion. Only in the dungeon: the same stalls in the towns stay the game's. The game's own merchant has the rest, so it keeps at least
+   a quarter of the stalls however many mods there are. One mod at 0.25 leaves it 75%, two 50%, three or more 25%.
+2. **Which class**, by its share. A mod with ten merchants comes up as often as a mod with one.
+3. **Which merchant of the class**, by weights that mean nothing outside it.
+
+- Everything a merchant needs is checked **before** the draw: the look is there and at least one of the goods is loaded. A merchant
+  that lacks something takes no part (the log says why, once); a class with nobody left shrinks no one. A stall is
+  wholly a mod's or wholly the game's.
+- The goods are put out by weight, no item twice; a place nothing is left for stays empty, without a price tag. No `Goods`: the
+  stall's own.
+- A merchant of a mod has the base price and no faction: killing them costs no reputation. With a `Look` the seller's own
+  armour, hat and hand items are taken off.
+- `ShopsApi.MerchantOf(npc)` says on the host whose a seller is (`"BerryMod:trader"`).
+- A class with a mistake is refused as a whole, each mistake named in the log.
+
+**The host's settings** (POG Config, page "POG Shops"; or `UserData/MelonPreferences.cfg`): `MerchantCeiling` under
+`[POGLib_Shops]`, and one line per mod under `[POGLib_Shops_Merchants]`: `-1` = as the mod asks, `0` = off, up to `1`. The
+host may give a class more than the 0.25 it may ask for. Read when a stall is decided, so a change works from the next dungeon.
 
 ## Where the file goes
 

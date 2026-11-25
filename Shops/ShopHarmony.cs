@@ -33,6 +33,28 @@ namespace POGLib.Shops
         }
     }
 
+    /// <summary>A dungeon merchant of a mod's is dressed as theirs (host; the look reaches everyone through the game).</summary>
+    [HarmonyPatch(typeof(Il2CppEntities.NPCEntity), nameof(Il2CppEntities.NPCEntity.OnNetworkPostSpawn))]
+    internal static class Patch_NPCEntity_OnNetworkPostSpawn
+    {
+        [HarmonyPriority(Priority.High)]   // before a content mod's own prefix, which may ask ShopsApi.MerchantOf
+        static void Prefix(Il2CppEntities.NPCEntity __instance)
+        {
+            try { MerchantStalls.BeforeSeller(__instance); }
+            catch (Exception ex) { MelonLogger.Error($"[POGLib] [Shops] dressing a merchant failed, the game's own look stays: {ex}"); }
+        }
+    }
+
+    [HarmonyPatch(typeof(Il2CppInventory.EnemyInventory), nameof(Il2CppInventory.EnemyInventory.OnNetworkPostSpawn))]
+    internal static class Patch_EnemyInventory_OnNetworkPostSpawn
+    {
+        static void Prefix(Il2CppInventory.EnemyInventory __instance)
+        {
+            try { MerchantStalls.BeforeEquipment(__instance); }
+            catch (Exception ex) { MelonLogger.Warning($"[POGLib] [Shops] a merchant's equipment: {ex.GetType().Name}: {ex.Message}"); }
+        }
+    }
+
     /// <summary>
     /// D8: a shop slot places its item by the slot's holder (<c>ShopLocation.get_SpawnTransform</c>: holder pose times
     /// the inverse of the item's <c>m_standingTransform</c>; build 26668562), and the holder is posed for the slot's

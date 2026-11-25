@@ -11,6 +11,7 @@ using POGLib.Shops;
 // After POGLib (-1000), before content mods (0): a content mod may call ShopsApi.AddFile from its OnInitializeMelon.
 [assembly: MelonPriority(-900)]
 [assembly: MelonAdditionalDependencies("POGLib")]
+[assembly: MelonOptionalDependencies("POGConfig")]
 // Patched one class at a time (HarmonyPatcher.PatchEachClass), never by MelonLoader's own PatchAll as well (D15).
 [assembly: HarmonyDontPatchAll]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("POGLibRuntimeDriver")]
@@ -28,7 +29,7 @@ namespace POGLib.Shops
     /// </summary>
     public sealed class ShopsMod : MelonMod
     {
-        internal const string VERSION = "0.1.1";
+        internal const string VERSION = "0.1.2";
         private const string Tag = "[POGShops]";
 
         // Compiled in from the POGLib this was built against (a const is copied into this assembly at build time).
@@ -40,6 +41,9 @@ namespace POGLib.Shops
             // 2026-11-14: spawners load by address (m_networkPrefab / m_lootTable became references).
             (typeof(ShopLocation), new[] { "m_lootTableRef", "m_itemHolder", "m_priceTagText", "LoadLootTable", "CreateShopItems" }),
             (typeof(SpawnerBase), new[] { "m_networkPrefabRef", "m_loadedPrefab", "LoadNetworkPrefab", "HasNetworkPrefab" }),
+            (typeof(NpcSpawner), new[] { "m_itemsForSale", "m_networkInstance" }),
+            (typeof(Il2CppEntities.NPCEntity), new[] { "m_useCosmetics", "m_useRandomCosmetics", "m_predefinedCosmeticsJson", "m_decreaseFactionReputationOnDeath", "Appearance", "OnNetworkPostSpawn" }),
+            (typeof(Il2CppInventory.EnemyInventory), new[] { "m_torsoSlot", "m_headSlot", "m_backSlot", "m_leftHandSlot", "m_rightHandSlot", "OnNetworkPostSpawn" }),
         };
         private static readonly (string name, Func<Type> touch)[] CompiledBindings =
         {
@@ -79,7 +83,12 @@ namespace POGLib.Shops
             HarmonyPatcher.CheckEachPatchOnce(HarmonyInstance, Tag);
         }
 
-        public override void OnUpdate() { if (_on) POGLib.Shops.Dev.ShopDevTools.OnUpdate(); }
+        public override void OnUpdate()
+        {
+            if (!_on) return;
+            MerchantSettings.SaveWhenSettled();
+            POGLib.Shops.Dev.ShopDevTools.OnUpdate();
+        }
 
         public override void OnGUI() { if (_on) POGLib.Shops.Dev.ShopDevTools.OnGUI(); }
 

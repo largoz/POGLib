@@ -51,13 +51,15 @@ namespace POGLib.Shops
                 $"When a mod adds items to a game shop slot, each of the game's own items there gets this weight. " +
                 $"Mods weigh their items against {ShopCatalogOptions.StandardVanillaWeight:0}: a mod item of weight {ShopCatalogOptions.StandardVanillaWeight:0} " +
                 "is as likely as a vanilla one. 0 = only the mods' items in such slots. Applies on the host, from the next scene.");
+            MerchantSettings.Init(cat);
 
             graph.AddSystem(PluginStage.SceneLoaded, Name, () =>
             {
                 if (Catalog == null || Catalog.Options.DefaultVanillaWeight != Options().DefaultVanillaWeight) Reload();
-                SellerTemplates.ApplyItemDisplays(Catalog);
+                ItemDisplays.Apply(Catalog);
                 SlotTemplates.BuildPending(Catalog);
-                SellerTemplates.BuildPending(Catalog);
+                MerchantStalls.OnSceneLoaded();
+                ShopsPage.OnSceneLoaded();
                 ShopRuntime.OnSceneLoaded();
             });
             // The game's prefab list (2026-11-14 build): item templates now exist, and the donor slot for new
@@ -65,7 +67,7 @@ namespace POGLib.Shops
             graph.AddSystem(PluginStage.GamePrefabsLoaded, Name, () =>
             {
                 if (Catalog == null) Reload();
-                SellerTemplates.ApplyItemDisplays(Catalog);
+                ItemDisplays.Apply(Catalog);
                 SlotTemplates.BuildPending(Catalog);
             });
             // Items are registered by now (they must be, to join a session): a rule naming a missing or
@@ -135,10 +137,11 @@ namespace POGLib.Shops
             files.AddRange(_codeFiles);
             _files = files;
             Catalog = ShopCatalog.Build(files, Options());
+            MerchantStalls.Rebuild(Catalog);
             Log(_loadDiagnostics);
             Log(Catalog.Diagnostics);
             MelonLogger.Msg($"[POGLib] [Shops] {files.Count} shop file(s) from {files.Select(f => f.Mod).Distinct().Count()} mod(s): " +
-                            $"{Catalog.ModSlots.Count} new slot(s), {Catalog.TargetedSlots.Count()} slot(s) with rules, {Catalog.Sellers.Count} merchant(s); order {string.Join(" > ", Catalog.ModOrder)}" +
+                            $"{Catalog.ModSlots.Count} new slot(s), {Catalog.TargetedSlots.Count()} slot(s) with rules, {MerchantStalls.Classes.Sum(c => c.Merchants.Count)} dungeon merchant(s) in {MerchantStalls.Classes.Count} class(es); order {string.Join(" > ", Catalog.ModOrder)}" +
                             (Catalog.Options.DefaultVanillaWeight != ShopCatalogOptions.StandardVanillaWeight ? $"; vanilla weight {Catalog.Options.DefaultVanillaWeight:0.##} (player setting)" : ""));
         }
 

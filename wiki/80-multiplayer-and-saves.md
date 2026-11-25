@@ -8,7 +8,7 @@
 | The host | your shop file, if you have one: the host decides what every slot sells |
 | A client | POGShops too, if your mod has shop slots: without it the slot is there but its price tag may sit wrong |
 
-The game lets a player without your mod join anyway (on build 26668562): your items simply do not appear for them.
+The game lets a player without your mod join anyway (seen on build 26668562): your items simply do not appear for them.
 [POG Mod Check](https://thunderstore.io/c/pit-of-goblin/p/Largo/POG_Mod_Check/) tells a joining player what differs
 before anything loads, and counts a mod that adds items through POGLib as required for everyone by itself.
 
@@ -24,7 +24,7 @@ item, drops it, and passes it to the host through the bucket.
 
 ## Saves
 
-*Tested in the game (build 26668562) with POGLib 0.1.1: a berry saved in the bucket came back after loading; without
+*Tested in the game (build 26791993) with POGLib 0.1.1: a berry saved in the bucket came back after loading; without
 its mod the save loaded with no error and the berry was gone.* **POGLib 0.1.0 does not bring mod items back from a
 save** (they vanish from the bucket on loading): use 0.1.1 or newer.
 

@@ -318,6 +318,71 @@ written after the experiment, not before.
         a new mesh only after the bundle round trip or a weight transfer from the game's jacket is shown.
   - Then the API (`Content.Cosmetics`), the wiki section (a free ten: 30 is reserved for mobs) and a seller with a look of its own
     (POGShops), the first consumer being the noir black-market goblin that sells the stones.
+- **The noir goblin sells in the dungeon, not in the hub** (the user, 2026-11-25: "maybe with some chance he turns up
+  instead of a merchant on the level? After all he has contraband. In the lobby he will not sell"). This is R2 with a
+  look: after the game has drawn a merchant preset and before its seller is spawned (`SpawnerBase.SpawnNetworkPrefab`,
+  host), the host decides by a chance whether it is ours, dresses it and stocks its slots. The entrance list is not
+  touched and only the host decides. The user, same day: each look has a chance of its own (plain coat, thief mask,
+  bandana over the mouth). **Tried on both machines 2026-11-25** (driver `Noir.cs`; host `noir-1`, `noir-2`, LAN
+  `noir-lan-with`, `noir-lan-without`): all six dungeon sellers are goblins of parts; the look is set before
+  `NPCEntity.OnNetworkPostSpawn`; the seller's own equipment (the Tinkerer's barrel, weapons) is taken off before
+  `EnemyInventory.OnNetworkPostSpawn`; a client that knows our parts sees the same goblin with the name, a client that
+  does not sees him without coat and hat under the vanilla name, no error from any of it; looks drawn by weight 5/3/2.
+  **Stalls** (they stay the replaced merchant's): Curiosa's tent (wagon, crates) fits best, the Tinkerer's and the
+  mystic's work, the smith's (anvils, cages) and the food vendor's do not.
+  **A mod of it, `ModSource/POGBlackMarket` 0.0.3 (dev, 2026-11-25):** chance, stalls, weights of the looks and the goods
+  (17 vanilla items: magic tomes, scrolls, poisons, dynamite, a shiv; no item twice) as settings; no faction, base price;
+  one decision per stall, made by whichever part the game spawns first. It reaches POGLib's OBJ loader and POGShops'
+  stocking by reflection: those calls are what the API of C2/C4 and R2 must become. Host, run `blackmarket-3`: the
+  Antique stall sold a shiv and two tomes, prices 24/20/20, faction None. The user saw him in their own game.
+  Left: buying from him (host and client), his goods on a client, the stones as goods, the chance as a setting
+  (proposed 15% of merchants), a floor for the vanilla merchants, theft and death, a player joining late, the API.
+- **The user, 2026-11-25 (afternoon):** the noir goblin is an ordinary merchant for now: **25%** instead of the vanilla one;
+  he sells **human things** (crossbow, bolts, dagger, ward, the mages' tomes), holds a **dagger**; **the stones go to the
+  fortune teller** (Mold Muncher in InBetween: 8 slots, 3 of them Speaking Stones, fixed items; a full lobby is 6): slots
+  of our own after her row, hers are not replaced. **His clothes open in the wardrobe of a player who has met him**
+  (proposed: within 6 m, his sight is 65 degrees and 20 m, 10 m in the dark), and **the player colours them with the
+  game's own tool** ("just in time we extend POGLib"): a chest part takes the clothes palette already; the game colours
+  no accessory, so ours follows the clothes colour. Written in POGBlackMarket 0.0.4, **not run yet**: wardrobe arrays
+  swapped in only while it is open (random goblins are drawn from the same arrays), found parts in a preference, never in
+  the game's list. Then: the same in POGLib (Content.Cosmetics).
+  From the files: no seller shoots (the ranged attack state is off in every seller); they stab with the shiv in the left hand.
+- **Merchant classes** (the user, 2026-11-25: "the system of weights seems very unstable to me; with many mods there will be
+  some chaos. I think I should add a system of classes, so that not a certain merchant is drawn but a certain class, which
+  holds several merchants of one mod for example, and then chance decides which of them turns up on the level"). For R2.
+  Today's prototype is the bad case: each mod would patch the stall and roll by itself, so two mods can claim one stall
+  and the later one only gets what the earlier ones left. Simulated (200 000 draws per case, every mod asks for 25%;
+  not the game): the game's own merchant keeps 24% of stalls with 5 such mods and 6% with 10 (one shared list of weights:
+  37% and 23%); a mod with 5 merchants against a mod with 1 takes 56% against 11% in a shared list.
+  **Decided 2026-11-25** (the user: "almost; I would lower the ceiling to 25% for vanilla merchants. Get to work", first read the
+  wrong way round (mods at most 25%), then: "25% to vanilla. To the others 75%. No more. But it can be set in the config"): the game's own
+  merchants keep at least 25%, the mods together take at most 75% (`StandardCeiling`), the host's setting.
+  One decision per stall, in POGShops, on the host, the game's own draw untouched: (1) the classes' chances add up to the
+  ceiling, past it all shrink in proportion; (2) a class by its share; (3) a merchant of it by weights that mean something
+  only inside. **One mod = one class** (its ModId) and a class asks for **at most 25%** (both can be loosened later); the host sets
+  the ceiling and a chance per class, over 25% too, on a POG Config page. A merchant that cannot come (look or goods missing)
+  is left out before the draw, so a stall is wholly a mod's or the game's (the prototype could put contraband on an ordinary
+  merchant's stall when the dressing failed). No conditions in the first version but the stalls. Refused: a class id of the
+  author's own (`CategoryID`: ten ids would be ten shares), equal weights for all classes (a rare class could not be rare).
+  **Built the same day, POGShops 0.1.2 (POGLib unchanged, so no new version of it):** `Shops/Model/Merchants.cs` (pure, 58 unit tests; 22 planted defects, all caught, with a control),
+  `MerchantStalls`, `MerchantSettings`, `ShopsPage`; `ShopsApi.AddMerchants`, `MerchantOf` (15 new lines of surface, none gone;
+  `api/POGShops.txt` rewritten). `SellerTemplates` is gone: a host's file `sellers` is a class too and no longer
+  changes the entrance list. POGBlackMarket 0.0.5 stands on it (three looks = three merchants, no chance of its own, no reflection
+  into POGShops).
+  **In the game, host, no Steam (`pog-runs/local/merchants.sh`), POGShops 0.1.2 (11717eba) on the published POGLib 0.1.2 (a25916ec), 0 failures:**
+  `merch-1-bm` (Black Market at 100% beside a class that cannot come: his coat, name, five different human things with prices), `merch-2-solo`
+  (one good, four places empty without price tags), `merch-3-game` (ceiling 0: the game's own merchant and goods), `merch-4-page` (POG
+  Config's page: shown, moved, read back from the file on disk, put back), `merch-5-noconfig` (without POG Config: starts, says where the
+  settings are), `merch-6-file` (a host's file: `sellers` and `add` into its slot 2), `merch-7-default` (no settings: 25% / 10% / the game's own
+  65%), `merch-8-town`, and the asserting run `checks-23-shops012`.
+  **Found before the release:** the dungeon merchants' presets stand in DarkBurg too, another one each visit (Smith, Curiosa, MysticTent, Tinkerer seen), and the first
+  build let a mod's merchant keep them there (`merch-8-town-defect`: two stalls of two); the user wants none in a lobby. Now only in `GameScene`.
+  Also found: the driver's race with POGLanTest (it missed the main menu by 0.1 s and waited for ever), likely the one early local run of seven that hung.
+  Forced to 0 or 100%: **no frequency was measured in the game**, the odds are held by the unit tests only.
+  Left: a LAN run (the laptop was off: a client sees the merchant and buys), the other five stalls, the client side of a merchant's name (Black
+  Market does it itself by the coat's id), `sellers` in a mod's own file.
+- **Names** (the user, 2026-11-25): the mod is **Black Market** on Thunderstore; inside (DLL, repository, ids) `POGBlackMarket`.
+  The POG prefix is for libraries and tools, not for content mods.
 - **Spy goblins, a faction of their own** (the user, 2026-11-25, seeing three noir goblins side by side: "maybe it will
   be a whole faction? Spy goblins? They will trade information of some kind. But for now in the plans"). Not started;
   after the first noir seller works. To find out first: what a faction is in the game (the `Faction` enum, reputation

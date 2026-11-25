@@ -38,6 +38,7 @@ Everything POGLib and POGShops notice goes to `MelonLoader/Latest.log` in your m
 | `slot <id>: seller '<seller>' not found` | the seller's id is misspelt, or the seller is absent on this visit | see [22](22-shops-sellers-and-scenes.md) |
 | `no floor found within 1 m: at the row's height` | nothing solid under the slot's place | use the other side, or place it by coordinates |
 | `slot ... is not in <scene>. Closest slot ids here: ...` | a game slot's id is wrong for this scene | copy one of the ids the line offers |
+| `merchants of '<mod>': ...; they are not used` / `merchant <id>: ...; they do not come` | a dungeon merchant's class has a mistake, or a merchant lacks something now | see [23](23-shops-dungeon-merchants.md) |
 
 ## In co-op
 

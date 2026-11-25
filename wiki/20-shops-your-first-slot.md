@@ -1,7 +1,7 @@
 # 20 Shops: your first slot
 
 Sell your item at one of the game's sellers. You need [POGShops](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGShops/)
-(add `Largo-POGShops-0.1.1` to your manifest's dependencies) and an item with a `ShopCost`
+(add `Largo-POGShops-0.1.2` to your manifest's dependencies) and an item with a `ShopCost`
 ([02 Your first item](02-your-first-item.md)). No code: a file.
 
 ## The file
@@ -58,7 +58,7 @@ file**; a player with POGShops also sees its price tag where yours is.
 In the log (`MelonLoader/Latest.log`):
 
 ```
-[Shops] 1 shop file(s) from 1 mod(s): 1 new slot(s), 1 slot(s) with rules, 0 merchant(s); order BerryMod
+[Shops] 1 shop file(s) from 1 mod(s): 1 new slot(s), 1 slot(s) with rules, 0 dungeon merchant(s) in 0 class(es); order BerryMod
 [Shops] placed BerryMod:berry_stand at (8.77, 3.85, -11.30) in the row after Game.Spawning.ShopLocation Item_Torch_Unlit, on the floor (SM_Prop_Rug_02), sold by vanilla:NPC_ShopKeeperShort_Lobby_StarterShop (None)
 [Shops] BerryMod:berry_stand: BerryMod:GlowBerry (100% of 1 candidate(s))
 ```
@@ -66,7 +66,8 @@ In the log (`MelonLoader/Latest.log`):
 ## What your file cannot do in 0.1
 
 A mod's file places only **its own** slots. It cannot put items into the game's slots or another mod's (`add`),
-change what others sell (`patch`), or add dungeon merchants (`sellers`): a file with any of those is not used at
+change what others sell (`patch`), or add dungeon merchants (`sellers`; those come from code:
+[23 Shops: dungeon merchants](23-shops-dungeon-merchants.md)): a file with any of those is not used at
 all, and the log names each reason:
 
 ```

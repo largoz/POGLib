@@ -106,7 +106,7 @@ tables (`DT_BonusChest_*`) casually — a removed mod then NREs on save restore;
 Install POGShops too (a mod of its own on POGLib). Give the item a `ShopCost`, then place **your own slots** at
 the game's sellers in a `pogshop.json` next to your mod — no shop code. `"after"` puts a slot in the row of a
 seller's goods, so you write no coordinates. In 0.1 a mod's file cannot put items into the game's slots or another
-mod's, nor add dungeon merchants; a host's own file can. Full guide: [`SHOPS.md`](SHOPS.md); example:
+mod's, nor add dungeon merchants (those come from code: `ShopsApi.AddMerchants`); a host's own file can. Full guide: [`SHOPS.md`](SHOPS.md); example:
 `samples/ShopDemo/`.
 
 ## Key technical decisions
@@ -122,7 +122,7 @@ mod's, nor add dungeon merchants; a host's own file can. Full guide: [`SHOPS.md`
 
 ## Multiplayer note
 
-On the current game build (26668562, checked 2026-11-14 and over LAN on 2026-11-19) the game runs with
+On game build 26668562 (checked 2026-11-14 and over LAN on 2026-11-19) the game runs with
 `NetworkConfig.ForceSamePrefabs` **false**: a player without a content pack can join a modded host, and the
 objects of a pack it lacks simply do not appear for it (NGO logs "Failed to create object locally"). New shop
 slots are copies of the game's own slot, so every player sees those. [POG Mod Check](https://github.com/largoz/POGModCheck)

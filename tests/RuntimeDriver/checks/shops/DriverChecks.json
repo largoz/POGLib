@@ -29,7 +29,8 @@
     { "id": "curiosa_right", "scene": "PitOfGoblin_Lobby", "seller": "vanilla:NPC_ShopKeeper_Lobby_Hub_Curiosa",
       "after": "right", "pool": [ { "item": "vanilla:Item_Apple", "weight": 1 } ] }
   ],
-  // A dungeon merchant variant (driver dungeon=1): weight 100 makes the Curiosa preset near certain at the entrance.
+  // A dungeon merchant (driver dungeon=1 entrance=EntranceCave_Shopkeeper_Curiosa, and in the run's preferences
+  // MerchantCeiling and DriverChecks at 1.0, so the stall is always this one's).
   "sellers": [
     { "id": "test_merchant", "preset": "EntranceCave_Shopkeeper_Curiosa", "weight": 100,
       "slots": [ [ { "item": "ShopDemo:GlowBerry", "weight": 1 } ] ] }

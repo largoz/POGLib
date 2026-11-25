@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Test driver for POGLib: copied into the Gale profile's Mods/ for one run by run.sh and
+  <!-- Test driver for POGLib: copied into the test profile's Mods/ for one run by run.sh and
        removed afterwards. Never ship it. It plays the game from inside (no mouse): enters a session as
        host through the game's own save-slot menu, then runs the checks a scenario asks for. -->
   <PropertyGroup>
@@ -8,7 +8,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>POGLibRuntimeDriver</AssemblyName>
     <RootNamespace>POGLib.RuntimeDriver</RootNamespace>
-    <GameDir Condition="'$(GameDir)' == ''">$(HOME)/.local/share/com.kesomannen.gale/pit-of-goblin/profiles/Default</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">$(HOME)/.config/r2modmanPlus-local/PitOfGoblin/profiles/Tests</GameDir>
     <MelonDir>$(GameDir)\MelonLoader\net6</MelonDir>
     <InteropDir>$(GameDir)\MelonLoader\Il2CppAssemblies</InteropDir>
   </PropertyGroup>

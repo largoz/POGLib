@@ -35,6 +35,7 @@ Tens are sections, so a page can be added later without renumbering the rest. A 
 | 20 | Shops: your first slot | A slot in five lines | yes |
 | 21 | Shops: the shop file | Reference for `pogshop.json` | yes |
 | 22 | Shops: sellers and scenes | The game's sellers per scene, with their ids | yes |
+| 23 | Shops: dungeon merchants | Merchants at the dungeon's entrance: classes, chances, the host's settings | yes |
 | 30 | Mobs | Reserved | later |
 | 40 | Levels | Reserved | later |
 | 80 | Multiplayer and saves | What every player needs, saves, POG Mod Check | yes |
@@ -56,5 +57,5 @@ Tens are sections, so a page can be added later without renumbering the rest. A 
 
 - A page says what is **shown in the game** and what is **experimental**, the same split as the store page.
 - Every code example compiles: the upload script refuses a page whose ```csharp block does not build against the
-  current `POGLib.dll` (as the store README's sample was checked on 2026-11-22).
+  current `POGLib.dll` and `POGShops.dll` (as the store README's sample was checked on 2026-11-22).
 - Game art (screenshots are fine; extracted sprites and models are not) stays out of the repository.

@@ -114,7 +114,7 @@ namespace POGLib.RuntimeDriver
         public static void MerchantChecks(System.Collections.Generic.List<POGLib.Shops.SlotRecord> merchantSlots)
         {
             Check("a mod merchant came up", merchantSlots.Count > 0,
-                  merchantSlots.Count > 0 ? string.Join(", ", merchantSlots.Select(r => r.SlotId)) : "no slot of a mod merchant in this dungeon (weight 100 of ~110: unlikely)");
+                  merchantSlots.Count > 0 ? string.Join(", ", merchantSlots.Select(r => r.SlotId)) : "no slot of a mod merchant in this dungeon (is the Curiosa preset forced and the ceiling 1?)");
             foreach (var r in merchantSlots)
             {
                 if (r.Slot == null || r.Picked == null || r.Resolved.Untouched) continue;

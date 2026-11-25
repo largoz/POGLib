@@ -7,6 +7,19 @@ POGLib.Shops.Model.ItemDisplayDef | prop POGLib.Shops.Model.TagDef Standing { ge
 POGLib.Shops.Model.ItemDisplayDef | prop String Item { get; set; }
 POGLib.Shops.Model.ItemDisplayDef | public ctor()
 POGLib.Shops.Model.ItemDisplayDef | sealed class
+POGLib.Shops.Model.MerchantClass | prop Double Chance { get; set; }
+POGLib.Shops.Model.MerchantClass | prop String ModId { get; set; }
+POGLib.Shops.Model.MerchantClass | prop String Title { get; set; }
+POGLib.Shops.Model.MerchantClass | prop System.Collections.Generic.List`1<POGLib.Shops.Model.MerchantDef> Merchants { get; set; }
+POGLib.Shops.Model.MerchantClass | public ctor()
+POGLib.Shops.Model.MerchantClass | sealed class
+POGLib.Shops.Model.MerchantDef | prop Double Weight { get; set; }
+POGLib.Shops.Model.MerchantDef | prop String Id { get; set; }
+POGLib.Shops.Model.MerchantDef | prop System.Collections.Generic.List`1<POGLib.Shops.Model.PoolEntry> Goods { get; set; }
+POGLib.Shops.Model.MerchantDef | prop System.Collections.Generic.List`1<String> Stalls { get; set; }
+POGLib.Shops.Model.MerchantDef | prop System.Func`1<String> Look { get; set; }
+POGLib.Shops.Model.MerchantDef | public ctor()
+POGLib.Shops.Model.MerchantDef | sealed class
 POGLib.Shops.Model.PatchOp | prop Boolean Remove { get; set; }
 POGLib.Shops.Model.PatchOp | prop String Item { get; set; }
 POGLib.Shops.Model.PatchOp | prop String ReplaceWith { get; set; }
@@ -53,6 +66,8 @@ POGLib.Shops.Model.TagDef | prop Single[] Rot { get; set; }
 POGLib.Shops.Model.TagDef | public ctor()
 POGLib.Shops.Model.TagDef | sealed class
 POGLib.Shops.ShopsApi | public static Boolean AddFile(POGLib.Shops.Model.ShopFile file)
+POGLib.Shops.ShopsApi | public static Boolean AddMerchants(POGLib.Shops.Model.MerchantClass merchants)
+POGLib.Shops.ShopsApi | public static String MerchantOf(Il2CppEntities.NPCEntity seller)
 POGLib.Shops.ShopsApi | public static Void Reload()
 POGLib.Shops.ShopsApi | static class
 POGLib.Shops.ShopsMod | public ctor()

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 (2026-11-25)
+
+- **Dungeon merchants of mods, by classes** (`ShopsApi.AddMerchants`): one mod is one class; a class is drawn first, by its
+  chance, then a merchant inside it. All mods together take at most 75% of the stalls, a mod asks for at most 25%. The host sets the ceiling and each
+  mod's chance on a POG Config page (POG Config is optional).
+- A host's own file: `sellers` no longer changes the game's list of who stands at the entrance, so the dungeon of a seed is the
+  game's own again; its `weight` is now the weight inside the file's class.
+- Needs POGLib 0.1.2. Nothing changes where no mod adds a merchant.
+
 ## 0.1.1 (2026-11-23)
 
 - `"after": "right"` placed nothing at some sellers (Curiosa, Pitaxas: "the slot is in the middle of the row"); the

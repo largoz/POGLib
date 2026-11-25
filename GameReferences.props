@@ -2,8 +2,8 @@
   <!-- The game's assemblies, shared by POGLib.csproj and Shops/POGShops.csproj (one list, so the two cannot drift). -->
   <PropertyGroup>
     <!-- The folder that holds MelonLoader\net6 and MelonLoader\Il2CppAssemblies. The default assumes
-         this project sits at <game>\ModSource\POGLib; override with -p:GameDir=... (for a Gale
-         profile: -p:GameDir=~/.local/share/com.kesomannen.gale/pit-of-goblin/profiles/Default). -->
+         this project sits at <game>\ModSource\POGLib; override with -p:GameDir=... (for an r2modman
+         profile: -p:GameDir=~/.config/r2modmanPlus-local/PitOfGoblin/profiles/Tests). -->
     <GameDir Condition="'$(GameDir)' == ''">$(MSBuildThisFileDirectory)..\..</GameDir>
     <MelonDir>$(GameDir)\MelonLoader\net6</MelonDir>
     <InteropDir>$(GameDir)\MelonLoader\Il2CppAssemblies</InteropDir>

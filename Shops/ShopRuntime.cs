@@ -51,12 +51,14 @@ namespace POGLib.Shops
             _memo.Clear();
             _placedAfter.Clear();
             ShopChoices.Reset();
-            SellerTemplates.Reset();
+            MerchantStalls.Reset();
         }
+
+        internal static double NextRandom() => _rng.NextDouble();
 
         private static ShopCatalog Catalog => ShopsPlugin.Instance?.Catalog;
 
-        private static bool IsHost
+        internal static bool IsHost
         {
             get { var nm = NetworkManager.Singleton; return nm != null && nm.IsListening && nm.IsServer; }
         }
@@ -82,10 +84,13 @@ namespace POGLib.Shops
                 if (seen.Prefab != null || seen.Picked == ShopIds.Nothing) ApplyChoice(slot, seen.Prefab);
                 return;
             }
-            string id = SellerTemplates.VariantSlotId(slot, catalog, _rng) ?? ShopScene.SlotId(slot);
+            // A dungeon merchant's slot whose stall a mod's merchant keeps goes by that merchant's id, any other by its own.
+            var stall = MerchantStalls.Of(slot.transform);
+            string id = stall != null && stall.Ours ? MerchantStalls.SlotId(stall, slot) : ShopScene.SlotId(slot);
             var vanilla = ShopScene.VanillaEntriesOf(slot);
             var memo = new Memo { Vanilla = vanilla };
             _memo[key] = memo;
+            if (stall?.Goods != null) { StockFromGoods(slot, stall, id, vanilla, memo); return; }
             var resolved = catalog.Resolve(id, vanilla);
             var rec = new SlotRecord { SlotId = id, Slot = slot, Resolved = resolved, Vanilla = vanilla };
             _records[id] = rec;
@@ -122,6 +127,21 @@ namespace POGLib.Shops
             if (chosenPrefab == null) { MakeEmpty(slot, rec); return; }
             ApplyChoice(slot, chosenPrefab);
             MelonLogger.Msg($"[POGLib] [Shops] {id}: {chosen.Item} ({100 * resolved.ChanceAmong(chosen, usable):0.#}% of {resolved.Entries.Count(e => usable(e) && WeightedPick.Usable(e.Weight))} candidate(s))");
+        }
+
+        // The next of the goods a mod's merchant puts out; a place nothing is left for stays empty.
+        private static void StockFromGoods(ShopLocation slot, MerchantStalls.Stall stall, string id, List<VanillaEntry> vanilla, Memo memo)
+        {
+            var entries = stall.Merchant.Goods.Select(g => new SlotEntry(g.Item, g.Weight, stall.Class.ModId)).ToList();
+            var history = entries.Select(e => new HistoryRecord(e.AddedBy, $"merchant's goods: {e.Item} weight {e.Weight:0.##}")).ToList();
+            var rec = new SlotRecord { SlotId = id, Slot = slot, Resolved = new ResolvedSlot(id, entries, history, false), Vanilla = vanilla };
+            _records[id] = rec;
+            string item = stall.Goods.Count > 0 ? stall.Goods.Dequeue() : ShopIds.Nothing;
+            rec.Picked = memo.Picked = item;
+            if (item == ShopIds.Nothing) { rec.Notes.Add("the merchant has no more goods: the place stays empty"); MakeEmpty(slot, rec); return; }
+            memo.Prefab = ShopScene.ResolveItemPrefab(item);
+            ApplyChoice(slot, memo.Prefab);
+            MelonLogger.Msg($"[POGLib] [Shops] {id}: {item}");
         }
 
         private static void MakeEmpty(ShopLocation slot, SlotRecord rec)

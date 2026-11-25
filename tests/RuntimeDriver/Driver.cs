@@ -28,7 +28,7 @@ namespace POGLib.RuntimeDriver
     {
         const string HubScene = "PitOfGoblin_Lobby";
 
-        enum Step { WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, Outfit, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
+        enum Step { Wardrobe, Client, WaitMenu, OpenSaves, StartSlot, WaitHub, Settle, Checks, Look, Outfit, SaveTest, DevTools, Jumps, Dungeon, Stay, Done }
 
         Step _step = Step.WaitMenu;
         float _next;
@@ -58,6 +58,9 @@ namespace POGLib.RuntimeDriver
             Checks.Enabled = Cfg("checks", 0) == 1;
             if (Checks.Enabled) Checks.RegisterTestItems();
             Explore.Enabled = Cfg("explore", 0) == 1;
+            Noir.Init(_cfg, Log);
+            if (Cfg("merchants", 0) == 1) Merchants.Register();
+            if (Cfg("noir", 0) == 1) try { Noir.Enable(HarmonyInstance, _cfg, Log); } catch (Exception ex) { Log($"noir: patch FAILED {ex.GetType().Name}: {ex.Message}"); }
         }
 
         // Every way out ends with the player's setting back at its default and the check count.
@@ -72,8 +75,11 @@ namespace POGLib.RuntimeDriver
             Log(how);
         }
 
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName) =>
+        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+        {
             Log($"scene loaded: {sceneName} (build {buildIndex}); {Role()}");
+            if (_cfg.ContainsKey("entrance") && sceneName == "GameScene") Noir.OnScene();
+        }
 
         static string Role()
         {
@@ -109,6 +115,11 @@ namespace POGLib.RuntimeDriver
             {
                 case Step.WaitMenu:
                     // The main menu is up when NetworkMenu exists and its current state is the main state.
+                    // configpage=1: the open panel is a menu state of its own, so its steps do not wait for the main menu.
+                    if (_pageOpen && !_pageDone) { float w = Merchants.PageStep(); if (w > 0) { _next = Time.unscaledTime + w; return; } _pageDone = true; Log("page: done"); _next = Time.unscaledTime + 2f; return; }
+                    // start=0: the mod that hosts may be through the main menu between two of our looks (2026-11-25: 0.1 s, the
+                    // driver then waited for the menu for ever; likely the one earlier run of seven that hung in the hub).
+                    if (Cfg("start", 1) == 0 && Role() == "host") { Log("hosting already (the main menu was passed between two looks)"); _step = Step.WaitHub; _deadline = Time.unscaledTime + 240f; _next = Time.unscaledTime + 1f; return; }
                     var menu = NetworkMenu.Instance;
                     if (menu == null || menu.m_currentState == null) { _next = Time.unscaledTime + 1f; return; }
                     if (menu.m_currentState.TryCast<NetworkMenuMainState>() == null) { _next = Time.unscaledTime + 1f; return; }
@@ -118,9 +129,101 @@ namespace POGLib.RuntimeDriver
                     if (_cfg.TryGetValue("savetest", out var st) && st == "delete") { _deleting = true; return; }
                     // start=0: another mod hosts (POGLanTest on a machine without Steam, where only its LAN hosting
                     // works); the driver only waits for the hub as host.
+                    if (Cfg("wardrobe", 0) == 1 && _wd == 0) { _step = Step.Wardrobe; _next = Time.unscaledTime + 6f; return; }
+                    if (Cfg("configpage", 0) == 1 && !_pageDone) { _pageOpen = true; _next = Time.unscaledTime + 0.5f; return; }
+                    if (Cfg("client", 0) == 1) { Log("client=1: waiting for the dungeon"); _step = Step.Client; _deadline = Time.unscaledTime + 900f; _next = Time.unscaledTime + 1f; return; }
                     if (Cfg("start", 1) == 0) { Log("start=0: waiting for someone else to host"); _step = Step.WaitHub; _deadline = Time.unscaledTime + 240f; _next = Time.unscaledTime + 1f; return; }
                     _step = Step.OpenSaves; _next = Time.unscaledTime + 3f;
                     return;
+
+                // wardrobe=1: open the game's own wardrobe in the main menu, show accessories and chests, put on what is named
+                // (wardrobechest=, wardrobeacc= ids; wardrobecolor= clothes colour), then leave it.
+                case Step.Wardrobe:
+                {
+                    var ui = Resources.FindObjectsOfTypeAll<Il2CppGame.Menu.NetworkMenuCharacterAppearance>().FirstOrDefault(u => u.gameObject.scene.IsValid());
+                    if (ui == null) { Log("wardrobe: no NetworkMenuCharacterAppearance in the scene"); _wd = 99; _step = Step.WaitMenu; _next = Time.unscaledTime + 1f; return; }
+                    uint Id(string k) => _cfg.TryGetValue(k, out var v) && uint.TryParse(v, out var n) ? n : 0;
+                    switch (_wd++)
+                    {
+                        case 0: NetworkMenu.Instance.SetState(ui); Log("wardrobe: opened"); _next = Time.unscaledTime + 8f; return;
+                        case 1: ui.SetCategory(CustomGoblinService.Category.Hair, true); Log($"wardrobe: hairs {ui.m_customGoblin.m_hairs.Length}, chests {ui.m_customGoblin.m_chests.Length}"); _next = Time.unscaledTime + 8f; return;
+                        case 2: Log("shot wardrobe_hair"); _next = Time.unscaledTime + 4f; return;
+                        case 3:
+                        {
+                            // An own hair style of the game first (what "right" looks like), then the one asked for.
+                            var e = ui.m_menuCharacter;
+                            Log($"wardrobe: appearance {(e != null ? e.name : "null")} head {(e?.m_headAnchor_TP != null ? e.m_headAnchor_TP.name : "-")}");
+                            if (e != null && e.m_headAnchor_TP == null) { e.RefreshAnchors(); Log($"wardrobe: after RefreshAnchors head {(e.m_headAnchor_TP != null ? e.m_headAnchor_TP.name : "-")}"); }
+                            ui.OnHairSelection(1588855695); ui.OnHairColorSelection(4);
+                            _next = Time.unscaledTime + 2f; return;
+                        }
+                        case 4: Log("shot wardrobe_hairvanilla"); _next = Time.unscaledTime + 4f; return;
+                        case 5:
+                            if (Id("wardrobehair") != 0) ui.OnHairSelection(Id("wardrobehair"));
+                            if (_cfg.ContainsKey("wardrobehaircolor")) ui.OnHairColorSelection((ushort)Cfg("wardrobehaircolor", 0));
+                            if (ui.m_scrollRect != null) ui.m_scrollRect.verticalNormalizedPosition = CfgF("wardrobescroll", 0.45f);
+                            _next = Time.unscaledTime + 2f; return;
+                        case 6: Log("shot wardrobe_hat"); _next = Time.unscaledTime + 4f; return;
+                        case 7: ui.SetCategory(CustomGoblinService.Category.Chest, true); _next = Time.unscaledTime + 3f; return;
+                        case 8: if (Id("wardrobechest") != 0) ui.OnChestSelection(Id("wardrobechest")); _next = Time.unscaledTime + 2f; return;
+                        case 9: Log("shot wardrobe_chest"); _next = Time.unscaledTime + 4f; return;
+                        case 10: if (_cfg.ContainsKey("wardrobecolor")) ui.OnChestColorSelection((ushort)Cfg("wardrobecolor", 0)); _next = Time.unscaledTime + 2f; return;
+                        case 11: Log("shot wardrobe_color"); _next = Time.unscaledTime + 4f; return;
+                        case 12:
+                        {
+                            var rs = Resources.FindObjectsOfTypeAll<Il2CppGame.Players.EntityCosmetics>().Where(e => e.gameObject.scene.IsValid() && e.m_currentPartsTP != null);
+                            foreach (var e in rs)
+                            {
+                                for (int pt = 0; pt <= 18; pt++)
+                                    foreach (var (which, dict) in new[] { ("TP", e.m_currentPartsTP), ("FP", e.m_currentPartsFP) })
+                                        if (dict != null && dict.ContainsKey((CustomGoblinService.Part)pt)) { var go = dict[(CustomGoblinService.Part)pt]; Log($"wardrobe:   {which} {(CustomGoblinService.Part)pt} = {(go != null ? $"{go.name} layer {LayerMask.LayerToName(go.layer)} active {go.activeInHierarchy} at {go.transform.position:F2} scale {go.transform.lossyScale:F2} parent {go.transform.parent?.name}" : "null")}"); }
+                                var bodyR = e.GetComponentsInChildren<SkinnedMeshRenderer>(true).FirstOrDefault(r => r.name.StartsWith("CH_Goblin"));
+                                Log($"wardrobe:   rig TP {(e.m_rigObjectTP != null ? e.m_rigObjectTP.name : "-")} FP {(e.m_rigObjectFP != null ? e.m_rigObjectFP.name : "-")} head {(e.m_headAnchor_TP != null ? e.m_headAnchor_TP.name : "-")} body {(bodyR != null ? bodyR.name + " layer " + LayerMask.LayerToName(bodyR.gameObject.layer) + " verts " + bodyR.sharedMesh.vertexCount : "-")}");
+                            }
+                            foreach (var e in rs) Log($"wardrobe: {e.name} wears chest {e.m_currentCustomizationData.ChestId} acc {e.m_currentCustomizationData.GetAccessory(0)} colour {e.m_currentCustomizationData.ChestColorIndex}; parts {e.m_currentPartsTP.Count}");
+                            ui.OnBackButton(); Log("wardrobe: left"); _next = Time.unscaledTime + 4f; return;
+                        }
+                        default:
+                            Log($"wardrobe: after it hairs {ui.m_customGoblin?.m_hairs.Length}, chests {ui.m_customGoblin?.m_chests.Length}; state {NetworkMenu.Instance.m_currentState?.GetIl2CppType().Name}");
+                            if (Cfg("wardrobeonly", 0) == 1) { Finish("done"); return; }
+                            _step = Step.WaitMenu; _next = Time.unscaledTime + 1f; return;
+                    }
+                }
+
+                // A client that another mod joins (POGLanTest): in the dungeon, look at the merchant and ask for shots
+                // ("[LAN-SHOT] want <name>", taken by the laptop's watcher).
+                case Step.Client:
+                {
+                    if (Time.unscaledTime > _deadline) { Finish("done (client: no dungeon)"); return; }
+                    if (SceneManager.GetActiveScene().name != "GameScene" || Role() != "client") { _next = Time.unscaledTime + 1f; return; }
+                    if (_cl == 0) { Log("client: in the dungeon"); _cl = 1; _next = Time.unscaledTime + 20f; return; }
+                    if (_cl == 1)
+                    {
+                        NpcSpawner sp = null;
+                        foreach (var x in UnityEngine.Object.FindObjectsOfType<NpcSpawner>())
+                            for (var t = x.transform; t != null; t = t.parent) if (t.name.StartsWith("EntranceCave_Shopkeeper")) sp = x;
+                        _clNpc = sp == null ? null : UnityEngine.Object.FindObjectsOfType<Il2CppEntities.NPCEntity>().OrderBy(n => Vector3.Distance(n.transform.position, sp.transform.position)).FirstOrDefault();
+                        if (_clNpc == null) { Log($"client: no merchant yet (spawner {(sp != null)})"); _next = Time.unscaledTime + 3f; return; }
+                        var ap = _clNpc.Appearance;
+                        Log($"client: merchant {_clNpc.name} at {_clNpc.transform.position:F2} tag='{_clNpc.m_npcName}' chest id {_clNpc.CosmeticsData.ChestId} worn {(ap?.m_currentPartsTP != null ? ap.m_currentPartsTP.Count : -1)}; draws {string.Join(", ", _clNpc.GetComponentsInChildren<Renderer>(false).Select(r => r.name))}");
+                        _cl = 2; _next = Time.unscaledTime + 0.5f; return;
+                    }
+                    if (_cl <= 4 && _clNpc != null)
+                    {
+                        HookCamera();
+                        var f = _clNpc.transform.position + Vector3.up * 0.7f;
+                        float d = _cl == 3 ? 3.2f : 1.5f;
+                        _ovPos = f + (_cl == 4 ? (_clNpc.transform.forward + _clNpc.transform.right).normalized : _clNpc.transform.forward) * d + Vector3.up * (_cl == 3 ? 0.9f : 0.2f);
+                        _ovRot = Quaternion.LookRotation(f - _ovPos); _override = true;
+                        if (!_clAsked) { _clAsked = true; _next = Time.unscaledTime + 1.5f; return; }
+                        _clAsked = false;
+                        LoggerInstance.Msg("[LAN-SHOT] want " + new[] { "noirclient_front", "noirclient_wide", "noirclient_side" }[_cl - 2]);
+                        _cl++; _next = Time.unscaledTime + 6f; return;
+                    }
+                    _override = false;
+                    Finish("done");
+                    return;
+                }
 
                 case Step.OpenSaves:
                 {
@@ -337,6 +440,8 @@ namespace POGLib.RuntimeDriver
             if (_of == 0)
             {
                 if (Cfg("outfits", 0) == 1) Outfit.Dump(Log);
+                if (Cfg("npcs", 0) == 1) Noir.DumpNpcPrefabs(Log);
+                if (Cfg("items", 0) == 1) Noir.DumpItems(Log);
                 Outfit.Make(_cfg, Log);
                 _of = 1; _next = Time.unscaledTime + (Outfit.Made.Count > 0 ? 5f : 0.5f);
                 return false;
@@ -463,6 +568,8 @@ namespace POGLib.RuntimeDriver
         // shop tools' timer freeze holds the round clock.
         int _dg;
         float _dgDeadline, _t1;
+        int _wd; bool _pageOpen, _pageDone;
+        int _cl; bool _clAsked; Il2CppEntities.NPCEntity _clNpc; float _clientsSince;
         bool DungeonStep()
         {
             string scene = SceneManager.GetActiveScene().name;
@@ -470,6 +577,15 @@ namespace POGLib.RuntimeDriver
             {
                 case 0:
                 {
+                    // waitclients=1: go down only with a client that has been in the hub for a while.
+                    if (Cfg("waitclients", 0) > 0)
+                    {
+                        int n = UnityEngine.Object.FindObjectsOfType<Il2CppEntities.EntityPlayer>().Length - 1;   // players that stand in the hub, the host aside
+                        if (_dgDeadline == 0f) { _dgDeadline = Time.unscaledTime + 420f; Log("dungeon: waiting for a client"); }
+                        if (n < Cfg("waitclients", 0)) { _clientsSince = 0f; if (Time.unscaledTime > _dgDeadline) { Log("dungeon: no client came"); return true; } _next = Time.unscaledTime + 1f; return false; }
+                        if (_clientsSince == 0f) { _clientsSince = Time.unscaledTime; Log($"dungeon: {n} client(s) connected"); }
+                        if (Time.unscaledTime < _clientsSince + CfgF("clientsettle", 40f)) { _next = Time.unscaledTime + 1f; return false; }
+                    }
                     var bucket = UnityEngine.Object.FindObjectsOfType<Il2CppGame.Gameplay.Bucket>().FirstOrDefault();
                     if (bucket == null) { Log("dungeon: no Bucket in the hub"); return true; }
                     Log($"dungeon: bucket at {bucket.m_location?.Value} -> {bucket.m_destination?.Value}; StartBucket()");
@@ -484,6 +600,9 @@ namespace POGLib.RuntimeDriver
                 {
                     foreach (var sp in POGLib.Shops.ShopScene.SellersInLoadedScenes())
                         Log($"dungeon: seller {POGLib.Shops.ShopScene.SellerId(sp)} root {sp.transform.root.name} slots {sp.m_itemsForSale.Length}");
+                    if (Cfg("merchant", 0) == 1) Noir.FindMerchant();
+                    if (_cfg.TryGetValue("expectmerchant", out var who)) { try { Merchants.CheckStall(who); } catch (Exception ex) { Checks.Check("stall checks", false, ex.ToString()); } Log("checks: " + Checks.Summary); }
+                    if (Cfg("noir", 0) == 1 || Cfg("merchant", 0) == 1) { _dg = 10; _next = Time.unscaledTime + 1f; return false; }
                     CheckShopRules();
                     var mine = POGLib.Shops.ShopRuntime.Records.Values.Where(r => r.SlotId.Contains("#")).OrderBy(r => r.SlotId).ToList();
                     foreach (var r in mine) Log($"dungeon: mod merchant slot {r.SlotId} picked {r.Picked}");
@@ -512,6 +631,36 @@ namespace POGLib.RuntimeDriver
                     SetField("_freeze", false);
                     _t1 = t2;
                     _dg = 5; _next = Time.unscaledTime + 8f; return false;
+                }
+                // noir=1: the merchant from the front and with its stall; presets=1: what each preset holds.
+                case 10:
+                case 11:
+                {
+                    var n = Noir.Npc;
+                    if (n == null) { Log("noir: no noir goblin in this dungeon"); _dg = 12; _next = Time.unscaledTime + 0.5f; return false; }
+                    if (_dg == 10)
+                    {
+                        Log($"noir: {n.name} at {n.transform.position:F2} tag='{n.m_npcName}' spawned={n.IsSpawned} worn {(n.Appearance?.m_currentPartsTP != null ? n.Appearance.m_currentPartsTP.Count : -1)}; draws {string.Join(", ", n.GetComponentsInChildren<Renderer>(false).Select(r => r.name))}");
+                        if (Noir.Spawner?.m_itemsForSale != null)
+                            Log("noir: slots " + string.Join(", ", Noir.Spawner.m_itemsForSale.Where(x => x != null).Select(x => $"{x.name} holds {(x.CurrentShopItem != null ? x.CurrentShopItem.name : "-")} price {x.CurrentPrice} faction {x.m_shopFaction?.Value}")));
+                    }
+                    HookCamera();
+                    var f = n.transform.position + Vector3.up * 0.7f;
+                    float dist = _dg == 10 ? 1.5f : 3.4f;
+                    _ovPos = f + n.transform.forward * dist + n.transform.right * (_dg == 10 ? 0.3f : 0.8f) + Vector3.up * (_dg == 10 ? 0.2f : 0.9f);
+                    _ovRot = Quaternion.LookRotation(f - _ovPos); _override = true;
+                    Log(_dg == 10 ? "shot noir_front" : "shot noir_wide");
+                    _dg++; _next = Time.unscaledTime + 5f; return false;
+                }
+                case 12:
+                {
+                    if (Cfg("presets", 0) != 1) { _override = false; return true; }
+                    var list = Noir.MerchantList();
+                    var all = Resources.FindObjectsOfTypeAll<GameObject>().Where(g => g != null && g.transform.parent == null && !g.scene.IsValid() && g.name.StartsWith("EntranceCave_Shopkeeper")).GroupBy(g => g.name).Select(g => g.First()).OrderBy(g => g.name).ToArray();
+                    Log($"noir: {all.Length} presets in memory; the list has {(list != null ? list.PropList.Length : -1)}");
+                    Noir.DumpPresets(all);
+                    _override = false;
+                    return true;
                 }
                 default:
                 {

@@ -7,7 +7,7 @@ using Xunit;
 namespace POGLib.Shops.Tests
 {
     /// <summary>
-    /// The one weighted draw the game uses for slots and merchant variants (ShopRuntime, SellerTemplates).
+    /// The one weighted draw the game uses for slots and merchant variants (ShopRuntime, MerchantDraw).
     /// Expected values come from the weights themselves (w / sum), not from another draw.
     /// </summary>
     public class WeightedPickTests

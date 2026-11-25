@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""wikicheck.py <wiki dir> <POGLib.dll> <game profile dir>
+"""wikicheck.py <wiki dir> <POGLib.dll> <game profile dir> [<POGShops.dll>]
 
 Compiles every ```csharp block of every wiki page against the given POGLib.dll, so a page never shows code that
 does not build. A block with a class in it is compiled as it is; any other block is taken as members of a
@@ -7,6 +7,7 @@ ModItemDefinition initializer (`Visual = ...,`) and wrapped in one. Exit code = 
 import os, re, subprocess, sys, tempfile, pathlib
 
 wiki, dll, profile = sys.argv[1], os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3])
+shops = os.path.abspath(sys.argv[4]) if len(sys.argv) > 4 else None
 work = pathlib.Path(tempfile.mkdtemp(prefix="wikicheck-"))
 WRAP = """using System.IO;
 using POGLib.Items;
@@ -31,6 +32,7 @@ proj = f"""<Project Sdk="Microsoft.NET.Sdk">
     <OutputType>Library</OutputType><MelonDir>{profile}/MelonLoader/net6</MelonDir><InteropDir>{profile}/MelonLoader/Il2CppAssemblies</InteropDir></PropertyGroup>
   <ItemGroup>
     <Reference Include="POGLib"><HintPath>{dll}</HintPath><Private>false</Private></Reference>
+    {f'<Reference Include="POGShops"><HintPath>{shops}</HintPath><Private>false</Private></Reference>' if shops else ""}
     <Reference Include="MelonLoader"><HintPath>$(MelonDir)/MelonLoader.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Il2CppInterop.Runtime"><HintPath>$(MelonDir)/Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Il2Cppmscorlib"><HintPath>$(InteropDir)/Il2Cppmscorlib.dll</HintPath><Private>false</Private></Reference>

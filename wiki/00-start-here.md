@@ -6,7 +6,7 @@ it, lets your mod **sell** them in the game's shops. You write the item in C# (a
 in a small JSON file; the library does the rest: the network identity, the shell from the game, the name, the
 journal entry.
 
-Game build 26668562, MelonLoader 0.7.
+Game build 26791993, MelonLoader 0.7.
 
 ## What you can add today
 
@@ -19,6 +19,7 @@ Game build 26668562, MelonLoader 0.7.
 | Glow, particles, a melee weapon, a throwable | [12 Items: capabilities](12-items-capabilities.md) | experimental |
 | A use of your own when the item is used | 13 (later) | experimental, host only |
 | A slot at a seller that sells your items | [20 Shops: your first slot](20-shops-your-first-slot.md) | shown in the game |
+| A dungeon merchant with your goods and a look | [23 Shops: dungeon merchants](23-shops-dungeon-merchants.md) | shown on a host, not yet on a client |
 
 **Shown in the game** means seen working on a host and a client over LAN. **Experimental** means the code is there
 but nobody has seen it work in the game yet: it may change. **Not in 0.1:** natural loot drops, models from Unity
@@ -40,6 +41,7 @@ AssetBundles, mobs, levels.
 - [20 Shops: your first slot](20-shops-your-first-slot.md)
 - [21 Shops: the shop file](21-shops-the-shop-file.md)
 - [22 Shops: sellers and scenes](22-shops-sellers-and-scenes.md)
+- [23 Shops: dungeon merchants](23-shops-dungeon-merchants.md)
 
 **Everything else**
 - [80 Multiplayer and saves](80-multiplayer-and-saves.md)

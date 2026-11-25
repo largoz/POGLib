@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run POGLib in the real game (Steam + the Gale profile) under the runtime driver, then clean up.
+# Run POGLib in the real game (Steam + the r2modman profile "Tests") under the runtime driver, then clean up.
 #
 #   run.sh <out dir> [extra DLL or folder to deploy into Mods/ ...]
 #
@@ -10,7 +10,7 @@
 # everything it deployed. Prints the library's and driver's log lines.
 # Ask/announce before running: the game takes the screen for a few minutes (see _research/TESTING.md §0).
 set -u
-PROFILE="${POG_PROFILE:-$HOME/.local/share/com.kesomannen.gale/pit-of-goblin/profiles/Default}"
+PROFILE="${POG_PROFILE:-$HOME/.config/r2modmanPlus-local/PitOfGoblin/profiles/Tests}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 OUT="$1"; shift

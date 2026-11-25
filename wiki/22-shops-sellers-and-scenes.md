@@ -1,7 +1,7 @@
 # 22 Shops: sellers and scenes
 
 The sellers a slot can belong to, with the ids your shop file uses (`scene` and `seller`). Read from the game
-(build 26668562) by a dump of each scene; a game update can add or move sellers.
+(build 26791993) by a dump of each scene; a game update can add or move sellers.
 
 "Left" and "right" are as a customer facing the seller sees them; the slot goes one step past the slot named in the
 column. **Seen in the game** means a slot was placed there and looked at; the rest is worked out from the dump by
@@ -33,7 +33,7 @@ The hub's gambling seller (`vanilla:NPC_ShopKeeper_Lobby_Hub_Gambling`) has no s
 | Moggoma the Inventor, the gadget shop | `vanilla:NPC_ShopKeeper_Darkburg_MoggomaTheInventor` | a cog, a crossbow, bolts, tool belts | crossbow / tool belt |
 | The Maiden, the smith | `vanilla:NPC_ShopKeeper_Darkburg_Maiden` | dagger, axe and pickaxe on a table; an item rack, an anvil, armour on a dummy | pickaxe / axe |
 | The pig butcher, the food hall | `vanilla:NPC_ShopKeeper_Darkburg_PigButcher` | four mugs in a row | mug 04 / mug 01 |
-| The Tinkerer | `vanilla:NPC_Shopkeeper_Dungeon_Tinkerer` | a cog, dynamite, a slingshot | cog / dynamite. A merchant of the dungeon entrances; seen in DarkBurg in one dump, so probably drawn at random |
+| A dungeon merchant, another one each visit | e.g. `vanilla:NPC_Shopkeeper_Dungeon_Tinkerer`, `..._Smith`, `..._Curiosa` | a dungeon merchant's goods | **drawn at random**: your slot is placed only when that merchant stands there (the log says so). A mod's dungeon merchants ([23](23-shops-dungeon-merchants.md)) do not come here |
 
 ## A seller without a row
 

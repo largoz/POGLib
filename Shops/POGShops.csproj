@@ -12,7 +12,17 @@
 
   <Import Project="../GameReferences.props" />
 
+  <PropertyGroup>
+    <POGConfigDll Condition="'$(POGConfigDll)' == ''">$(GameDir)/Mods/POGConfig.dll</POGConfigDll>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="../POGLib.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Optional at runtime: only ShopsPage touches it, behind a NoInlining call. POG Config (Thunderstore: Largo/POG_Config) in
+         the profile's Mods/, or -p:POGConfigDll=... -->
+    <Reference Include="POGConfig"><HintPath>$(POGConfigDll)</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 </Project>
