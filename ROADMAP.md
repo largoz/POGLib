@@ -396,7 +396,7 @@ written after the experiment, not before.
   Control first, the same probe and files: `tags0` (the published DLL) shows "0" on the client at the hub's torch place, at a mod's new place and at four
   places of the dungeon's stall; `tags1` (the fix, a client without mods) and `tags2` (the fix on both) show none, and the 12 other places of the hub and
   the one good of the stall keep theirs. Not D12: there the place has an item, which the client lacks.
-  The fixed build (91305752, API list unchanged, 160 unit tests) also passes the asserting host run `checks-24-shops013`, 0 failures of 41. **Not published yet.**
+  The fixed build (91305752, API list unchanged, 160 unit tests) also passes the asserting host run `checks-24-shops013`, 0 failures of 41. **Published 2026-11-25** (07f2164; the package downloaded from the site holds this DLL).
 - **Names** (the user, 2026-11-25): the mod is **Black Market** on Thunderstore; inside (DLL, repository, ids) `POGBlackMarket`.
   The POG prefix is for libraries and tools, not for content mods.
 - **Spy goblins, a faction of their own** (the user, 2026-11-25, seeing three noir goblins side by side: "maybe it will
