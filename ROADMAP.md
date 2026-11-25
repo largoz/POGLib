@@ -375,6 +375,8 @@ written after the experiment, not before.
   Config's page: shown, moved, read back from the file on disk, put back), `merch-5-noconfig` (without POG Config: starts, says where the
   settings are), `merch-6-file` (a host's file: `sellers` and `add` into its slot 2), `merch-7-default` (no settings: 25% / 10% / the game's own
   65%), `merch-8-town`, and the asserting run `checks-23-shops012`.
+  **Published 2026-11-25:** POGShops 0.1.2 on Thunderstore (the downloaded DLL is the tested one, 11717eba), wiki page 23 and the corrected build
+  numbers uploaded (13 + 1 pages equal to the files).
   **Found before the release:** the dungeon merchants' presets stand in DarkBurg too, another one each visit (Smith, Curiosa, MysticTent, Tinkerer seen), and the first
   build let a mod's merchant keep them there (`merch-8-town-defect`: two stalls of two); the user wants none in a lobby. Now only in `GameScene`.
   Also found: the driver's race with POGLanTest (it missed the main menu by 0.1 s and waited for ever), likely the one early local run of seven that hung.

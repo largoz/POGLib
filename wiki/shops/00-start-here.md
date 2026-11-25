@@ -11,6 +11,8 @@ The pages about shops:
   every key of `pogshop.json`, and what a host's own file can do
 - [22 Shops: sellers and scenes](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGLib/wiki/6985-22-shops-sellers-and-scenes/):
   who sells what, and the ids your file uses
+- [23 Shops: dungeon merchants](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGLib/wiki/6989-23-shops-dungeon-merchants/):
+  a merchant of your own in the dungeon, and the host's settings
 - [90 Troubleshooting](https://thunderstore.io/c/pit-of-goblin/p/Largo/POGLib/wiki/6987-90-troubleshooting/): what the log says and how to fix it
 
 Your item itself comes from POGLib:
