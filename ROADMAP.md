@@ -312,7 +312,7 @@ written after the experiment, not before.
         are never changed, only the answer of `GetPartList` is longer) and by 6000 random looks, none with a part of ours.
   - [x] C4 A coat that moves with the body: GLB with weights by the bones' names. Seen running, sprinting, crouching, jumping (`run-3`, filmed
         on the king's plate; the user: "ideal").
-  - [~] **`Content.Cosmetics` is written** (0.1.3, not committed, not released): `docs/design/cosmetics.md`, wiki 50-52, API list +39 lines, none
+  - [x] **`Content.Cosmetics`** (0.1.3, published 2026-11-26): `docs/design/cosmetics.md`, wiki 50-52, API list +39 lines, none
         gone. 203 unit tests (the GLB reader against files Blender wrote, with planted values; nine planted faults in the reader, all caught);
         the asserting run `cosm-6` on the last build (9e5cb848), 63 checks, 0 failures; the shop checks `checks-25-poglib013` on the same build with
         the **published** POGShops 0.1.3, 0 failures of 41: seven groups worn in the menu, by an NPC and by the player (through the
@@ -416,8 +416,11 @@ written after the experiment, not before.
   places of the dungeon's stall; `tags1` (the fix, a client without mods) and `tags2` (the fix on both) show none, and the 12 other places of the hub and
   the one good of the stall keep theirs. Not D12: there the place has an item, which the client lacks.
   The fixed build (91305752, API list unchanged, 160 unit tests) also passes the asserting host run `checks-24-shops013`, 0 failures of 41. **Published 2026-11-25** (07f2164; the package downloaded from the site holds this DLL).
-- **POGShops 0.1.4 and Black Market 0.1.0 (2026-11-25/26, the user: "finish POGShops and Black Market"; written, not committed, not
-  released).** From the game's code first: a place that does not run out is the game's own `ItemSpawner.m_setSpawnCopyOnSpawn` (the
+- **POGShops 0.1.4 and Black Market 0.1.0 (2026-11-25/26, the user: "finish POGShops and Black Market"). Published 2026-11-26** with
+  POGLib 0.1.3 (8e7961c; the packages downloaded from the site hold the tested DLLs: POGLib 9e5cb848, POGShops 9c7f7605, Black Market
+  dc017fd8, the last run made from those packages as a mod manager lays them out, `pog-runs/rc-curiosa`); wiki uploaded (pages 50-52 new).
+  Black Market is **alpha** (the user: items of future mods may join his goods); its own repository largoz/POGBlackMarket, the store page
+  shows the three looks in black (`docs/looks.png`, rendered in Blender from our coat and hat on the goblin body read on this machine). From the game's code first: a place that does not run out is the game's own `ItemSpawner.m_setSpawnCopyOnSpawn` (the
   starter shop's bread); the spawner marks the item before it spawns (`InventoryItem.SpawnCopyInsteadOfPickup`, sent with the item),
   `BuyItem` then gives a copy (`SpawnCopyAndPickup`), and the seller's death clears the mark on the host. From the game's files: the
   stalls have 3 places (Antique, Foodlover, Smith, Tinkerer), 4 (MysticTent), 5 (Curiosa), each preset's counter along its own x, and
