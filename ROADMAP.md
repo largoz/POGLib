@@ -443,6 +443,17 @@ written after the experiment, not before.
   buys the bolts twice (18 -> 15 -> 12) and they stay, sees the dagger drawn; a client without our mods sees the seller's own name and
   trades the same; one who joins inside the dungeon is named and sees goods and marks, but the game makes them a ghost until the next level.
   Not checked: the client's bag counted after buying a copy (gold and the game's "Item purchased" only); a real Steam session.
+- **POGLib 0.1.4 and Black Market 0.1.1 (published 2026-11-26, the user: "if a part is locked it should stand there with a padlock;
+  POGLib must have it").** The game's wardrobe (`SetContent`): lock type 0 goes to `m_scrollViewContentUnlocked`, every other to
+  `m_scrollViewContentLocked`; `LockedReward` is open when its id is in `MetaData`'s list, `LockedAchievement` by the achievement,
+  `LockedHidden` is left out unless open; then `CustomizationItem.SetLocked`, which shows the padlock and leaves the toggle
+  interactable only when it is on. Ours stay lock type 0 (nothing enters `MetaData`); a prefix of `SetLocked` tells our button by its
+  picture, locks it and moves it to the locked section (the divider is counted after the list). `HiddenWhileLocked` keeps the old way.
+  Shown (`cosm-8`, `rc2-cosm` from the packages: 67/67): the locked part under the padlock among the locked ones, a mouse click puts nothing
+  on, the secret not there, the unlocked one open. Black Market 0.1.1: darker cloth (`_assets/NoirGoblin/cloth.py`, a 160/255 grey picture
+  the game's colour multiplies: the darkest clothes colour ~#2E3034), icon and store pictures from the game without its interface
+  (driver `clean=1`, `goblinviews`, `runshowturn`). Downloads hold the tested files: POGLib 76592fc9, Black Market 46ce6cd9, coat ec39c895.
+  A display that sleeps stops window shots: `kscreen-doctor --dpms on` and `kde-inhibit --power --screenSaver` around a run.
 - **Names** (the user, 2026-11-25): the mod is **Black Market** on Thunderstore; inside (DLL, repository, ids) `POGBlackMarket`.
   The POG prefix is for libraries and tools, not for content mods.
 - **Spy goblins, a faction of their own** (the user, 2026-11-25, seeing three noir goblins side by side: "maybe it will
