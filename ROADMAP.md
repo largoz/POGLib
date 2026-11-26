@@ -453,6 +453,8 @@ written after the experiment, not before.
   on, the secret not there, the unlocked one open. Black Market 0.1.1: darker cloth (`_assets/NoirGoblin/cloth.py`, a 160/255 grey picture
   the game's colour multiplies: the darkest clothes colour ~#2E3034), icon and store pictures from the game without its interface
   (driver `clean=1`, `goblinviews`, `runshowturn`). Downloads hold the tested files: POGLib 76592fc9, Black Market 46ce6cd9, coat ec39c895.
+  Black Market 0.1.2 the same day: the store picture back to the Blender sheet (darker cloth), no GIF, icon from the game on the plate (the
+  user: the Blender icon "is not the goblin itself"); DLL 1ef37187 (only its version changed), checked at his stall (`rc3-curiosa`).
   A display that sleeps stops window shots: `kscreen-doctor --dpms on` and `kde-inhibit --power --screenSaver` around a run.
 - **Names** (the user, 2026-11-25): the mod is **Black Market** on Thunderstore; inside (DLL, repository, ids) `POGBlackMarket`.
   The POG prefix is for libraries and tools, not for content mods.
