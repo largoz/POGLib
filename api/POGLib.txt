@@ -2,6 +2,7 @@ POGLib.Core.HostBridge | public Void RegisterHandler(String action, System.Actio
 POGLib.Core.HostBridge | public Void SendToClient(UInt64 clientId, String action, String payload)
 POGLib.Core.HostBridge | public Void SendToServer(String action, String payload)
 POGLib.Core.HostBridge | sealed class
+POGLib.Cosmetics.CosmeticDefinition | prop Boolean HiddenWhileLocked { get; set; }
 POGLib.Cosmetics.CosmeticDefinition | prop Boolean Locked { get; set; }
 POGLib.Cosmetics.CosmeticDefinition | prop POGLib.Cosmetics.CosmeticSlot Slot { get; set; }
 POGLib.Cosmetics.CosmeticDefinition | prop String ContentId { get; set; }

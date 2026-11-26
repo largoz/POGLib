@@ -62,7 +62,7 @@ namespace POGLib.Cosmetics
         {
             if (given == null) { MelonLogger.Error("[POGLib.Cosmetics] Register(null)."); return false; }
             // A copy: what the mod does to its object afterwards changes nothing here.
-            var d = new CosmeticDefinition { ModId = given.ModId, ContentId = given.ContentId, Slot = given.Slot, ModelFile = given.ModelFile, ThumbnailFile = given.ThumbnailFile, Locked = given.Locked };
+            var d = new CosmeticDefinition { ModId = given.ModId, ContentId = given.ContentId, Slot = given.Slot, ModelFile = given.ModelFile, ThumbnailFile = given.ThumbnailFile, Locked = given.Locked, HiddenWhileLocked = given.HiddenWhileLocked };
             d.HiddenInFirstPerson.AddRange(given.HiddenInFirstPerson.Where(h => h != null).Distinct());
             bool Refuse(string why) { MelonLogger.Error($"[POGLib.Cosmetics] {d.FullId} is refused: {why}."); return false; }
             var wrong = CosmeticRules.CheckIds(d.ModId, d.ContentId);
@@ -210,12 +210,24 @@ namespace POGLib.Cosmetics
         internal Il2CppReferenceArray<GameObject> Wardrobe(CustomGoblinService.Category category, Il2CppReferenceArray<GameObject> list)
         {
             if (list == null) return null;
-            var ours = _parts.Where(p => !p.Failed && p.Item != null && CategoryOf(p.Def.Slot) == category && IsUnlocked(p.Def.FullId)).ToList();
+            var ours = _parts.Where(p => !p.Failed && p.Item != null && CategoryOf(p.Def.Slot) == category
+                                         && CosmeticRules.InWardrobe(p.Def.Locked, p.Def.HiddenWhileLocked, IsUnlocked(p.Def.FullId)).listed).ToList();
             if (ours.Count == 0) return list;
             var longer = new Il2CppReferenceArray<GameObject>(list.Length + ours.Count);
             for (int i = 0; i < list.Length; i++) longer[i] = list[i];
             for (int i = 0; i < ours.Count; i++) longer[list.Length + i] = ours[i].Item.gameObject;
             return longer;
+        }
+
+        /// <summary>
+        /// Whether a wardrobe button with this picture is a part of ours the player has not unlocked: the game puts its own padlock on it.
+        /// (The game thinks every part of ours is open; which part a button is, only its picture says.)
+        /// </summary>
+        internal bool Padlocked(Sprite picture)
+        {
+            if (picture == null) return false;
+            var p = _parts.FirstOrDefault(x => x.Item != null && x.Item.m_thumbnail != null && x.Item.m_thumbnail.Pointer == picture.Pointer);
+            return p != null && CosmeticRules.InWardrobe(p.Def.Locked, p.Def.HiddenWhileLocked, IsUnlocked(p.Def.FullId)).padlock;
         }
 
         private bool Make(Part p, CustomGoblinService s, GoblinRig rig)

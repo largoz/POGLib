@@ -1,6 +1,6 @@
 {
   "name": "POGLib",
-  "version_number": "0.1.3",
+  "version_number": "0.1.4",
   "website_url": "https://github.com/largoz/POGLib",
   "description": "A library for content mods: new items with their own model and icon that work in co-op, and new clothes for goblins. Install it when a mod asks for it; it adds nothing of its own.",
   "dependencies": [

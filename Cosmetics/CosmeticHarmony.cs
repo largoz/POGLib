@@ -53,6 +53,50 @@ namespace POGLib.Cosmetics
         }
     }
 
+    /// <summary>The wardrobe decides each button's padlock here, after it has set the button's picture (Initialize).</summary>
+    [HarmonyPatch(typeof(Il2CppGame.Menu.CustomizationItem), nameof(Il2CppGame.Menu.CustomizationItem.SetLocked))]
+    internal static class Patch_CustomizationItem_SetLocked
+    {
+        private static bool _reported;
+
+        static void Prefix(Il2CppGame.Menu.CustomizationItem __instance, ref bool __0)
+        {
+            try
+            {
+                if (__0 || CosmeticsPlugin.Instance?.Any != true || __instance == null || __instance.m_thumbnail == null
+                    || !CosmeticsPlugin.Instance.Padlocked(__instance.m_thumbnail.sprite)) return;
+                __0 = true;
+                // Among the game's own locked parts, below its divider (the game counts that section after its list is made).
+                var menu = __instance.m_menu;
+                if (menu != null && menu.m_scrollViewContentLocked != null && __instance.transform.parent != menu.m_scrollViewContentLocked)
+                    __instance.transform.SetParent(menu.m_scrollViewContentLocked, false);
+            }
+            catch (Exception ex)
+            {
+                if (!_reported) MelonLogger.Error($"[POGLib.Cosmetics] a wardrobe padlock: {ex}");
+                _reported = true;
+            }
+        }
+    }
+
+    /// <summary>A padlocked part of ours cannot be put on, whatever the game would let a click do.</summary>
+    [HarmonyPatch(typeof(Il2CppGame.Menu.CustomizationItem), nameof(Il2CppGame.Menu.CustomizationItem.OnValueChanged))]
+    internal static class Patch_CustomizationItem_OnValueChanged
+    {
+        static bool Prefix(Il2CppGame.Menu.CustomizationItem __instance, bool __0)
+        {
+            try
+            {
+                if (!__0 || __instance == null || !__instance.m_isLocked || CosmeticsPlugin.Instance?.Any != true || __instance.m_thumbnail == null
+                    || !CosmeticsPlugin.Instance.Padlocked(__instance.m_thumbnail.sprite)) return true;
+                __instance.m_ignoreValueChanged = true;
+                if (__instance.m_toggle != null) __instance.m_toggle.isOn = false;
+                return false;
+            }
+            catch (Exception ex) { MelonLogger.Warning($"[POGLib.Cosmetics] a click on a padlocked part: {ex.GetType().Name}: {ex.Message}"); return true; }
+        }
+    }
+
     /// <summary>Only the wardrobe asks for these lists; the game draws random goblins from its arrays without it.</summary>
     [HarmonyPatch(typeof(CustomGoblinService), nameof(CustomGoblinService.GetPartList))]
     internal static class Patch_CustomGoblinService_GetPartList

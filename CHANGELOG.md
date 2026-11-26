@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 (2026-11-26)
+
+- **A locked part stands in the wardrobe under the game's own padlock**, among the game's locked parts, so players know it is there to
+  be found; a click does nothing until the mod unlocks it. `HiddenWhileLocked = true` keeps a part out of the wardrobe until then (a
+  secret), as every locked part was in 0.1.3. Nothing of ours goes into the game's own list of unlocked parts.
+
 ## 0.1.3 (2026-11-26)
 
 - **Cosmetics** (`Content.Cosmetics`): clothes, hair, horns and accessories of a mod's own, from a GLB file. A model weighted to the

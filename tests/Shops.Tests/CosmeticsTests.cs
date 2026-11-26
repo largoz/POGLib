@@ -175,5 +175,15 @@ namespace POGLib.Shops.Tests
             }
             finally { Directory.Delete(Path.GetDirectoryName(Path.GetDirectoryName(path)), true); }
         }
-    }
+    
+        [Theory]
+        [InlineData(false, false, false, true, false)]   // an open part
+        [InlineData(false, true, false, true, false)]    // "hidden while locked" means nothing for a part that is never locked
+        [InlineData(true, false, false, true, true)]     // locked: there, under the padlock
+        [InlineData(true, false, true, true, false)]     // unlocked: there, open
+        [InlineData(true, true, false, false, false)]    // a secret: not there
+        [InlineData(true, true, true, true, false)]      // a secret found: there, open
+        public void TheWardrobeShowsALockedPartUnderThePadlockUnlessItIsASecret(bool locked, bool hidden, bool unlocked, bool listed, bool padlock) =>
+            Assert.Equal((listed, padlock), CosmeticRules.InWardrobe(locked, hidden, unlocked));
+}
 }

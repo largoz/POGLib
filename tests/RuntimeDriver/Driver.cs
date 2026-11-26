@@ -61,7 +61,7 @@ namespace POGLib.RuntimeDriver
             Noir.Init(_cfg, Log);
             if (Cfg("merchants", 0) == 1) Merchants.Register();
             if (Cfg("cosmetics", 0) == 1) CosmeticsRun.Init(_cfg, Log);
-            if (_cfg.TryGetValue("runshow", out var clips)) { RunShow.Init(clips, Log); RunShow.PoseDump = _cfg.TryGetValue("posedump", out var pd) ? pd : null; }
+            if (_cfg.TryGetValue("runshow", out var clips)) { RunShow.Init(clips, Log); RunShow.PoseDump = _cfg.TryGetValue("posedump", out var pd) ? pd : null; RunShow.Turn = CfgF("runshowturn", 0f); }
             if (Cfg("noir", 0) == 1) try { Noir.Enable(HarmonyInstance, _cfg, Log); } catch (Exception ex) { Log($"noir: patch FAILED {ex.GetType().Name}: {ex.Message}"); }
         }
 
@@ -94,8 +94,33 @@ namespace POGLib.RuntimeDriver
 
         bool _deleting;   // savetest=delete: at the main menu, then done
 
+        // clean=1: nothing over the picture: no HUD, no cursor, no name tags, no mod's status box (POGLanTest's Overlay).
+        float _cleanAt;
+        readonly HashSet<string> _cleanSeen = new HashSet<string>();
+        void Clean()
+        {
+            if (Cfg("clean", 0) != 1 || Time.unscaledTime < _cleanAt) return;
+            _cleanAt = Time.unscaledTime + 0.5f;
+            Cursor.visible = false;
+            var lan = MelonPreferences.GetEntry<bool>("POGLanTest", "Overlay"); if (lan != null && lan.Value) lan.Value = false;
+            // The game draws the scene into a texture and shows it on a canvas of its own: that one stays, every other one goes.
+            foreach (var c in UnityEngine.Object.FindObjectsOfType<Canvas>())
+            {
+                if (c == null || !c.enabled || c.renderMode == RenderMode.WorldSpace || !c.isRootCanvas) continue;
+                var scene = c.GetComponentsInChildren<UnityEngine.UI.RawImage>(true).FirstOrDefault(r => r.texture != null && r.texture.TryCast<RenderTexture>() != null);
+                if (!_cleanSeen.Contains(c.name)) { _cleanSeen.Add(c.name); Log($"clean: canvas {c.name} {(scene != null ? $"shows the scene ({scene.name}): only that stays" : "hidden")}"); }
+                if (scene == null) { c.enabled = false; continue; }
+                // The HUD shares this canvas: every picture and text of it goes out of sight, nothing is moved (the layout stays as it is).
+                foreach (var g in c.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+                    if (g != null && g.enabled && g.Pointer != scene.Pointer) g.enabled = false;
+            }
+            foreach (var n in UnityEngine.Object.FindObjectsOfType<Il2CppEntities.NPCEntity>())
+                foreach (var t in n.GetComponentsInChildren<Transform>(false)) if (t.name.StartsWith("NameTag")) t.gameObject.SetActive(false);
+        }
+
         public override void OnUpdate()
         {
+            try { Clean(); } catch (Exception ex) { Log("clean: " + ex.Message); _cleanAt = float.MaxValue; }
             if (_deleting)
             {
                 try { if (SaveTest.Delete(Cfg("slot", 2))) { _deleting = false; Finish("done"); } }
@@ -473,11 +498,14 @@ namespace POGLib.RuntimeDriver
                 _of = 1; _next = Time.unscaledTime + (Outfit.Made.Count > 0 ? 5f : 0.5f);
                 return false;
             }
-            int shot = _of - 1, i = shot / 2;
+            // goblinviews=front,q,side,back (default front,q): the angle the camera stands at, from the goblin's front.
+            var views = (_cfg.TryGetValue("goblinviews", out var gv) ? gv : "front,q").Split(',').Select(x => x.Trim()).Where(x => x.Length > 0).ToArray();
+            int shot = _of - 1, i = shot / views.Length;
             if (i >= Outfit.Made.Count) { DestroyLookCamera(); _next = Time.unscaledTime + 1f; return true; }
             var g = Outfit.Made[i];
-            bool side = shot % 2 == 1;
-            if (!side) Outfit.Report(g);
+            string view = views[shot % views.Length];
+            bool side = view != "front";
+            if (shot % views.Length == 0) Outfit.Report(g);
             if (shot == 0 && g.Npc != null && _cfg.TryGetValue("rigdump", out var rigPath))
                 try { RigDump.Write(g.Npc, rigPath, Log); } catch (Exception ex) { Log($"rigdump FAILED {ex.GetType().Name}: {ex.Message}"); }
             _of++;
@@ -485,11 +513,13 @@ namespace POGLib.RuntimeDriver
             var t = g.Npc.transform;
             HookCamera();
             var focus = t.position + Vector3.up * CfgF("goblinfocus", 0.75f);
-            var dir = side ? (t.forward + t.right).normalized : t.forward;
+            float angle = view == "q" ? 45f : view == "side" ? 90f : view == "back" ? 180f : 0f;
+            var dir = Quaternion.AngleAxis(angle, Vector3.up) * t.forward;
             _ovPos = focus + dir * CfgF("goblindist", 1.9f) + Vector3.up * 0.25f;
             _ovRot = Quaternion.LookRotation(focus - _ovPos);
             _override = true;
-            Log($"shot {g.Key}_{(side ? "side" : "front")}");
+            // The name the older runs used for the three-quarter view stays "side".
+            Log($"shot {g.Key}_{(_cfg.ContainsKey("goblinviews") ? view : side ? "side" : "front")}");
             _next = Time.unscaledTime + 5f;
             return false;
         }

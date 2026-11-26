@@ -85,6 +85,7 @@ namespace POGLib.RuntimeDriver
                 return;
             }
             var seller = UnityEngine.Object.FindObjectsOfType<NpcSpawner>().FirstOrDefault(x => x.m_npcFlag != null && x.m_npcFlag.Contains("StarterShop"));
+            Stage.BackLight = cfg.ContainsKey("goblinviews") && cfg["goblinviews"].Contains("back");
             bool stage = Stage.Ready(log);      // the plate; by the starter shop it is dark and crowded
             if (seller == null && !stage) { log("goblin: no starter shop seller to stand before"); return; }
             if (cfg.ContainsKey("hat") || cfg.ContainsKey("coat")) Wearables.Register(s, prefab, cfg, log);
@@ -94,10 +95,10 @@ namespace POGLib.RuntimeDriver
             {
                 try
                 {
-                    var at = (stage ? Stage.Spot : seller.transform.position + fwd * 3.2f) + right * ((i - (looks.Count - 1) / 2f) * 1.3f);
+                    var at = (stage ? Stage.Spot : seller.transform.position + fwd * 3.2f) + right * ((i - (looks.Count - 1) / 2f) * (cfg.TryGetValue("goblinspacing", out var sp) && float.TryParse(sp, NumberStyles.Float, CultureInfo.InvariantCulture, out var spf) ? spf : 1.3f));
                     if (Physics.Raycast(at + Vector3.up * 1.5f, Vector3.down, out RaycastHit hit, 4f, ~0, QueryTriggerInteraction.Ignore)) at = hit.point;
                     string tag; int expected;
-                    string json = CosmeticsRun.Enabled || RunShow.Wanted ? CosmeticsRun.Json(looks[i].Value, out expected, out tag) : Json(s, looks[i].Value, out expected, out tag, log);
+                    string json = CosmeticsRun.Enabled || RunShow.Wanted || cfg.ContainsKey("goblinviews") ? CosmeticsRun.Json(looks[i].Value, out expected, out tag) : Json(s, looks[i].Value, out expected, out tag, log);
                     var go = UnityEngine.Object.Instantiate(prefab, at, Quaternion.LookRotation(fwd));
                     var npc = go.GetComponent<NPCEntity>();
                     if (npc == null) { log($"goblin: {prefabName} has no NPCEntity"); UnityEngine.Object.Destroy(go); return; }
@@ -105,6 +106,13 @@ namespace POGLib.RuntimeDriver
                     npc.m_useRandomCosmetics = false;
                     npc.m_predefinedCosmeticsJson = json;
                     if (tag != null) npc.m_npcName = tag;
+                    // Nothing in the hands, nothing over the clothes (a seller's prefab has a shiv, armour, and one in five carries loot).
+                    var inv = go.GetComponent<Il2CppInventory.EnemyInventory>();
+                    if (inv != null)
+                    {
+                        inv.m_leftHandSlot = null; inv.m_rightHandSlot = null; inv.m_torsoSlot = null; inv.m_headSlot = null; inv.m_backSlot = null;
+                        inv.m_lootTables = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<Il2CppInventory.InventoryLootTable>(0);
+                    }
                     go.GetComponent<NetworkObject>().Spawn();
                     Made.Add(new Goblin { Key = looks[i].Key, Npc = npc, Expected = expected });
                     log($"goblin: {looks[i].Key} = {prefabName} spawned at {at:F2}; look {json}");

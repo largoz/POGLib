@@ -17,6 +17,13 @@ namespace POGLib.Cosmetics.Model
         public const int MaxAccessories = 6;
 
         /// <summary>Null, or what is wrong with the ids. They are written into looks and lists as "Mod:Part".</summary>
+        /// <summary>Whether the wardrobe lists a part, and with the padlock: its own, or one of a part the player has not unlocked yet.</summary>
+        public static (bool listed, bool padlock) InWardrobe(bool locked, bool hiddenWhileLocked, bool unlocked)
+        {
+            bool shut = locked && !unlocked;
+            return shut ? (!hiddenWhileLocked, !hiddenWhileLocked) : (true, false);
+        }
+
         public static string CheckIds(string modId, string contentId)
         {
             foreach (var (name, value) in new[] { ("ModId", modId), ("ContentId", contentId) })

@@ -43,6 +43,7 @@ How to make `coat.glb` is on [51 Cosmetics: the model](51-cosmetics-the-model.md
 | `ThumbnailFile` | A square PNG with a transparent background for the wardrobe. The game's own are uncoloured (white and grey). |
 | `HiddenInFirstPerson` | Objects of the model (Blender's object names) the wearer does not see in first person, such as a high collar: `{ "collar" }`. Everyone else sees them. See below. |
 | `Locked` | `false` (the default): everyone who has your mod finds it in the wardrobe. `true`: only after `Unlock`, see below. |
+| `HiddenWhileLocked` | `false` (the default): a locked part stands in the wardrobe under the game's padlock. `true`: it is not there at all until it is unlocked (a secret). POGLib 0.1.4 |
 
 `Register` returns `false` and says why in the log when something is wrong with the part. The files are read at once, so
 you see it when the game starts.
@@ -90,8 +91,9 @@ public class Finds : MelonMod
 }
 ```
 
-With `Locked = true` the part is not in the wardrobe until your mod calls `Unlock`, on that player's machine, whenever you
-like: when they meet somebody, find something, win. POGLib keeps it in `UserData/POGLib/Cosmetics.json`. An NPC can
+With `Locked = true` the part stands among the game's locked parts under its padlock, and a click does nothing, until your mod
+calls `Unlock`, on that player's machine, whenever you like: when they meet somebody, find something, win. With
+`HiddenWhileLocked = true` as well it is not in the wardrobe at all until then (POGLib 0.1.3 did that with every locked part). POGLib keeps it in `UserData/POGLib/Cosmetics.json`. An NPC can
 wear a locked part all the same.
 
 ## An NPC in your clothes

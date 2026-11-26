@@ -1,6 +1,6 @@
 # POGLib — modular content framework for Pit of Goblin
 
-> **Version:** 0.1.3 · **Game:** Pit of Goblin · **Mod loader:** MelonLoader 0.7.2
+> **Version:** 0.1.4 · **Game:** Pit of Goblin · **Mod loader:** MelonLoader 0.7.2
 
 One library with a modular core for adding **items, mobs, levels and effects** to the game via
 community content packs. Targets **Unity IL2CPP + Unity Netcode for GameObjects** (host-authoritative).

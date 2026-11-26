@@ -21,6 +21,7 @@ namespace POGLib.RuntimeDriver
         static string _dir;
         static Action<string> _log;
         static int _m, _h, _cat;
+        static uint _hairBefore;
         static NetworkMenuCharacterAppearance _ui;
         static readonly Dictionary<string, int> _arrays = new Dictionary<string, int>();
 
@@ -60,6 +61,9 @@ namespace POGLib.RuntimeDriver
             Check("number of a part that is not there", Id("BadChest") == 0 && Content.Cosmetics.IdOf("nobody:nothing") == 0, "0");
             Check("numbers differ", Parts.Select(p => Id(p.id)).Distinct().Count() == Parts.Length, string.Join(" ", Parts.Select(p => p.id + "=" + Id(p.id))));
             Check("locked", !Content.Cosmetics.IsUnlocked(Full("Hood")) && Content.Cosmetics.IsUnlocked(Full("Cap")), "Hood locked, Cap not");
+            // A secret: locked and out of the wardrobe until it is unlocked.
+            Check("registered Secret", Content.Cosmetics.Register(new CosmeticDefinition { ModId = Mod, ContentId = "Secret", Slot = CosmeticSlot.Hair, ModelFile = Path.Combine(_dir, "cap.glb"),
+                ThumbnailFile = Path.Combine(_dir, "cap.png"), Locked = true, HiddenWhileLocked = true }), "Hair");
         }
 
         static void Arrays(CustomGoblinService s, string when)
@@ -105,16 +109,21 @@ namespace POGLib.RuntimeDriver
             catch (Exception ex) { Check("nothing of ours in the game's list of unlocked rewards", false, ex.GetType().Name + ": " + ex.Message); }
         }
 
-        // Which of our parts the wardrobe shows now, told by the thumbnail: what is on the screen, not what a list says.
+        // Which of our parts the wardrobe shows now, told by the thumbnail: what is on the screen, not what a list says. "Hood!" = in the
+        // game's locked section, under its padlock.
+        static readonly string[] Extra = { "Secret" };
         static List<string> Shown()
         {
             var shown = new List<string>();
-            foreach (var item in _ui.m_scrollViewContentUnlocked.GetComponentsInChildren<CustomizationItem>(false))
-                foreach (var p in Parts)
-                {
-                    var c = _ui.m_customGoblin.GetPartObject(Id(p.id));
-                    if (c != null && c.m_thumbnail != null && item.m_thumbnail != null && item.m_thumbnail.sprite != null && item.m_thumbnail.sprite.Pointer == c.m_thumbnail.Pointer) shown.Add(p.id);
-                }
+            foreach (var (content, inLocked) in new[] { (_ui.m_scrollViewContentUnlocked, false), (_ui.m_scrollViewContentLocked, true) })
+                foreach (var item in content.GetComponentsInChildren<CustomizationItem>(false))
+                    foreach (var id in Parts.Select(p => p.id).Concat(Extra))
+                    {
+                        var c = _ui.m_customGoblin.GetPartObject(Id(id));
+                        if (c == null || c.m_thumbnail == null || item.m_thumbnail == null || item.m_thumbnail.sprite == null || item.m_thumbnail.sprite.Pointer != c.m_thumbnail.Pointer) continue;
+                        bool padlock = item.m_isLocked && item.m_lockedItemObject != null && item.m_lockedItemObject.activeSelf;
+                        shown.Add(id + (inLocked && padlock ? "!" : inLocked || padlock ? "?" : ""));
+                    }
             return shown;
         }
 
@@ -152,16 +161,34 @@ namespace POGLib.RuntimeDriver
                     _ui.SetCategory(Cats[_cat].cat, true); _m++; return 3f;
                 case 3:
                 {
-                    var want = Parts.Where(p => p.slot == Cats[_cat].slot && !p.locked).Select(p => p.id).OrderBy(x => x).ToList();
+                    // A locked part stands in the game's locked section with the padlock; the secret is not there at all.
+                    var want = Parts.Where(p => p.slot == Cats[_cat].slot).Select(p => p.id + (p.locked ? "!" : "")).OrderBy(x => x).ToList();
                     var got = Shown().OrderBy(x => x).ToList();
                     Check($"the wardrobe shows ours under {Cats[_cat].cat}", want.SequenceEqual(got), $"want {string.Join(",", want)}; on the screen {string.Join(",", got)}; items {_ui.m_scrollViewContentUnlocked.childCount}+{_ui.m_scrollViewContentLocked.childCount}");
                     _cat++; _m = 2; return 0.1f;
                 }
-                case 4:
+                case 4: _ui.SetCategory(CustomGoblinService.Category.Hair, true); _m = 41; return 3f;
+                case 41:
+                {
+                    // A click on the padlocked hood, as far as the game can tell: the toggle itself.
+                    _hairBefore = _ui.m_customizationData.HairId;
+                    var hood = _ui.m_customGoblin.GetPartObject(Id("Hood"));
+                    var item = _ui.m_scrollViewContentLocked.GetComponentsInChildren<CustomizationItem>(false).FirstOrDefault(i => i.m_thumbnail.sprite != null && i.m_thumbnail.sprite.Pointer == hood.m_thumbnail.Pointer);
+                    Check("the padlocked hood is there to click, and the game lets no click through", item != null && !item.m_toggle.interactable,
+                          item != null ? $"locked {item.m_isLocked}, interactable {item.m_toggle.interactable}" : "not in the locked section");
+                    // As a mouse does it: a click the toggle itself takes or refuses.
+                    if (item != null) item.m_toggle.OnPointerClick(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { button = UnityEngine.EventSystems.PointerEventData.InputButton.Left });
+                    _log("shot cosm_padlock"); _m = 42; return 2f;
+                }
+                case 42:
+                    Check("a click on a padlocked part puts nothing on", _ui.m_customizationData.HairId == _hairBefore && _ui.m_customizationData.HairId != Id("Hood"), $"hair {_ui.m_customizationData.HairId} (was {_hairBefore}), hood {Id("Hood")}");
+                    _m = 43; return 0.5f;
+                case 43:
                     Check("unlocking", Content.Cosmetics.Unlock(Full("Hood")) && !Content.Cosmetics.Unlock(Full("Hood")) && !Content.Cosmetics.Unlock(Full("Cap")) && Content.Cosmetics.IsUnlocked(Full("Hood")), "Hood once, Cap never was locked");
-                    _ui.SetCategory(CustomGoblinService.Category.Hair, true); _m++; return 3f;
+                    _ui.SetCategory(CustomGoblinService.Category.Hair, true); _m = 5; return 3f;
                 case 5:
-                    Check("the unlocked one is in the wardrobe", Shown().Contains("Hood"), string.Join(",", Shown()));
+                    Check("the unlocked one is in the wardrobe, open", Shown().Contains("Hood") && !Shown().Any(s => s.StartsWith("Hood") && s != "Hood"), string.Join(",", Shown()));
+                    Check("the game's divider stands over the locked section only when it has something", _ui.m_scrollViewDivider == null || _ui.m_scrollViewDivider.activeSelf == (_ui.m_scrollViewContentLocked.childCount > 0), $"divider {_ui.m_scrollViewDivider?.activeSelf}, locked {_ui.m_scrollViewContentLocked.childCount}");
                     _log("shot cosm_hair"); _m++; return 4f;
                 case 6:
                 {

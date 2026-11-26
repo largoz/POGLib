@@ -15,7 +15,7 @@ items of its own.
 
 ## For mod developers
 
-Reference `POGLib.dll`, add `Largo-POGLib-0.1.3` to your manifest's dependencies, and register items in your
+Reference `POGLib.dll`, add `Largo-POGLib-0.1.4` to your manifest's dependencies, and register items in your
 `OnInitializeMelon`:
 
 ```csharp
@@ -72,14 +72,14 @@ Everything public is listed line by line in
 [`api/POGLib.txt`](https://github.com/largoz/POGLib/blob/main/api/POGLib.txt); the rest of the library is internal.
 What that file lists stays through 0.x, **except the parts marked experimental below**.
 
-## Status of 0.1.3
+## Status of 0.1.4
 
 Shown in the game (the host on build 26791993), on a host and on a client over LAN:
 
 - items registered from code appear for every player with the mod; bought in a shop, eaten, carried, passed
   between players, put in the bucket;
 - clothes (`Content.Cosmetics`): worn by players and NPCs, in the wardrobe, in the colours the player chose, hidden from the wearer in first
-  person where the mod says so; a client without the mod, even one whose saved look names the clothes, plays without them;
+  person where the mod says so; a locked part under the game's padlock, a click on it refused; a client without the mod, even one whose saved look names the clothes, plays without them;
 - your own model (`ItemVisual.Obj`) and icon (`IconFile`); eating (`EatCapability`); a big item (`Big = true`);
   the item's journal entry.
 

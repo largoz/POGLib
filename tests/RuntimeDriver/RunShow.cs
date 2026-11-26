@@ -18,9 +18,12 @@ namespace POGLib.RuntimeDriver
         static GameObject _who;
         static AnimationClip _playing;
         static int _clip;
-        static float _t0;
+        static float _t0, _turn0;
         const float SegmentSeconds = 6f;
         static bool _ready, _told;
+
+        /// <summary>runshowturn=N: the goblin stays on the spot and turns once in N seconds, the clip playing (for a picture of the clothes).</summary>
+        internal static float Turn;
 
         internal static void Init(string clips, Action<string> log) { Wanted = true; _log = log; _names = clips.Split(',').Select(x => x.Trim()).Where(x => x.Length > 0).ToList(); }
 
@@ -33,6 +36,13 @@ namespace POGLib.RuntimeDriver
         {
             if (_playing == null || _who == null || _npc == null) return;
             float s = Time.unscaledTime - _t0, a = s * Speed(_playing.name) / Stage.Radius;
+            if (Turn > 0f)
+            {
+                _npc.position = Stage.Spot;
+                _playing.SampleAnimation(_who, Mathf.Repeat(s, _playing.length));
+                _who.transform.SetPositionAndRotation(Stage.Spot, Quaternion.LookRotation(Stage.CamDir) * Quaternion.Euler(0f, 360f * (Time.unscaledTime - _turn0) / Turn, 0f));
+                return;
+            }
             _npc.position = Stage.Spot + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * Stage.Radius;
             _playing.SampleAnimation(_who, Mathf.Repeat(s, _playing.length));
             _who.transform.SetPositionAndRotation(_npc.position, Quaternion.LookRotation(new Vector3(-Mathf.Sin(a), 0f, Mathf.Cos(a))));
@@ -151,13 +161,13 @@ namespace POGLib.RuntimeDriver
             }
             if (_clip >= _names.Count) { if (_playing != null) _log("runshow: recorded"); _playing = null; return FirstPerson(camera, free); }
             _playing = _clips[_names[_clip]];
-            var eye = Stage.Spot + Stage.CamDir * (Stage.Radius + 1.9f) + Vector3.up * 1.3f;
-            camera(eye, Quaternion.LookRotation(Stage.Spot + Vector3.up * 0.42f - eye));
-            if (_clip == 0 && !_told) { _told = true; _t0 = Time.unscaledTime; _log("runshow: recording"); return 3f; }
+            var eye = Turn > 0f ? Stage.Spot + Stage.CamDir * 2.1f + Vector3.up * 0.75f : Stage.Spot + Stage.CamDir * (Stage.Radius + 1.9f) + Vector3.up * 1.3f;
+            camera(eye, Quaternion.LookRotation(Stage.Spot + Vector3.up * (Turn > 0f ? 0.5f : 0.42f) - eye));
+            if (_clip == 0 && !_told) { _told = true; _t0 = _turn0 = Time.unscaledTime; _log("runshow: recording"); return 3f; }
             _log($"runshow: segment {_names[_clip]}");
             _t0 = Time.unscaledTime;
             _clip++;
-            return SegmentSeconds;
+            return Turn > 0f ? Turn : SegmentSeconds;
         }
     }
 }

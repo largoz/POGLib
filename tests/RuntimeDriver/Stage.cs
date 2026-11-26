@@ -1,6 +1,7 @@
 // Where goblins are put to be looked at: the great plate before the king and queen (the user's choice, 2026-11-25: roomy and level; by the
 // starter shop it is dark and crowded), under two lights of the scene's own kind. Every shot of clothes uses it.
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Il2CppEntities;
 using UnityEngine;
@@ -15,6 +16,8 @@ namespace POGLib.RuntimeDriver
         internal static Vector3 CamDir { get; private set; } = Vector3.forward;
         internal static float Radius { get; private set; } = 1.15f;
         static bool _looked, _lit;
+        /// <summary>A third light behind the stage, for pictures of the back too.</summary>
+        internal static bool BackLight;
 
         /// <summary>Finds the plate and lights it, once; false when the scene has none.</summary>
         internal static bool Ready(Action<string> log)
@@ -71,11 +74,13 @@ namespace POGLib.RuntimeDriver
             Light like = null;
             foreach (var l in UnityEngine.Object.FindObjectsOfType<Light>()) if (l != null && l.enabled && l.type == LightType.Point && l.GetComponents<Component>().Length <= 4) { like = l; break; }
             if (like == null) { log("stage: no light to copy"); return; }
-            foreach (var (side, up, power) in new[] { (0.9f, 2.1f, 1f), (-1.4f, 1.7f, 0.7f) })
+            var lights = new List<(float side, float up, float power, float ahead)> { (0.9f, 2.1f, 1f, 2f), (-1.4f, 1.7f, 0.7f, 2f) };
+            if (BackLight) lights.Add((0.4f, 2.0f, 0.9f, -2.2f));
+            foreach (var (side, up, power, ahead) in lights)
             {
                 var go = UnityEngine.Object.Instantiate(like.gameObject);
                 go.name = "StageLight";
-                go.transform.position = Spot + CamDir * 2f + Vector3.Cross(Vector3.up, CamDir) * side * 1.8f + Vector3.up * up;
+                go.transform.position = Spot + CamDir * ahead + Vector3.Cross(Vector3.up, CamDir) * side * 1.8f + Vector3.up * up;
                 var l = go.GetComponent<Light>();
                 l.color = new Color(1f, 0.95f, 0.88f); l.range = 14f; l.intensity = like.intensity * 2.4f * power; l.enabled = true;
             }

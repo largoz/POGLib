@@ -43,6 +43,12 @@ namespace POGLib.Cosmetics
         public bool Locked { get; set; }
 
         /// <summary>
+        /// For a <see cref="Locked"/> part, until it is unlocked: false (the default) shows it in the wardrobe with the game's own
+        /// padlock, so players know it is there to be found; true keeps it out of the wardrobe (a secret).
+        /// </summary>
+        public bool HiddenWhileLocked { get; set; }
+
+        /// <summary>
         /// The objects of the model (Blender's object names) that the wearer does not see in first person, such as a high
         /// collar; everyone else sees the part whole. All of them: the wearer sees nothing of it. The game itself draws only chest,
         /// legs and feet in first person, so hair, horns and accessories need no entry here.
